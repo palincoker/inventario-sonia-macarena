@@ -2044,13 +2044,103 @@
 
     function onCodigoDetectado(codigo) {
       detenerEscaneo();
+      feedbackEscaneoExitoso();
 
+      // 1. Intentar parsear JSON desde el codigo QR
+      const datosJson = parsearDatosQr(codigo);
+      if (datosJson) {
+        procesarCodigoConDatos(datosJson.code || datosJson.codigo || generarCodigoUnico(), datosJson);
+        return;
+      }
+
+      // 2. Si es un codigo de barras numerico, buscar en Open Food Facts
+      if (/^\d{8,13}$/.test(codigo)) {
+        mostrarToast('Buscando producto en base de datos...', 'info');
+        buscarOpenFoodFacts(codigo).then(datos => {
+          if (datos) {
+            procesarCodigoConDatos(codigo, datos);
+          } else {
+            procesarCodigoConDatos(codigo, null);
+          }
+        }).catch(() => {
+          procesarCodigoConDatos(codigo, null);
+        });
+        return;
+      }
+
+      // 3. Codigo normal
+      procesarCodigoConDatos(codigo, null);
+    }
+
+    function procesarCodigoConDatos(codigo, datos) {
       if (productos[codigo]) {
         abrirDetalle(codigo);
         mostrarMensaje('mensaje-escanear', 'Producto encontrado: ' + productos[codigo].name, 'exito');
         mostrarToast('Producto encontrado: ' + escaparHtml(productos[codigo].name), 'exito');
       } else {
-        prepararNuevoProducto(codigo);
+        prepararNuevoProducto(codigo, datos);
+      }
+    }
+
+    function parsearDatosQr(codigo) {
+      try {
+        const datos = JSON.parse(codigo);
+        if (datos && typeof datos === 'object' && !Array.isArray(datos)) {
+          return datos;
+        }
+      } catch (e) {
+        // No es JSON
+      }
+      return null;
+    }
+
+    async function buscarOpenFoodFacts(codigo) {
+      try {
+        const resp = await fetch(`https://world.openfoodfacts.org/api/v0/product/${encodeURIComponent(codigo)}.json`, {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' }
+        });
+        const data = await resp.json();
+        if (data.status !== 1 || !data.product) return null;
+
+        const p = data.product;
+        return {
+          name: p.product_name || '',
+          description: [p.brands, p.quantity].filter(Boolean).join(' - '),
+          category: extraerCategoriaOpenFoodFacts(p.categories),
+          image: p.image_url || ''
+        };
+      } catch (e) {
+        console.error('Error consultando Open Food Facts:', e);
+        return null;
+      }
+    }
+
+    function extraerCategoriaOpenFoodFacts(categories) {
+      if (!categories) return 'Alimentos';
+      const partes = categories.split(',').map(s => s.trim());
+      return partes[0] || 'Alimentos';
+    }
+
+    function generarCodigoUnico() {
+      return 'QR-' + Date.now().toString(36).toUpperCase();
+    }
+
+    function feedbackEscaneoExitoso() {
+      if (navigator.vibrate) navigator.vibrate(80);
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = 880;
+        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.15);
+      } catch (e) {
+        // Ignorar errores de audio
       }
     }
 
@@ -2214,28 +2304,34 @@
     // ========================
     // PRODUCTOS
     // ========================
-    function prepararNuevoProducto(codigo) {
+    function prepararNuevoProducto(codigo, datosIniciales) {
       productoActual = codigo;
+      const d = datosIniciales || {};
       document.getElementById('detalle-codigo').textContent = codigo;
       document.getElementById('detalle-stock').textContent = 'Nuevo producto';
-      document.getElementById('detalle-nombre').value = '';
-      document.getElementById('detalle-descripcion').value = '';
-      document.getElementById('detalle-categoria').value = '';
-      document.getElementById('detalle-ubicacion-area').value = '';
-      document.getElementById('detalle-ubicacion-estante').value = '';
-      document.getElementById('detalle-ubicacion-nivel').value = '';
-      document.getElementById('detalle-ubicacion-posicion').value = '';
+      document.getElementById('detalle-nombre').value = d.name || '';
+      document.getElementById('detalle-descripcion').value = d.description || '';
+      document.getElementById('detalle-categoria').value = d.category || '';
+      document.getElementById('detalle-ubicacion-area').value = d.locationArea || '';
+      document.getElementById('detalle-ubicacion-estante').value = d.locationShelf || '';
+      document.getElementById('detalle-ubicacion-nivel').value = d.locationLevel || '';
+      document.getElementById('detalle-ubicacion-posicion').value = d.locationPosition || '';
       document.getElementById('detalle-stock-minimo').value = '0';
-      document.getElementById('detalle-lote').value = '';
-      document.getElementById('detalle-fecha-vencimiento').value = '';
-      document.getElementById('detalle-precio-costo').value = '';
-      document.getElementById('detalle-precio-venta').value = '';
+      document.getElementById('detalle-lote').value = d.lot || '';
+      document.getElementById('detalle-fecha-vencimiento').value = d.expiryDate || '';
+      document.getElementById('detalle-precio-costo').value = d.costPrice > 0 ? d.costPrice.toFixed(2) : '';
+      document.getElementById('detalle-precio-venta').value = d.salePrice > 0 ? d.salePrice.toFixed(2) : '';
       document.getElementById('detalle-foto').value = '';
-      mostrarPreviewFoto('');
+      fotoProductoTemp = d.image || '';
+      mostrarPreviewFoto(d.image || '');
       document.getElementById('detalle-historial').innerHTML = '<p class="vacio">Aún no hay historial.</p>';
       document.getElementById('detalle-titulo').textContent = 'Nuevo producto';
       renderCategoriasDatalist();
       mostrarSeccion('detalle');
+
+      if (d.name) {
+        mostrarToast('Datos del producto extraídos automáticamente', 'exito');
+      }
     }
 
     function nuevoProductoManual() {
