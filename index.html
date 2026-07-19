@@ -712,11 +712,32 @@
     </button>
   </nav>
 
+  <!-- Firebase SDK (solo se activa si configuras tu proyecto) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
   <script>
     // ========================
     // CONFIGURACIÓN Y ESTADO
     // ========================
     const STORAGE_KEY = 'inventario_sonia_macarena_v1';
+
+    // === CONFIGURACIÓN FIREBASE ===
+    // Reemplaza estos valores con los de tu proyecto de Firebase.
+    // Mientras diga 'TU_API_KEY' la app funciona solo con localStorage.
+    const firebaseConfig = {
+      apiKey: 'TU_API_KEY',
+      authDomain: 'TU_AUTH_DOMAIN',
+      databaseURL: 'TU_DATABASE_URL',
+      projectId: 'TU_PROJECT_ID',
+      storageBucket: 'TU_STORAGE_BUCKET',
+      messagingSenderId: 'TU_MESSAGING_SENDER_ID',
+      appId: 'TU_APP_ID'
+    };
+    let firebaseApp = null;
+    let dbRef = null;
+    let firebaseActivado = false;
+
     let productos = {};
     let escaner = null;
     let escaneoActivo = false;
@@ -737,6 +758,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       try {
         cargarDatos();
+        inicializarFirebase();
         renderDashboard();
         document.addEventListener('keydown', onKeydownPistola);
 
@@ -828,9 +850,51 @@
     function guardarDatos() {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(productos));
+        if (firebaseActivado && dbRef) {
+          dbRef.set(productos).catch((err) => {
+            console.error('Error sincronizando con Firebase:', err);
+          });
+        }
       } catch (e) {
         console.error('Error al guardar datos:', e);
         mostrarMensaje('mensaje-escanear', 'No se pudieron guardar los datos. El almacenamiento puede estar lleno.', 'error');
+      }
+    }
+
+    function inicializarFirebase() {
+      if (!firebaseConfig.apiKey || firebaseConfig.apiKey === 'TU_API_KEY') {
+        console.log('Firebase no configurado. Usando solo localStorage.');
+        return;
+      }
+
+      // Firebase no funciona desde file:// por restricciones de seguridad.
+      if (window.location.protocol === 'file:') {
+        console.warn('Abre esta página desde http://localhost para usar la sincronización con Firebase.');
+        return;
+      }
+
+      try {
+        firebaseApp = firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig);
+        dbRef = firebase.database().ref('inventario');
+        firebaseActivado = true;
+
+        dbRef.on('value', (snapshot) => {
+          const datos = snapshot.val();
+          if (datos && typeof datos === 'object' && !Array.isArray(datos)) {
+            productos = datos;
+            migrarDatos();
+            try {
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(productos));
+            } catch (e) {
+              console.error('Error guardando copia local:', e);
+            }
+            renderDashboard();
+            if (document.getElementById('seccion-inventario').classList.contains('activa')) renderInventario();
+            if (document.getElementById('seccion-historico').classList.contains('activa')) renderHistorico();
+          }
+        });
+      } catch (e) {
+        console.error('Error inicializando Firebase:', e);
       }
     }
 
