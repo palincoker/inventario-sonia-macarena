@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acceso - Control de Inventario Sonia Macarena</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    :root {
+      --color-primario: #2563eb;
+      --color-fondo: #f3f4f6;
+      --color-superficie: #ffffff;
+      --color-texto: #111827;
+      --color-texto-secundario: #6b7280;
+      --radio: 16px;
+      --sombra: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--color-fondo);
+      color: var(--color-texto);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .contenedor {
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+    }
+    .tarjeta {
+      background: var(--color-superficie);
+      border-radius: var(--radio);
+      padding: 28px;
+      margin-bottom: 16px;
+      box-shadow: var(--sombra);
+    }
+    h1 { margin: 0 0 8px; font-size: 1.4rem; }
+    p { margin: 0 0 20px; color: var(--color-texto-secundario); font-size: 0.95rem; }
+    .qr-box {
+      display: flex;
+      justify-content: center;
+      margin: 16px 0;
+    }
+    .qr-box img { border-radius: 12px; }
+    .btn {
+      display: block;
+      width: 100%;
+      background: var(--color-primario);
+      color: white;
+      text-decoration: none;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: 500;
+      margin-bottom: 10px;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-secundario {
+      background: #e5e7eb;
+      color: var(--color-texto);
+    }
+    .url {
+      font-size: 0.8rem;
+      color: var(--color-texto-secundario);
+      word-break: break-all;
+      margin-top: 6px;
+    }
+    .separador {
+      border: none;
+      border-top: 1px solid #e5e7eb;
+      margin: 24px 0;
+    }
+    .nota {
+      font-size: 0.8rem;
+      color: var(--color-texto-secundario);
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+  <main class="contenedor">
+    <div class="tarjeta">
+      <h1>📦 Control de Inventario</h1>
+      <p>Sonia Macarena</p>
+
+      <h2 style="font-size: 1rem; margin: 20px 0 8px;">Versión online</h2>
+      <div class="qr-box" id="qr-online"></div>
+      <a class="btn" href="https://palincoker.github.io/inventario-sonia-macarena/" target="_blank">
+        Abrir página online
+      </a>
+      <div class="url">https://palincoker.github.io/inventario-sonia-macarena/</div>
+
+      <hr class="separador">
+
+      <h2 style="font-size: 1rem; margin: 0 0 8px;">Versión local (red WiFi)</h2>
+      <div class="qr-box" id="qr-local"></div>
+      <a class="btn btn-secundario" href="http://192.168.1.150:8082" target="_blank">
+        Abrir página local
+      </a>
+      <div class="url">http://192.168.1.150:8082</div>
+      <p class="nota">
+        Requiere que el servidor local esté corriendo en la Mac.
+      </p>
+    </div>
+
+    <p class="nota">
+      Escanea el código QR con la cámara de tu celular para abrir la página.
+    </p>
+  </main>
+
+  <script>
+    new QRCode(document.getElementById('qr-online'), {
+      text: 'https://palincoker.github.io/inventario-sonia-macarena/',
+      width: 200,
+      height: 200,
+      colorDark: '#111827',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+
+    new QRCode(document.getElementById('qr-local'), {
+      text: 'http://192.168.1.150:8082',
+      width: 200,
+      height: 200,
+      colorDark: '#2563eb',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  </script>
+</body>
+</html>
