@@ -9,140 +9,258 @@
     :root {
       --color-primario: #2563eb;
       --color-primario-oscuro: #1d4ed8;
-      --color-fondo: #f3f4f6;
+      --color-primario-claro: #dbeafe;
+      --color-fondo: #f8fafc;
       --color-superficie: #ffffff;
-      --color-texto: #111827;
-      --color-texto-secundario: #6b7280;
-      --color-borde: #e5e7eb;
+      --color-superficie-secundaria: #f1f5f9;
+      --color-texto: #0f172a;
+      --color-texto-secundario: #64748b;
+      --color-borde: #e2e8f0;
       --color-exito: #10b981;
+      --color-exito-oscuro: #059669;
       --color-peligro: #ef4444;
+      --color-peligro-oscuro: #dc2626;
       --color-advertencia: #f59e0b;
-      --radio: 12px;
-      --sombra: 0 1px 3px rgba(0,0,0,0.1);
+      --color-advertencia-oscuro: #d97706;
+      --color-info: #3b82f6;
+      --radio: 14px;
+      --radio-pequeno: 10px;
+      --sombra-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+      --sombra: 0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+      --sombra-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.1), 0 4px 6px -4px rgba(15, 23, 42, 0.05);
+      --transicion: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    [data-theme="dark"] {
+      --color-primario: #3b82f6;
+      --color-primario-oscuro: #2563eb;
+      --color-primario-claro: #1e3a8a;
+      --color-fondo: #0f172a;
+      --color-superficie: #1e293b;
+      --color-superficie-secundaria: #334155;
+      --color-texto: #f8fafc;
+      --color-texto-secundario: #94a3b8;
+      --color-borde: #334155;
+      --color-exito: #34d399;
+      --color-exito-oscuro: #10b981;
+      --color-peligro: #f87171;
+      --color-peligro-oscuro: #ef4444;
+      --color-advertencia: #fbbf24;
+      --color-advertencia-oscuro: #f59e0b;
+      --color-info: #60a5fa;
+      --sombra-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+      --sombra: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+      --sombra-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
     }
 
     * { box-sizing: border-box; }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: var(--font-sans);
       background: var(--color-fondo);
       color: var(--color-texto);
       min-height: 100vh;
-      padding-bottom: 80px;
+      padding-bottom: 90px;
+      line-height: 1.5;
+      transition: background 0.3s ease, color 0.3s ease;
     }
 
     header {
-      background: var(--color-primario);
+      background: linear-gradient(135deg, var(--color-primario) 0%, var(--color-primario-oscuro) 100%);
       color: white;
-      padding: 16px;
+      padding: 18px 16px;
       text-align: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      box-shadow: var(--sombra);
       position: sticky;
       top: 0;
       z-index: 100;
     }
 
-    header h1 { margin: 0; font-size: 1.2rem; }
+    header h1 { margin: 0; font-size: 1.25rem; font-weight: 700; letter-spacing: -0.01em; }
+    header p { margin: 4px 0 0; font-size: 0.85rem; opacity: 0.9; }
+
+    .header-actions {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      gap: 8px;
+    }
+
+    .header-actions button {
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: white;
+      border-radius: var(--radio-pequeno);
+      padding: 8px;
+      cursor: pointer;
+      transition: var(--transicion);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .header-actions button:hover { background: rgba(255,255,255,0.25); }
 
     .contenedor {
-      max-width: 800px;
+      max-width: 860px;
       margin: 0 auto;
       padding: 16px;
     }
 
-    .seccion { display: none; }
+    .seccion { display: none; animation: fadeIn 0.25s ease; }
     .seccion.activa { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
     .tarjeta {
       background: var(--color-superficie);
       border-radius: var(--radio);
-      padding: 16px;
-      margin-bottom: 12px;
+      padding: 18px;
+      margin-bottom: 16px;
       box-shadow: var(--sombra);
+      border: 1px solid var(--color-borde);
+      transition: var(--transicion);
     }
+
+    .tarjeta:hover { box-shadow: var(--sombra-lg); }
+
+    .tarjeta h2, .tarjeta h3 {
+      margin-top: 0;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .tarjeta h2 { font-size: 1.3rem; }
+    .tarjeta h3 { font-size: 1.1rem; margin-bottom: 14px; }
 
     .tarjeta-resumen {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      grid-template-columns: repeat(2, 1fr);
       gap: 12px;
       text-align: center;
+      padding: 16px;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+    }
+
+    .tarjeta-resumen .tarjeta {
+      margin-bottom: 0;
+      padding: 16px 8px;
     }
 
     .resumen-item {
-      background: #eff6ff;
+      background: var(--color-superficie);
       border-radius: var(--radio);
-      padding: 16px;
+      padding: 16px 8px;
+      box-shadow: var(--sombra);
+      border: 1px solid var(--color-borde);
+      transition: var(--transicion);
     }
 
+    .resumen-item:hover { transform: translateY(-2px); box-shadow: var(--sombra-lg); }
+
     .resumen-item .numero {
-      font-size: 2rem;
-      font-weight: bold;
+      font-size: 1.8rem;
+      font-weight: 800;
       color: var(--color-primario);
+      line-height: 1.1;
     }
 
     .resumen-item .etiqueta {
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       color: var(--color-texto-secundario);
+      margin-top: 4px;
+      font-weight: 500;
     }
 
     .btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 8px;
       background: var(--color-primario);
       color: white;
       border: none;
-      border-radius: var(--radio);
+      border-radius: var(--radio-pequeno);
       padding: 12px 20px;
       font-size: 1rem;
+      font-weight: 600;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: var(--transicion);
       text-decoration: none;
       width: 100%;
       margin-bottom: 8px;
+      box-shadow: var(--sombra-sm);
     }
 
-    .btn:hover { background: var(--color-primario-oscuro); }
+    .btn:hover {
+      background: var(--color-primario-oscuro);
+      transform: translateY(-1px);
+      box-shadow: var(--sombra);
+    }
+    .btn:active { transform: translateY(0); }
+
     .btn-exito { background: var(--color-exito); }
-    .btn-exito:hover { background: #059669; }
+    .btn-exito:hover { background: var(--color-exito-oscuro); }
     .btn-peligro { background: var(--color-peligro); }
-    .btn-peligro:hover { background: #dc2626; }
-    .btn-secundario { background: #e5e7eb; color: var(--color-texto); }
-    .btn-secundario:hover { background: #d1d5db; }
+    .btn-peligro:hover { background: var(--color-peligro-oscuro); }
+    .btn-advertencia { background: var(--color-advertencia); color: #1f2937; }
+    .btn-advertencia:hover { background: var(--color-advertencia-oscuro); }
+    .btn-secundario { background: var(--color-superficie-secundaria); color: var(--color-texto); border: 1px solid var(--color-borde); }
+    .btn-secundario:hover { background: var(--color-borde); }
     .btn-pequeno { padding: 8px 12px; font-size: 0.9rem; width: auto; margin-bottom: 0; }
 
     .botones-grupo {
       display: flex;
       gap: 8px;
       margin-bottom: 12px;
+      flex-wrap: wrap;
     }
 
-    .botones-grupo .btn { margin-bottom: 0; }
+    .botones-grupo .btn { margin-bottom: 0; flex: 1; min-width: 100px; }
 
     label {
       display: block;
-      margin-bottom: 4px;
-      font-weight: 500;
+      margin-bottom: 6px;
+      font-weight: 600;
       font-size: 0.9rem;
       color: var(--color-texto-secundario);
     }
 
     input, textarea, select {
       width: 100%;
-      padding: 12px;
+      padding: 12px 14px;
       border: 1px solid var(--color-borde);
-      border-radius: var(--radio);
+      border-radius: var(--radio-pequeno);
       font-size: 1rem;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
       font-family: inherit;
+      background: var(--color-superficie);
+      color: var(--color-texto);
+      transition: var(--transicion);
     }
 
     input:focus, textarea:focus, select:focus {
       outline: none;
       border-color: var(--color-primario);
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    [data-theme="dark"] input:focus,
+    [data-theme="dark"] textarea:focus,
+    [data-theme="dark"] select:focus {
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
     }
 
     .lector-container {
@@ -163,32 +281,45 @@
     }
 
     .mensaje {
-      padding: 12px;
-      border-radius: var(--radio);
+      padding: 12px 16px;
+      border-radius: var(--radio-pequeno);
       margin-bottom: 12px;
       display: none;
+      font-weight: 500;
+      animation: slideDown 0.2s ease;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .mensaje.visible { display: block; }
-    .mensaje-exito { background: #d1fae5; color: #065f46; }
-    .mensaje-error { background: #fee2e2; color: #991b1b; }
-    .mensaje-info { background: #dbeafe; color: #1e40af; }
+    .mensaje-exito { background: rgba(16, 185, 129, 0.12); color: #065f46; border: 1px solid rgba(16, 185, 129, 0.25); }
+    .mensaje-error { background: rgba(239, 68, 68, 0.12); color: #991b1b; border: 1px solid rgba(239, 68, 68, 0.25); }
+    .mensaje-info { background: rgba(59, 130, 246, 0.12); color: #1e40af; border: 1px solid rgba(59, 130, 246, 0.25); }
+
+    [data-theme="dark"] .mensaje-exito { color: #34d399; }
+    [data-theme="dark"] .mensaje-error { color: #f87171; }
+    [data-theme="dark"] .mensaje-info { color: #60a5fa; }
 
     .busqueda-container {
       position: sticky;
-      top: 60px;
+      top: 66px;
       background: var(--color-fondo);
-      padding: 8px 0;
+      padding: 10px 0;
       z-index: 90;
     }
 
     table {
       width: 100%;
-      border-collapse: collapse;
+      border-collapse: separate;
+      border-spacing: 0;
       background: var(--color-superficie);
       border-radius: var(--radio);
       overflow: hidden;
       box-shadow: var(--sombra);
+      border: 1px solid var(--color-borde);
     }
 
     th, td {
@@ -198,17 +329,20 @@
     }
 
     th {
-      background: #f9fafb;
-      font-weight: 600;
-      font-size: 0.85rem;
+      background: var(--color-superficie-secundaria);
+      font-weight: 700;
+      font-size: 0.8rem;
       color: var(--color-texto-secundario);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
     }
 
-    tr:hover { background: #f9fafb; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--color-superficie-secundaria); }
 
     .codigo-celda {
-      font-family: monospace;
-      font-size: 0.85rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.8rem;
       color: var(--color-texto-secundario);
     }
 
@@ -217,41 +351,54 @@
       align-items: center;
       gap: 4px;
       font-size: 0.75rem;
-      font-weight: 600;
-      padding: 2px 8px;
+      font-weight: 700;
+      padding: 3px 10px;
       border-radius: 999px;
-      margin-top: 4px;
+      margin-top: 6px;
     }
 
     .alerta-stock.critico {
-      background: #fee2e2;
+      background: rgba(239, 68, 68, 0.12);
       color: #991b1b;
     }
 
     .alerta-stock.bajo {
-      background: #fef3c7;
+      background: rgba(245, 158, 11, 0.12);
       color: #92400e;
     }
 
-    .fila-stock-bajo td {
-      background: #fff7ed;
+    .alerta-stock.vencimiento {
+      background: rgba(139, 92, 246, 0.12);
+      color: #6d28d9;
     }
+
+    [data-theme="dark"] .alerta-stock.critico { color: #f87171; }
+    [data-theme="dark"] .alerta-stock.bajo { color: #fbbf24; }
+    [data-theme="dark"] .alerta-stock.vencimiento { color: #a78bfa; }
+
+    .fila-stock-bajo td { background: rgba(245, 158, 11, 0.04); }
+    .fila-sin-stock td { background: rgba(239, 68, 68, 0.04); }
+    .fila-vencimiento td { background: rgba(139, 92, 246, 0.04); }
 
     .vacio {
       text-align: center;
-      padding: 40px;
+      padding: 40px 20px;
       color: var(--color-texto-secundario);
     }
 
     .historial-item {
       border-left: 4px solid var(--color-primario);
-      padding-left: 12px;
-      margin-bottom: 12px;
+      padding-left: 14px;
+      margin-bottom: 14px;
+      padding-top: 2px;
+      padding-bottom: 2px;
     }
 
     .historial-item.entrada { border-color: var(--color-exito); }
     .historial-item.salida { border-color: var(--color-peligro); }
     .historial-item.edicion { border-color: var(--color-advertencia); }
+    .historial-item.alta { border-color: var(--color-info); }
+    .historial-item.anulado { opacity: 0.6; text-decoration: line-through; }
 
     .historial-fecha {
       font-size: 0.8rem;
@@ -259,7 +406,7 @@
     }
 
     .historial-cantidad {
-      font-weight: bold;
+      font-weight: 800;
     }
 
     nav {
@@ -271,30 +418,34 @@
       border-top: 1px solid var(--color-borde);
       display: flex;
       justify-content: space-around;
-      padding: 8px 0;
+      padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
       z-index: 100;
-      box-shadow: 0 -2px 4px rgba(0,0,0,0.05);
+      box-shadow: 0 -4px 6px -1px rgba(15, 23, 42, 0.05);
     }
 
     nav button {
       background: none;
       border: none;
       color: var(--color-texto-secundario);
-      font-size: 0.75rem;
+      font-size: 0.7rem;
+      font-weight: 600;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 4px;
       cursor: pointer;
-      padding: 4px 8px;
+      padding: 6px 4px;
       flex: 1;
+      transition: var(--transicion);
+      border-radius: var(--radio-pequeno);
     }
 
     nav button.activo { color: var(--color-primario); }
+    nav button:hover { background: var(--color-superficie-secundaria); }
 
     nav button svg {
-      width: 24px;
-      height: 24px;
+      width: 22px;
+      height: 22px;
     }
 
     .oculto { display: none !important; }
@@ -302,6 +453,7 @@
     .btn-modo-activo {
       background: var(--color-primario) !important;
       color: white !important;
+      border-color: var(--color-primario) !important;
     }
 
     #input-pistola:focus {
@@ -311,38 +463,53 @@
 
     .estado-pistola-leyendo {
       color: var(--color-primario) !important;
-      font-weight: 600;
+      font-weight: 700;
     }
 
     .detalle-codigo {
-      font-family: monospace;
-      background: #f3f4f6;
-      padding: 8px 12px;
-      border-radius: var(--radio);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      background: var(--color-superficie-secundaria);
+      padding: 10px 14px;
+      border-radius: var(--radio-pequeno);
       display: inline-block;
       margin-bottom: 12px;
       font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--color-texto-secundario);
     }
 
     .detalle-stock {
-      font-size: 2rem;
-      font-weight: bold;
+      font-size: 2.2rem;
+      font-weight: 800;
       color: var(--color-primario);
-      margin: 8px 0;
+      margin: 8px 0 16px;
+      line-height: 1.1;
     }
 
     .filtros {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 12px;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
     }
 
     .filtros select, .filtros input {
-      flex: 1;
-      min-width: 120px;
       margin-bottom: 0;
     }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: var(--color-primario-claro);
+      color: var(--color-primario-oscuro);
+      margin-top: 4px;
+    }
+
+    [data-theme="dark"] .badge { color: #93c5fd; }
 
     .modal {
       position: fixed;
@@ -350,12 +517,14 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0,0,0,0.5);
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
       display: none;
       align-items: center;
       justify-content: center;
       z-index: 200;
       padding: 16px;
+      animation: fadeIn 0.2s ease;
     }
 
     .modal.visible { display: flex; }
@@ -363,22 +532,203 @@
     .modal-contenido {
       background: var(--color-superficie);
       border-radius: var(--radio);
-      padding: 20px;
+      padding: 22px;
       width: 100%;
-      max-width: 400px;
+      max-width: 420px;
       max-height: 90vh;
       overflow-y: auto;
+      box-shadow: var(--sombra-lg);
+      border: 1px solid var(--color-borde);
+      animation: scaleIn 0.2s ease;
+    }
+
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
     }
 
     .modal-titulo {
       margin-top: 0;
-      font-size: 1.2rem;
+      font-size: 1.25rem;
+      font-weight: 700;
     }
 
+    .pin-circles {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin: 24px 0;
+    }
+
+    .pin-circle {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid var(--color-borde);
+      transition: var(--transicion);
+    }
+
+    .pin-circle.activo {
+      background: var(--color-primario);
+      border-color: var(--color-primario);
+    }
+
+    .teclado-pin {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      max-width: 280px;
+      margin: 0 auto;
+    }
+
+    .teclado-pin button {
+      aspect-ratio: 1;
+      font-size: 1.3rem;
+      font-weight: 700;
+      border: 1px solid var(--color-borde);
+      background: var(--color-superficie-secundaria);
+      color: var(--color-texto);
+      border-radius: var(--radio-pequeno);
+      cursor: pointer;
+      transition: var(--transicion);
+    }
+
+    .teclado-pin button:hover { background: var(--color-borde); }
+    .teclado-pin button:active { transform: scale(0.96); }
+
+    .toast-container {
+      position: fixed;
+      top: 76px;
+      right: 16px;
+      z-index: 300;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 320px;
+      width: calc(100% - 32px);
+      pointer-events: none;
+    }
+
+    .toast {
+      background: var(--color-superficie);
+      color: var(--color-texto);
+      padding: 14px 18px;
+      border-radius: var(--radio-pequeno);
+      box-shadow: var(--sombra-lg);
+      border-left: 4px solid var(--color-primario);
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      pointer-events: auto;
+      animation: toastIn 0.3s ease;
+      font-weight: 500;
+      border: 1px solid var(--color-borde);
+    }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(100%); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .toast.saliendo { animation: toastOut 0.3s ease forwards; }
+
+    @keyframes toastOut {
+      to { opacity: 0; transform: translateX(100%); }
+    }
+
+    .toast-exito { border-left-color: var(--color-exito); }
+    .toast-error { border-left-color: var(--color-peligro); }
+    .toast-advertencia { border-left-color: var(--color-advertencia); }
+    .toast-info { border-left-color: var(--color-info); }
+
+    .toast-cerrar {
+      margin-left: auto;
+      background: none;
+      border: none;
+      color: var(--color-texto-secundario);
+      cursor: pointer;
+      font-size: 1.1rem;
+      line-height: 1;
+      padding: 0;
+    }
+
+    .config-opcion {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--color-borde);
+    }
+
+    .config-opcion:last-child { border-bottom: none; }
+
+    .config-opcion-info h4 { margin: 0 0 4px; font-size: 1rem; }
+    .config-opcion-info p { margin: 0; font-size: 0.85rem; color: var(--color-texto-secundario); }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 26px;
+    }
+
+    .switch input { opacity: 0; width: 0; height: 0; margin: 0; }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: var(--color-borde);
+      transition: 0.3s;
+      border-radius: 34px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.3s;
+      border-radius: 50%;
+      box-shadow: var(--sombra-sm);
+    }
+
+    input:checked + .slider { background-color: var(--color-primario); }
+    input:checked + .slider:before { transform: translateX(22px); }
+
+    .info-valor {
+      font-size: 0.85rem;
+      color: var(--color-texto-secundario);
+      margin-bottom: 12px;
+    }
+
+    .detalle-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 14px;
+    }
+
+    .detalle-grid .campo-completo { grid-column: 1 / -1; }
+
     @media (min-width: 600px) {
-      .tarjeta-resumen { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+      .tarjeta-resumen { grid-template-columns: repeat(3, 1fr); }
       .btn { width: auto; }
       .botones-grupo .btn { flex: 1; }
+      .contenedor { padding: 20px; }
+      .header-actions { right: 20px; }
+    }
+
+    @media (min-width: 768px) {
+      .tarjeta-resumen { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    @media (max-width: 480px) {
+      header h1 { font-size: 1.05rem; }
+      .resumen-item .numero { font-size: 1.5rem; }
+      .detalle-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -412,6 +762,11 @@
   </script>
 
   <header>
+    <div class="header-actions">
+      <button onclick="toggleTema()" id="btn-toggle-tema" title="Cambiar tema">
+        <svg id="icono-tema" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+      </button>
+    </div>
     <h1>📦 Control de Inventario Sonia Macarena</h1>
   </header>
 
@@ -428,6 +783,10 @@
           <div class="etiqueta">Total unidades</div>
         </div>
         <div class="resumen-item">
+          <div class="numero" id="resumen-valor">$0</div>
+          <div class="etiqueta">Valor inventario</div>
+        </div>
+        <div class="resumen-item">
           <div class="numero" id="resumen-entradas">0</div>
           <div class="etiqueta">Entradas hoy</div>
         </div>
@@ -435,9 +794,17 @@
           <div class="numero" id="resumen-salidas">0</div>
           <div class="etiqueta">Salidas hoy</div>
         </div>
-        <div class="resumen-item" style="background: #fff7ed;">
+        <div class="resumen-item" style="background: rgba(239, 68, 68, 0.08);">
+          <div class="numero" id="resumen-sin-stock" style="color: var(--color-peligro);">0</div>
+          <div class="etiqueta">Sin stock</div>
+        </div>
+        <div class="resumen-item" style="background: rgba(245, 158, 11, 0.08);">
           <div class="numero" id="resumen-stock-bajo" style="color: var(--color-advertencia);">0</div>
           <div class="etiqueta">Stock bajo</div>
+        </div>
+        <div class="resumen-item" style="background: rgba(139, 92, 246, 0.08);">
+          <div class="numero" id="resumen-por-vencer" style="color: #8b5cf6;">0</div>
+          <div class="etiqueta">Por vencer</div>
         </div>
       </div>
 
@@ -459,6 +826,13 @@
       </div>
 
       <div class="tarjeta">
+        <h3>⏰ Próximos a vencer (30 días)</h3>
+        <div id="alertas-vencimiento">
+          <p class="vacio">No hay productos próximos a vencer.</p>
+        </div>
+      </div>
+
+      <div class="tarjeta">
         <h3>Últimos movimientos</h3>
         <div id="ultimos-movimientos">
           <p class="vacio">Aún no hay movimientos registrados.</p>
@@ -470,7 +844,7 @@
     <section id="seccion-escanear" class="seccion">
       <div class="tarjeta">
         <h2>Escanear código QR o de barras</h2>
-        <p style="color: var(--color-texto-secundario); font-size: 0.9rem;" id="texto-ayuda-escaneo">
+        <p style="color: var(--color-texto-secundario); font-size: 0.9rem; margin-top: -8px;" id="texto-ayuda-escaneo">
           Elige cómo quieres capturar el código.
         </p>
 
@@ -503,7 +877,7 @@
 
         <!-- PANEL PISTOLA ESCÁNER -->
         <div id="panel-pistola" class="oculto">
-          <div class="tarjeta" style="background: #eff6ff; border: 2px dashed var(--color-primario);">
+          <div class="tarjeta" style="background: var(--color-primario-claro); border: 2px dashed var(--color-primario);">
             <div style="text-align: center; margin-bottom: 12px;">
               <strong>Modo pistola escáner activo</strong>
             </div>
@@ -518,7 +892,7 @@
               autocorrect="off"
               autocapitalize="off"
               spellcheck="false"
-              style="font-family: monospace; text-align: center; font-size: 1.1rem;"
+              style="font-family: ui-monospace, monospace; text-align: center; font-size: 1.1rem;"
             >
             <div id="estado-pistola" style="text-align: center; font-size: 0.85rem; color: var(--color-texto-secundario);">
               Escáner listo
@@ -529,7 +903,7 @@
           </div>
         </div>
 
-        <hr style="border: none; border-top: 1px solid var(--color-borde); margin: 16px 0;">
+        <hr style="border: none; border-top: 1px solid var(--color-borde); margin: 20px 0;">
 
         <h3>O ingresa el código manualmente</h3>
         <input type="text" id="input-codigo-manual" placeholder="Escribe o pega el código">
@@ -537,7 +911,7 @@
           <span>🔍</span> Buscar / Crear
         </button>
 
-        <hr style="border: none; border-top: 1px solid var(--color-borde); margin: 16px 0;">
+        <hr style="border: none; border-top: 1px solid var(--color-borde); margin: 20px 0;">
 
         <h3>O escanea desde una imagen</h3>
         <input type="file" id="input-imagen" accept="image/*" onchange="escanearDesdeImagen(this)">
@@ -547,7 +921,7 @@
     <!-- INVENTARIO -->
     <section id="seccion-inventario" class="seccion">
       <div class="busqueda-container">
-        <input type="text" id="input-busqueda" placeholder="Buscar por nombre, código o ubicación..." oninput="renderInventario()">
+        <input type="text" id="input-busqueda" placeholder="Buscar por nombre, código, ubicación o lote..." oninput="renderInventario()">
       </div>
 
       <div id="mensaje-inventario" class="mensaje"></div>
@@ -562,8 +936,26 @@
       </div>
 
       <div class="tarjeta">
+        <h3>Filtros avanzados</h3>
+        <div class="filtros">
+          <select id="filtro-categoria" onchange="renderInventario()">
+            <option value="">Todas las categorías</option>
+          </select>
+          <select id="filtro-estado" onchange="renderInventario()">
+            <option value="">Todos los estados</option>
+            <option value="stock-bajo">Stock bajo</option>
+            <option value="sin-stock">Sin stock</option>
+            <option value="por-vencer">Próximos a vencer</option>
+          </select>
+        </div>
+        <button class="btn btn-secundario btn-pequeno" onclick="limpiarFiltrosInventario()">
+          Limpiar filtros
+        </button>
+      </div>
+
+      <div class="tarjeta">
         <h3>Exportar / Importar datos</h3>
-        <p style="font-size: 0.85rem; color: var(--color-texto-secundario); margin-top: 0;">
+        <p style="font-size: 0.85rem; color: var(--color-texto-secundario); margin-top: -8px;">
           Guarda una copia de seguridad o restáurala desde un archivo.
         </p>
         <div class="botones-grupo">
@@ -597,28 +989,67 @@
         <div class="detalle-codigo" id="detalle-codigo"></div>
         <div class="detalle-stock" id="detalle-stock"></div>
 
-        <label for="detalle-nombre">Nombre</label>
-        <input type="text" id="detalle-nombre">
+        <div class="detalle-grid">
+          <div class="campo-completo">
+            <label for="detalle-nombre">Nombre</label>
+            <input type="text" id="detalle-nombre">
+          </div>
 
-        <label for="detalle-descripcion">Descripción</label>
-        <textarea id="detalle-descripcion" rows="2"></textarea>
+          <div class="campo-completo">
+            <label for="detalle-descripcion">Descripción</label>
+            <textarea id="detalle-descripcion" rows="2"></textarea>
+          </div>
 
-        <label for="detalle-ubicacion">Ubicación</label>
-        <input type="text" id="detalle-ubicacion">
+          <div>
+            <label for="detalle-categoria">Categoría</label>
+            <input type="text" id="detalle-categoria" list="lista-categorias" placeholder="Ej: Alimentos, Limpieza, Electrónica">
+            <datalist id="lista-categorias"></datalist>
+          </div>
 
-        <label for="detalle-stock-minimo">Stock mínimo (alerta cuando el stock sea igual o menor)</label>
-        <input type="number" id="detalle-stock-minimo" min="0" value="0">
+          <div>
+            <label for="detalle-ubicacion">Ubicación</label>
+            <input type="text" id="detalle-ubicacion">
+          </div>
+
+          <div>
+            <label for="detalle-stock-minimo">Stock mínimo</label>
+            <input type="number" id="detalle-stock-minimo" min="0" value="0">
+          </div>
+
+          <div>
+            <label for="detalle-lote">Lote (opcional)</label>
+            <input type="text" id="detalle-lote">
+          </div>
+
+          <div>
+            <label for="detalle-fecha-vencimiento">Fecha de vencimiento (opcional)</label>
+            <input type="date" id="detalle-fecha-vencimiento">
+          </div>
+
+          <div>
+            <label for="detalle-precio-costo">Precio costo</label>
+            <input type="number" id="detalle-precio-costo" min="0" step="0.01" placeholder="0.00">
+          </div>
+
+          <div>
+            <label for="detalle-precio-venta">Precio venta</label>
+            <input type="number" id="detalle-precio-venta" min="0" step="0.01" placeholder="0.00">
+          </div>
+        </div>
 
         <div class="botones-grupo">
           <button class="btn btn-exito" onclick="guardarProducto()">
             💾 Guardar
+          </button>
+          <button class="btn" onclick="duplicarProducto()">
+            📋 Duplicar
           </button>
           <button class="btn btn-peligro" onclick="eliminarProducto()">
             🗑️ Eliminar
           </button>
         </div>
 
-        <hr style="border: none; border-top: 1px solid var(--color-borde); margin: 16px 0;">
+        <hr style="border: none; border-top: 1px solid var(--color-borde); margin: 20px 0;">
 
         <h3>Movimiento rápido</h3>
         <div class="botones-grupo">
@@ -662,6 +1093,67 @@
         <p class="vacio">No hay movimientos registrados.</p>
       </div>
     </section>
+
+    <!-- CONFIGURACIÓN -->
+    <section id="seccion-configuracion" class="seccion">
+      <div class="tarjeta">
+        <h2>Configuración</h2>
+
+        <div class="config-opcion">
+          <div class="config-opcion-info">
+            <h4>🔒 PIN de acceso</h4>
+            <p id="pin-estado-texto">No hay PIN configurado.</p>
+          </div>
+          <button class="btn btn-pequeno" id="btn-config-pin" onclick="mostrarConfiguracionPin()">
+            Configurar
+          </button>
+        </div>
+
+        <div class="config-opcion">
+          <div class="config-opcion-info">
+            <h4>🌙 Modo oscuro</h4>
+            <p>Cambia entre tema claro y oscuro.</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggle-tema-config" onchange="toggleTema()">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="config-opcion">
+          <div class="config-opcion-info">
+            <h4>💾 Backup local</h4>
+            <p>Exporta o importa todos los datos del inventario.</p>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secundario btn-pequeno" onclick="exportarBackup(); mostrarToast('Backup descargado', 'exito');">
+              Exportar
+            </button>
+            <button class="btn btn-secundario btn-pequeno" onclick="document.getElementById('input-importar-config').click()">
+              Importar
+            </button>
+            <input type="file" id="input-importar-config" class="oculto" accept=".json,application/json" onchange="importarBackup(this)">
+          </div>
+        </div>
+
+        <div class="config-opcion">
+          <div class="config-opcion-info">
+            <h4>🗑️ Vaciar datos</h4>
+            <p>Elimina todos los productos y movimientos del almacenamiento local.</p>
+          </div>
+          <button class="btn btn-peligro btn-pequeno" onclick="vaciarDatos()">
+            Vaciar
+          </button>
+        </div>
+      </div>
+
+      <div class="tarjeta">
+        <h3>Información</h3>
+        <p style="font-size: 0.9rem; color: var(--color-texto-secundario); margin: 0;">
+          Versión mejorada del Control de Inventario Sonia Macarena. Los datos se guardan localmente y se sincronizan con Firebase cuando está disponible.
+        </p>
+      </div>
+    </section>
   </main>
 
   <!-- MODAL MOVIMIENTO -->
@@ -674,7 +1166,7 @@
       <label for="movimiento-nota">Nota (opcional)</label>
       <input type="text" id="movimiento-nota" placeholder="Ej: Compra, venta, ajuste">
       <div class="botones-grupo">
-        <button class="btn" onclick="cerrarModalMovimiento()">Cancelar</button>
+        <button class="btn btn-secundario" onclick="cerrarModalMovimiento()">Cancelar</button>
         <button class="btn btn-exito" id="modal-movimiento-confirmar" onclick="confirmarMovimiento()">Confirmar</button>
       </div>
     </div>
@@ -687,21 +1179,56 @@
       <p style="font-size: 0.85rem; color: var(--color-texto-secundario);">
         Haz clic en el recuadro de abajo y escanea un código con la pistola. Se mostrará exactamente lo que recibe el navegador.
       </p>
-      <textarea id="diagnostico-input" rows="3" placeholder="Esperando escaneo..." style="font-family: monospace;"></textarea>
+      <textarea id="diagnostico-input" rows="3" placeholder="Esperando escaneo..." style="font-family: ui-monospace, monospace;"></textarea>
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
         <label style="margin: 0; font-size: 0.85rem;">
           <input type="checkbox" id="diagnostico-sufijo" checked> Mostrar Enter/Tab como [ENTER]/[TAB]
         </label>
       </div>
-      <div class="tarjeta" style="max-height: 200px; overflow-y: auto; margin-bottom: 12px; background: #f9fafb;">
-        <div id="diagnostico-log" style="font-family: monospace; font-size: 0.8rem; white-space: pre-wrap;"></div>
+      <div class="tarjeta" style="max-height: 200px; overflow-y: auto; margin-bottom: 12px; background: var(--color-superficie-secundaria);">
+        <div id="diagnostico-log" style="font-family: ui-monospace, monospace; font-size: 0.8rem; white-space: pre-wrap;"></div>
       </div>
       <div class="botones-grupo">
-        <button class="btn" onclick="cerrarDiagnosticoPistola()">Cerrar</button>
+        <button class="btn btn-secundario" onclick="cerrarDiagnosticoPistola()">Cerrar</button>
         <button class="btn btn-peligro" onclick="limpiarDiagnosticoPistola()">Limpiar</button>
       </div>
     </div>
   </div>
+
+  <!-- MODAL PIN -->
+  <div id="modal-pin" class="modal">
+    <div class="modal-contenido" style="text-align: center;">
+      <h3 class="modal-titulo" id="modal-pin-titulo">Ingresa tu PIN</h3>
+      <p style="color: var(--color-texto-secundario); font-size: 0.9rem;" id="modal-pin-mensaje">Usa el teclado numérico para ingresar.</p>
+
+      <div id="pin-circles" class="pin-circles">
+        <div class="pin-circle"></div>
+        <div class="pin-circle"></div>
+        <div class="pin-circle"></div>
+        <div class="pin-circle"></div>
+      </div>
+
+      <div id="mensaje-modal-pin" class="mensaje"></div>
+
+      <div class="teclado-pin">
+        <button onclick="ingresarDigitoPin('1')">1</button>
+        <button onclick="ingresarDigitoPin('2')">2</button>
+        <button onclick="ingresarDigitoPin('3')">3</button>
+        <button onclick="ingresarDigitoPin('4')">4</button>
+        <button onclick="ingresarDigitoPin('5')">5</button>
+        <button onclick="ingresarDigitoPin('6')">6</button>
+        <button onclick="ingresarDigitoPin('7')">7</button>
+        <button onclick="ingresarDigitoPin('8')">8</button>
+        <button onclick="ingresarDigitoPin('9')">9</button>
+        <button onclick="borrarDigitoPin()">⌫</button>
+        <button onclick="ingresarDigitoPin('0')">0</button>
+        <button onclick="cancelarPin()">✕</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast-container" class="toast-container"></div>
 
   <!-- NAVEGACIÓN INFERIOR -->
   <nav>
@@ -721,6 +1248,10 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
       Histórico
     </button>
+    <button id="nav-configuracion" onclick="mostrarSeccion('configuracion')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      Config
+    </button>
   </nav>
 
   <!-- Firebase SDK (solo se activa si configuras tu proyecto) -->
@@ -732,10 +1263,10 @@
     // CONFIGURACIÓN Y ESTADO
     // ========================
     const STORAGE_KEY = 'inventario_sonia_macarena_v1';
+    const THEME_KEY = 'inventario_sonia_macarena_tema';
+    const PIN_KEY = 'inventario_sonia_macarena_pin';
 
     // === CONFIGURACIÓN FIREBASE ===
-    // Reemplaza estos valores con los de tu proyecto de Firebase.
-    // Mientras diga 'TU_API_KEY' la app funciona solo con localStorage.
     const firebaseConfig = {
       apiKey: 'AIzaSyDr-tQibiQrenB2RS9zW37iqbtLpMiMkZU',
       authDomain: 'datadriver-ffc9c.firebaseapp.com',
@@ -763,76 +1294,108 @@
     let timeoutPistola = null;
     const TIEMPO_MAX_ENTRE_TECLAS = 80; // ms
 
+    // PIN
+    let pinBuffer = '';
+    let pinCallback = null;
+    let pinCancelCallback = null;
+    let pinModo = 'verificar'; // verificar, configurar, confirmar
+    let pinTemporal = '';
+
     // ========================
     // INICIALIZACIÓN
     // ========================
     document.addEventListener('DOMContentLoaded', () => {
       try {
+        aplicarTemaGuardado();
         cargarDatos();
         inicializarFirebase();
+        configurarEventosGlobales();
         renderDashboard();
-        document.addEventListener('keydown', onKeydownPistola);
+        renderCategoriasFiltro();
 
-        const inputPistola = document.getElementById('input-pistola');
-        if (inputPistola) {
-          // Captura directa desde el input de la pistola (modo mas confiable)
-          inputPistola.addEventListener('input', onInputPistola);
-          inputPistola.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && escanerPistolaActivo) {
-              e.preventDefault();
-            }
-          });
-
-          // Mantener el foco en el input mientras el modo pistola este activo
-          inputPistola.addEventListener('blur', () => {
-            if (escanerPistolaActivo) {
-              setTimeout(() => inputPistola.focus(), 50);
-            }
-          });
-        }
-
-        // Confirmar modal de movimiento con Enter
-        const modalCantidad = document.getElementById('movimiento-cantidad');
-        const modalNota = document.getElementById('movimiento-nota');
-        const confirmarConEnter = (e) => {
-          if (e.key === 'Enter') confirmarMovimiento();
-        };
-        if (modalCantidad) modalCantidad.addEventListener('keydown', confirmarConEnter);
-        if (modalNota) modalNota.addEventListener('keydown', confirmarConEnter);
-
-        // Diagnostico de pistola
-        const diagnosticoInput = document.getElementById('diagnostico-input');
-        if (diagnosticoInput) {
-          diagnosticoInput.addEventListener('keydown', (e) => {
-            const mostrarSufijo = document.getElementById('diagnostico-sufijo').checked;
-            if (e.key === 'Enter') {
-              if (mostrarSufijo) {
-                e.preventDefault();
-                diagnosticoInput.value += '[ENTER]';
-                logDiagnosticoPistola('Tecla: [ENTER] (codigo 13)');
-              } else {
-                logDiagnosticoPistola('Tecla: [ENTER] (codigo 13)');
-              }
-            } else if (e.key === 'Tab') {
-              if (mostrarSufijo) {
-                e.preventDefault();
-                diagnosticoInput.value += '[TAB]';
-                logDiagnosticoPistola('Tecla: [TAB] (codigo 9)');
-              } else {
-                logDiagnosticoPistola('Tecla: [TAB] (codigo 9)');
-              }
-            } else {
-              logDiagnosticoPistola('Tecla: "' + e.key + '" (codigo ' + e.keyCode + ')');
-            }
-          });
-          diagnosticoInput.addEventListener('input', (e) => {
-            logDiagnosticoPistola('Input actual: "' + e.target.value + '"');
+        const pinGuardado = localStorage.getItem(PIN_KEY);
+        if (pinGuardado && window.location.protocol !== 'file:') {
+          solicitarPin(() => {
+            // PIN correcto, continuar
+          }, () => {
+            document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;padding:20px;text-align:center;"><h1>Acceso denegado</h1><p>Se requiere el PIN para usar la aplicación.</p></div>';
           });
         }
       } catch (err) {
         console.error('Error al iniciar la aplicacion:', err);
       }
     });
+
+    function configurarEventosGlobales() {
+      document.addEventListener('keydown', onKeydownPistola);
+
+      const inputPistola = document.getElementById('input-pistola');
+      if (inputPistola) {
+        inputPistola.addEventListener('input', onInputPistola);
+        inputPistola.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && escanerPistolaActivo) {
+            e.preventDefault();
+          }
+        });
+        inputPistola.addEventListener('blur', () => {
+          if (escanerPistolaActivo) {
+            setTimeout(() => inputPistola.focus(), 50);
+          }
+        });
+      }
+
+      // Confirmar modal de movimiento con Enter
+      const modalCantidad = document.getElementById('movimiento-cantidad');
+      const modalNota = document.getElementById('movimiento-nota');
+      const confirmarConEnter = (e) => {
+        if (e.key === 'Enter') confirmarMovimiento();
+      };
+      if (modalCantidad) modalCantidad.addEventListener('keydown', confirmarConEnter);
+      if (modalNota) modalNota.addEventListener('keydown', confirmarConEnter);
+
+      // Diagnostico de pistola
+      const diagnosticoInput = document.getElementById('diagnostico-input');
+      if (diagnosticoInput) {
+        diagnosticoInput.addEventListener('keydown', (e) => {
+          const mostrarSufijo = document.getElementById('diagnostico-sufijo').checked;
+          if (e.key === 'Enter') {
+            if (mostrarSufijo) {
+              e.preventDefault();
+              diagnosticoInput.value += '[ENTER]';
+              logDiagnosticoPistola('Tecla: [ENTER] (codigo 13)');
+            } else {
+              logDiagnosticoPistola('Tecla: [ENTER] (codigo 13)');
+            }
+          } else if (e.key === 'Tab') {
+            if (mostrarSufijo) {
+              e.preventDefault();
+              diagnosticoInput.value += '[TAB]';
+              logDiagnosticoPistola('Tecla: [TAB] (codigo 9)');
+            } else {
+              logDiagnosticoPistola('Tecla: [TAB] (codigo 9)');
+            }
+          } else {
+            logDiagnosticoPistola('Tecla: "' + e.key + '" (codigo ' + e.keyCode + ')');
+          }
+        });
+        diagnosticoInput.addEventListener('input', (e) => {
+          logDiagnosticoPistola('Input actual: "' + e.target.value + '"');
+        });
+      }
+
+      // Teclado físico para PIN
+      document.addEventListener('keydown', (e) => {
+        const modal = document.getElementById('modal-pin');
+        if (!modal.classList.contains('visible')) return;
+        if (e.key >= '0' && e.key <= '9') {
+          ingresarDigitoPin(e.key);
+        } else if (e.key === 'Backspace') {
+          borrarDigitoPin();
+        } else if (e.key === 'Escape') {
+          cancelarPin();
+        }
+      });
+    }
 
     function cargarDatos() {
       try {
@@ -855,6 +1418,12 @@
         if (!p.history) p.history = [];
         if (typeof p.minStock !== 'number') p.minStock = 0;
         if (!p.createdAt) p.createdAt = new Date().toISOString();
+        // Migración de nuevos campos
+        if (!p.category) p.category = '';
+        if (typeof p.costPrice !== 'number') p.costPrice = parseFloat(p.costPrice) || 0;
+        if (typeof p.salePrice !== 'number') p.salePrice = parseFloat(p.salePrice) || 0;
+        if (!p.lot) p.lot = '';
+        if (!p.expiryDate) p.expiryDate = '';
       });
     }
 
@@ -878,7 +1447,6 @@
         return;
       }
 
-      // Firebase no funciona desde file:// por restricciones de seguridad.
       if (window.location.protocol === 'file:') {
         console.warn('Abre esta página desde http://localhost para usar la sincronización con Firebase.');
         return;
@@ -900,6 +1468,7 @@
               console.error('Error guardando copia local:', e);
             }
             renderDashboard();
+            renderCategoriasFiltro();
             if (document.getElementById('seccion-inventario').classList.contains('activa')) renderInventario();
             if (document.getElementById('seccion-historico').classList.contains('activa')) renderHistorico();
           }
@@ -907,6 +1476,156 @@
       } catch (e) {
         console.error('Error inicializando Firebase:', e);
       }
+    }
+
+    // ========================
+    // TEMA CLARO/OSCURO
+    // ========================
+    function aplicarTemaGuardado() {
+      const tema = localStorage.getItem(THEME_KEY) || 'claro';
+      aplicarTema(tema);
+    }
+
+    function aplicarTema(tema) {
+      document.documentElement.setAttribute('data-theme', tema === 'oscuro' ? 'dark' : 'light');
+      const toggle = document.getElementById('toggle-tema-config');
+      if (toggle) toggle.checked = tema === 'oscuro';
+      actualizarIconoTema(tema);
+    }
+
+    function toggleTema() {
+      const actual = localStorage.getItem(THEME_KEY) || 'claro';
+      const nuevo = actual === 'oscuro' ? 'claro' : 'oscuro';
+      localStorage.setItem(THEME_KEY, nuevo);
+      aplicarTema(nuevo);
+      mostrarToast('Tema ' + (nuevo === 'oscuro' ? 'oscuro' : 'claro') + ' activado', 'info');
+    }
+
+    function actualizarIconoTema(tema) {
+      const icono = document.getElementById('icono-tema');
+      if (!icono) return;
+      if (tema === 'oscuro') {
+        icono.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
+      } else {
+        icono.innerHTML = '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>';
+      }
+    }
+
+    // ========================
+    // PIN DE ACCESO
+    // ========================
+    function solicitarPin(callback, cancelCallback) {
+      pinBuffer = '';
+      pinCallback = callback;
+      pinCancelCallback = cancelCallback;
+      pinModo = 'verificar';
+      document.getElementById('modal-pin-titulo').textContent = 'Ingresa tu PIN';
+      document.getElementById('modal-pin-mensaje').textContent = 'Usa el teclado numérico para ingresar.';
+      document.getElementById('mensaje-modal-pin').classList.remove('visible');
+      document.getElementById('modal-pin').classList.add('visible');
+      actualizarCirculosPin();
+    }
+
+    function mostrarConfiguracionPin() {
+      const pinGuardado = localStorage.getItem(PIN_KEY);
+      if (pinGuardado) {
+        if (!confirm('Ya hay un PIN configurado. ¿Quieres cambiarlo? Se te pedirá el PIN actual primero.')) return;
+        solicitarPin(() => {
+          iniciarConfiguracionPin();
+        });
+      } else {
+        iniciarConfiguracionPin();
+      }
+    }
+
+    function iniciarConfiguracionPin() {
+      pinBuffer = '';
+      pinCallback = null;
+      pinCancelCallback = null;
+      pinModo = 'configurar';
+      pinTemporal = '';
+      document.getElementById('modal-pin-titulo').textContent = 'Configurar nuevo PIN';
+      document.getElementById('modal-pin-mensaje').textContent = 'Ingresa un PIN de 4 dígitos.';
+      document.getElementById('mensaje-modal-pin').classList.remove('visible');
+      document.getElementById('modal-pin').classList.add('visible');
+      actualizarCirculosPin();
+    }
+
+    function ingresarDigitoPin(digito) {
+      if (pinBuffer.length >= 4) return;
+      pinBuffer += digito;
+      actualizarCirculosPin();
+
+      if (pinBuffer.length === 4) {
+        setTimeout(procesarPinCompleto, 150);
+      }
+    }
+
+    function borrarDigitoPin() {
+      pinBuffer = pinBuffer.slice(0, -1);
+      actualizarCirculosPin();
+    }
+
+    function cancelarPin() {
+      document.getElementById('modal-pin').classList.remove('visible');
+      pinBuffer = '';
+      if (pinCancelCallback) pinCancelCallback();
+      pinCallback = null;
+      pinCancelCallback = null;
+    }
+
+    function actualizarCirculosPin() {
+      const circulos = document.querySelectorAll('.pin-circle');
+      circulos.forEach((c, i) => {
+        c.classList.toggle('activo', i < pinBuffer.length);
+      });
+    }
+
+    function procesarPinCompleto() {
+      const pin = pinBuffer;
+      pinBuffer = '';
+      actualizarCirculosPin();
+
+      if (pinModo === 'verificar') {
+        const pinGuardado = localStorage.getItem(PIN_KEY);
+        if (pin === pinGuardado) {
+          document.getElementById('modal-pin').classList.remove('visible');
+          if (pinCallback) pinCallback();
+        } else {
+          mostrarMensaje('mensaje-modal-pin', 'PIN incorrecto. Inténtalo de nuevo.', 'error');
+        }
+      } else if (pinModo === 'configurar') {
+        pinTemporal = pin;
+        pinModo = 'confirmar';
+        document.getElementById('modal-pin-titulo').textContent = 'Confirmar PIN';
+        document.getElementById('modal-pin-mensaje').textContent = 'Ingresa el mismo PIN de 4 dígitos para confirmar.';
+      } else if (pinModo === 'confirmar') {
+        if (pin === pinTemporal) {
+          localStorage.setItem(PIN_KEY, pin);
+          document.getElementById('modal-pin').classList.remove('visible');
+          mostrarToast('PIN configurado correctamente', 'exito');
+          renderConfiguracion();
+        } else {
+          pinModo = 'configurar';
+          pinTemporal = '';
+          document.getElementById('modal-pin-titulo').textContent = 'Configurar nuevo PIN';
+          document.getElementById('modal-pin-mensaje').textContent = 'Los PIN no coinciden. Ingresa un PIN de 4 dígitos.';
+          mostrarMensaje('mensaje-modal-pin', 'Los PIN no coinciden.', 'error');
+        }
+      }
+    }
+
+    function quitarPin() {
+      const pinGuardado = localStorage.getItem(PIN_KEY);
+      if (!pinGuardado) {
+        mostrarToast('No hay PIN configurado', 'info');
+        return;
+      }
+      solicitarPin(() => {
+        localStorage.removeItem(PIN_KEY);
+        renderConfiguracion();
+        mostrarToast('PIN eliminado correctamente', 'exito');
+      });
     }
 
     // ========================
@@ -925,8 +1644,9 @@
       window.scrollTo(0, 0);
 
       if (seccion === 'dashboard') renderDashboard();
-      if (seccion === 'inventario') renderInventario();
+      if (seccion === 'inventario') { renderCategoriasFiltro(); renderInventario(); }
       if (seccion === 'historico') renderHistorico();
+      if (seccion === 'configuracion') renderConfiguracion();
     }
 
     function volverAtras() {
@@ -959,7 +1679,7 @@
       const config = {
         fps: 10,
         qrbox: { width: 250, height: 250 },
-        formatsToSupport: undefined // Todos los formatos soportados
+        formatsToSupport: undefined
       };
 
       escaner.start(
@@ -1028,6 +1748,7 @@
       if (productos[codigo]) {
         abrirDetalle(codigo);
         mostrarMensaje('mensaje-escanear', 'Producto encontrado: ' + productos[codigo].name, 'exito');
+        mostrarToast('Producto encontrado: ' + escaparHtml(productos[codigo].name), 'exito');
       } else {
         prepararNuevoProducto(codigo);
       }
@@ -1060,7 +1781,6 @@
       }
     }
 
-    // Captura principal: lee directamente los caracteres que llegan al input pistola
     function onInputPistola(e) {
       if (!escanerPistolaActivo) return;
 
@@ -1075,7 +1795,6 @@
 
       if (timeoutPistola) clearTimeout(timeoutPistola);
 
-      // La mayoria de las pistolas envian Enter (\n o \r), Tab (\t) o nada al final
       if (/[\n\r\t]$/.test(valor)) {
         const codigo = valor.replace(/[\n\r\t]+$/, '').trim();
         if (codigo.length >= 1) {
@@ -1085,7 +1804,6 @@
         return;
       }
 
-      // Respaldo: si no hay terminador, procesar tras una pausa
       timeoutPistola = setTimeout(() => {
         const codigo = input.value.trim();
         if (codigo.length >= 3) {
@@ -1095,16 +1813,13 @@
       }, 300);
     }
 
-    // Respaldo global por si el foco no esta en el input pistola
     function onKeydownPistola(e) {
       if (!escanerPistolaActivo) return;
 
-      // Solo actuar si el foco no esta ya en el input de la pistola
       if (document.activeElement && document.activeElement.id === 'input-pistola') {
         return;
       }
 
-      // No interceptar cuando se escribe en otros campos editables
       const tagActivo = document.activeElement && document.activeElement.tagName
         ? document.activeElement.tagName.toLowerCase()
         : '';
@@ -1163,7 +1878,6 @@
 
       onCodigoDetectado(codigo);
 
-      // Limpiar el campo tras un momento para el siguiente escaneo
       setTimeout(() => {
         if (inputPistola) inputPistola.value = '';
         if (estadoPistola) estadoPistola.textContent = 'Escaner listo';
@@ -1206,10 +1920,16 @@
       document.getElementById('detalle-stock').textContent = 'Nuevo producto';
       document.getElementById('detalle-nombre').value = '';
       document.getElementById('detalle-descripcion').value = '';
+      document.getElementById('detalle-categoria').value = '';
       document.getElementById('detalle-ubicacion').value = '';
       document.getElementById('detalle-stock-minimo').value = '0';
+      document.getElementById('detalle-lote').value = '';
+      document.getElementById('detalle-fecha-vencimiento').value = '';
+      document.getElementById('detalle-precio-costo').value = '';
+      document.getElementById('detalle-precio-venta').value = '';
       document.getElementById('detalle-historial').innerHTML = '<p class="vacio">Aún no hay historial.</p>';
       document.getElementById('detalle-titulo').textContent = 'Nuevo producto';
+      renderCategoriasDatalist();
       mostrarSeccion('detalle');
     }
 
@@ -1235,9 +1955,15 @@
       document.getElementById('detalle-stock').textContent = p.quantity + ' unidad' + (p.quantity !== 1 ? 'es' : '');
       document.getElementById('detalle-nombre').value = p.name || '';
       document.getElementById('detalle-descripcion').value = p.description || '';
+      document.getElementById('detalle-categoria').value = p.category || '';
       document.getElementById('detalle-ubicacion').value = p.location || '';
       document.getElementById('detalle-stock-minimo').value = (typeof p.minStock === 'number' ? p.minStock : 0);
+      document.getElementById('detalle-lote').value = p.lot || '';
+      document.getElementById('detalle-fecha-vencimiento').value = p.expiryDate || '';
+      document.getElementById('detalle-precio-costo').value = p.costPrice > 0 ? p.costPrice.toFixed(2) : '';
+      document.getElementById('detalle-precio-venta').value = p.salePrice > 0 ? p.salePrice.toFixed(2) : '';
 
+      renderCategoriasDatalist();
       renderHistorialProducto(codigo);
       mostrarSeccion('detalle');
     }
@@ -1247,8 +1973,13 @@
 
       const nombre = document.getElementById('detalle-nombre').value.trim();
       const descripcion = document.getElementById('detalle-descripcion').value.trim();
+      const categoria = document.getElementById('detalle-categoria').value.trim();
       const ubicacion = document.getElementById('detalle-ubicacion').value.trim();
       const stockMinimo = parseInt(document.getElementById('detalle-stock-minimo').value, 10) || 0;
+      const lote = document.getElementById('detalle-lote').value.trim();
+      const fechaVencimiento = document.getElementById('detalle-fecha-vencimiento').value;
+      const precioCosto = parseFloat(document.getElementById('detalle-precio-costo').value) || 0;
+      const precioVenta = parseFloat(document.getElementById('detalle-precio-venta').value) || 0;
 
       if (!nombre) {
         mostrarMensaje('mensaje-detalle', 'El nombre del producto es obligatorio.', 'error');
@@ -1262,23 +1993,63 @@
           code: productoActual,
           name: nombre,
           description: descripcion,
+          category: categoria,
           location: ubicacion,
           quantity: 0,
           minStock: stockMinimo,
+          lot: lote,
+          expiryDate: fechaVencimiento,
+          costPrice: precioCosto,
+          salePrice: precioVenta,
           createdAt: new Date().toISOString(),
           history: []
         };
         registrarMovimiento(productoActual, 'alta', 0, 'Alta del producto');
       } else {
-        productos[productoActual].name = nombre;
-        productos[productoActual].description = descripcion;
-        productos[productoActual].location = ubicacion;
-        productos[productoActual].minStock = stockMinimo;
+        const p = productos[productoActual];
+        p.name = nombre;
+        p.description = descripcion;
+        p.category = categoria;
+        p.location = ubicacion;
+        p.minStock = stockMinimo;
+        p.lot = lote;
+        p.expiryDate = fechaVencimiento;
+        p.costPrice = precioCosto;
+        p.salePrice = precioVenta;
         registrarMovimiento(productoActual, 'edicion', 0, 'Edición de datos');
       }
 
       guardarDatos();
+      mostrarToast(esNuevo ? 'Producto creado correctamente' : 'Producto actualizado correctamente', 'exito');
       mostrarSeccion('inventario');
+    }
+
+    function duplicarProducto() {
+      if (!productoActual || !productos[productoActual]) return;
+      const p = productos[productoActual];
+      const nuevoCodigo = prompt('Ingresa el código para el producto duplicado:');
+      if (!nuevoCodigo || !nuevoCodigo.trim()) return;
+      const codigoLimpio = nuevoCodigo.trim();
+      if (productos[codigoLimpio]) {
+        mostrarMensaje('mensaje-detalle', 'Ya existe un producto con ese código.', 'error');
+        return;
+      }
+
+      productos[codigoLimpio] = {
+        ...JSON.parse(JSON.stringify(p)),
+        code: codigoLimpio,
+        quantity: 0,
+        createdAt: new Date().toISOString(),
+        history: [{
+          date: new Date().toISOString(),
+          type: 'alta',
+          quantity: 0,
+          note: 'Producto duplicado desde ' + productoActual
+        }]
+      };
+      guardarDatos();
+      mostrarToast('Producto duplicado correctamente', 'exito');
+      abrirDetalle(codigoLimpio);
     }
 
     function eliminarProducto() {
@@ -1288,6 +2059,7 @@
       delete productos[productoActual];
       guardarDatos();
       productoActual = null;
+      mostrarToast('Producto eliminado correctamente', 'exito');
       mostrarSeccion('inventario');
     }
 
@@ -1303,6 +2075,7 @@
       renderInventario();
       renderDashboard();
       mostrarMensaje('mensaje-inventario', `Se agregaron ${cantidad} unidades a "${p.name}"`, 'exito');
+      mostrarToast(`Se agregaron ${cantidad} unidades a "${escaparHtml(p.name)}"`, 'exito');
     }
 
     function salidaRapida(codigo) {
@@ -1321,6 +2094,7 @@
       renderInventario();
       renderDashboard();
       mostrarMensaje('mensaje-inventario', `Se descontaron ${cantidad} unidades de "${p.name}"`, 'exito');
+      mostrarToast(`Se descontaron ${cantidad} unidades de "${escaparHtml(p.name)}"`, 'exito');
     }
 
     function eliminarProductoRapido(codigo) {
@@ -1333,6 +2107,7 @@
       renderInventario();
       renderDashboard();
       mostrarMensaje('mensaje-inventario', `"${p.name}" eliminado correctamente`, 'exito');
+      mostrarToast(`"${escaparHtml(p.name)}" eliminado correctamente`, 'exito');
     }
 
     function ajustarStock() {
@@ -1356,6 +2131,7 @@
       abrirDetalle(productoActual);
       renderDashboard();
       mostrarMensaje('mensaje-detalle', `Stock ajustado a ${nuevoStock} unidades.`, 'exito');
+      mostrarToast(`Stock ajustado a ${nuevoStock} unidades`, 'exito');
     }
 
     // ========================
@@ -1404,6 +2180,7 @@
       cerrarModalMovimiento();
       abrirDetalle(productoActual);
       mostrarMensaje('mensaje-detalle', 'Movimiento registrado correctamente.', 'exito');
+      mostrarToast('Movimiento registrado correctamente', 'exito');
     }
 
     function registrarMovimiento(codigo, tipo, cantidad, nota) {
@@ -1443,6 +2220,7 @@
       guardarDatos();
       abrirDetalle(codigo);
       mostrarMensaje('mensaje-detalle', 'Movimiento anulado correctamente.', 'exito');
+      mostrarToast('Movimiento anulado correctamente', 'exito');
     }
 
     // ========================
@@ -1452,6 +2230,10 @@
       const lista = Object.values(productos);
       const totalProductos = lista.length;
       const totalStock = lista.reduce((sum, p) => sum + (p.quantity || 0), 0);
+      const valorInventario = lista.reduce((sum, p) => {
+        const precio = typeof p.salePrice === 'number' ? p.salePrice : 0;
+        return sum + (precio * (p.quantity || 0));
+      }, 0);
 
       const hoy = new Date().toISOString().split('T')[0];
       let entradasHoy = 0;
@@ -1467,12 +2249,18 @@
       });
 
       const stockBajo = lista.filter(p => esStockBajo(p)).sort((a, b) => (a.quantity || 0) - (b.quantity || 0));
+      const sinStock = lista.filter(p => (p.quantity || 0) === 0);
+      const porVencer = lista.filter(p => diasParaVencer(p) !== null && diasParaVencer(p) <= 30)
+        .sort((a, b) => diasParaVencer(a) - diasParaVencer(b));
 
       document.getElementById('resumen-total').textContent = totalProductos;
       document.getElementById('resumen-stock').textContent = totalStock;
+      document.getElementById('resumen-valor').textContent = formatearMoneda(valorInventario);
       document.getElementById('resumen-entradas').textContent = entradasHoy;
       document.getElementById('resumen-salidas').textContent = salidasHoy;
       document.getElementById('resumen-stock-bajo').textContent = stockBajo.length;
+      document.getElementById('resumen-sin-stock').textContent = sinStock.length;
+      document.getElementById('resumen-por-vencer').textContent = porVencer.length;
 
       const contenedorAlertas = document.getElementById('alertas-stock-bajo');
       if (stockBajo.length === 0) {
@@ -1481,7 +2269,7 @@
         contenedorAlertas.innerHTML = stockBajo.slice(0, 5).map(p => `
           <div class="historial-item ${p.quantity === 0 ? 'salida' : 'edicion'}" style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
             <div style="cursor: pointer; flex: 1;" onclick="abrirDetalle('${p.code}')">
-              <div style="font-weight: 500;">${escaparHtml(p.name)}</div>
+              <div style="font-weight: 600;">${escaparHtml(p.name)}</div>
               <div style="font-size: 0.85rem; color: var(--color-texto-secundario);">
                 Stock: <strong>${p.quantity || 0}</strong> / Mínimo: ${p.minStock || 0}
               </div>
@@ -1489,6 +2277,27 @@
             <button class="btn btn-peligro btn-pequeno" style="width: auto; padding: 6px 10px;" onclick="event.stopPropagation(); salidaRapida('${p.code}')" title="Descontar">➖</button>
           </div>
         `).join('');
+      }
+
+      const contenedorVencimiento = document.getElementById('alertas-vencimiento');
+      if (porVencer.length === 0) {
+        contenedorVencimiento.innerHTML = '<p class="vacio">No hay productos próximos a vencer.</p>';
+      } else {
+        contenedorVencimiento.innerHTML = porVencer.slice(0, 5).map(p => {
+          const dias = diasParaVencer(p);
+          const clase = dias <= 7 ? 'critico' : 'vencimiento';
+          const texto = dias < 0 ? `Vencido hace ${Math.abs(dias)} días` : dias === 0 ? 'Vence hoy' : `Vence en ${dias} días`;
+          return `
+          <div class="historial-item ${dias <= 7 ? 'salida' : 'edicion'}" style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+            <div style="cursor: pointer; flex: 1;" onclick="abrirDetalle('${p.code}')">
+              <div style="font-weight: 600;">${escaparHtml(p.name)}</div>
+              <div style="font-size: 0.85rem; color: var(--color-texto-secundario);">
+                Lote: ${escaparHtml(p.lot || '-')} · Vence: ${formatearFecha(p.expiryDate)}
+              </div>
+              <div class="alerta-stock ${clase}">${texto}</div>
+            </div>
+          </div>
+        `}).join('');
       }
 
       const ultimos = [];
@@ -1510,16 +2319,34 @@
     function esStockBajo(p) {
       const min = typeof p.minStock === 'number' ? p.minStock : 0;
       if (min <= 0) return false;
-      return (p.quantity || 0) <= min;
+      return (p.quantity || 0) <= min && (p.quantity || 0) > 0;
+    }
+
+    function esSinStock(p) {
+      return (p.quantity || 0) === 0;
     }
 
     function nivelStockBajo(p) {
       const qty = p.quantity || 0;
       const min = typeof p.minStock === 'number' ? p.minStock : 0;
-      if (min <= 0) return null;
       if (qty === 0) return 'critico';
-      if (qty <= min) return 'bajo';
+      if (min > 0 && qty <= min) return 'bajo';
       return null;
+    }
+
+    function diasParaVencer(p) {
+      if (!p.expiryDate) return null;
+      const hoy = new Date();
+      hoy.setHours(0, 0, 0, 0);
+      const vencimiento = new Date(p.expiryDate);
+      vencimiento.setHours(0, 0, 0, 0);
+      const diff = vencimiento - hoy;
+      return Math.ceil(diff / (1000 * 60 * 60 * 24));
+    }
+
+    function estaPorVencer(p) {
+      const dias = diasParaVencer(p);
+      return dias !== null && dias <= 30;
     }
 
     function renderAlertaStock(p) {
@@ -1529,11 +2356,48 @@
       return `<div class="alerta-stock ${nivel}">⚠️ ${texto}</div>`;
     }
 
+    function renderAlertaVencimiento(p) {
+      const dias = diasParaVencer(p);
+      if (dias === null) return '';
+      const clase = dias < 0 ? 'critico' : dias <= 7 ? 'critico' : 'vencimiento';
+      const texto = dias < 0 ? `Vencido (${Math.abs(dias)}d)` : dias === 0 ? 'Vence hoy' : `Vence en ${dias}d`;
+      return `<div class="alerta-stock ${clase}">⏰ ${texto}</div>`;
+    }
+
+    function renderCategoriasFiltro() {
+      const select = document.getElementById('filtro-categoria');
+      const valorActual = select.value;
+      const categorias = [...new Set(Object.values(productos).map(p => p.category).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+
+      select.innerHTML = '<option value="">Todas las categorías</option>';
+      categorias.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat;
+        option.textContent = cat;
+        select.appendChild(option);
+      });
+      select.value = valorActual;
+    }
+
+    function renderCategoriasDatalist() {
+      const datalist = document.getElementById('lista-categorias');
+      const categorias = [...new Set(Object.values(productos).map(p => p.category).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+      datalist.innerHTML = categorias.map(cat => `<option value="${escaparHtml(cat)}">`).join('');
+    }
+
     function renderInventario() {
       const busqueda = document.getElementById('input-busqueda').value.toLowerCase().trim();
+      const categoriaFiltro = document.getElementById('filtro-categoria').value;
+      const estadoFiltro = document.getElementById('filtro-estado').value;
+
       const lista = Object.values(productos).filter(p => {
-        const texto = (p.name + ' ' + p.code + ' ' + p.location + ' ' + p.description).toLowerCase();
-        return texto.includes(busqueda);
+        const texto = (p.name + ' ' + p.code + ' ' + p.location + ' ' + p.description + ' ' + p.lot + ' ' + p.category).toLowerCase();
+        if (busqueda && !texto.includes(busqueda)) return false;
+        if (categoriaFiltro && p.category !== categoriaFiltro) return false;
+        if (estadoFiltro === 'stock-bajo' && !esStockBajo(p)) return false;
+        if (estadoFiltro === 'sin-stock' && !esSinStock(p)) return false;
+        if (estadoFiltro === 'por-vencer' && !estaPorVencer(p)) return false;
+        return true;
       });
 
       lista.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'es', { sensitivity: 'base' }));
@@ -1547,13 +2411,17 @@
       let html = '<table><thead><tr><th>Producto</th><th>Stock</th><th>Ubicación</th><th style="text-align:center;">Acciones</th></tr></thead><tbody>';
       lista.forEach(p => {
         const nivel = nivelStockBajo(p);
-        html += `<tr class="${nivel ? 'fila-stock-bajo' : ''}">
+        const porVencer = estaPorVencer(p);
+        const filaClase = nivel === 'critico' ? 'fila-sin-stock' : nivel ? 'fila-stock-bajo' : porVencer ? 'fila-vencimiento' : '';
+        html += `<tr class="${filaClase}">
           <td onclick="abrirDetalle('${p.code}')" style="cursor: pointer;">
-            <div style="font-weight: 500;">${escaparHtml(p.name)}</div>
+            <div style="font-weight: 600;">${escaparHtml(p.name)}</div>
             <div class="codigo-celda">${escaparHtml(p.code)}</div>
+            ${p.category ? `<div class="badge">${escaparHtml(p.category)}</div>` : ''}
             ${renderAlertaStock(p)}
+            ${renderAlertaVencimiento(p)}
           </td>
-          <td onclick="abrirDetalle('${p.code}')" style="cursor: pointer; font-weight: bold;">${p.quantity || 0}</td>
+          <td onclick="abrirDetalle('${p.code}')" style="cursor: pointer; font-weight: 800;">${p.quantity || 0}</td>
           <td onclick="abrirDetalle('${p.code}')" style="cursor: pointer;">${escaparHtml(p.location || '-')}</td>
           <td style="white-space: nowrap; text-align: center;">
             <button class="btn btn-exito btn-pequeno" style="width: auto; padding: 6px 10px;" onclick="event.stopPropagation(); entradaRapida('${p.code}')" title="Entrada">➕</button>
@@ -1564,6 +2432,13 @@
       });
       html += '</tbody></table>';
       contenedor.innerHTML = html;
+    }
+
+    function limpiarFiltrosInventario() {
+      document.getElementById('input-busqueda').value = '';
+      document.getElementById('filtro-categoria').value = '';
+      document.getElementById('filtro-estado').value = '';
+      renderInventario();
     }
 
     function renderHistorialProducto(codigo) {
@@ -1618,9 +2493,10 @@
         alta: '🆕 Alta'
       }[h.type] || h.type;
 
-      const puedeAnular = permitirAnular && idx !== null && code && (h.type === 'entrada' || h.type === 'salida');
+      const puedeAnular = permitirAnular && idx !== null && code && (h.type === 'entrada' || h.type === 'salida') && !h.anulado;
+      const claseAnulado = h.anulado ? 'anulado' : '';
 
-      return `<div class="historial-item ${h.type}">
+      return `<div class="historial-item ${h.type} ${claseAnulado}">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
           <div>
             <div class="historial-fecha">${fechaStr}</div>
@@ -1642,6 +2518,45 @@
       renderHistorico();
     }
 
+    function renderConfiguracion() {
+      const pinGuardado = localStorage.getItem(PIN_KEY);
+      const estadoTexto = document.getElementById('pin-estado-texto');
+      const btnConfig = document.getElementById('btn-config-pin');
+      if (pinGuardado) {
+        estadoTexto.textContent = 'PIN activado. La app lo pedirá al iniciar.';
+        btnConfig.textContent = 'Cambiar PIN';
+        btnConfig.onclick = mostrarConfiguracionPin;
+        // Agregar botón quitar si no existe
+        if (!document.getElementById('btn-quitar-pin')) {
+          const btnQuitar = document.createElement('button');
+          btnQuitar.id = 'btn-quitar-pin';
+          btnQuitar.className = 'btn btn-peligro btn-pequeno';
+          btnQuitar.style.marginLeft = '8px';
+          btnQuitar.textContent = 'Quitar PIN';
+          btnQuitar.onclick = quitarPin;
+          btnConfig.parentNode.appendChild(btnQuitar);
+        }
+      } else {
+        estadoTexto.textContent = 'No hay PIN configurado.';
+        btnConfig.textContent = 'Configurar';
+        btnConfig.onclick = iniciarConfiguracionPin;
+        const btnQuitar = document.getElementById('btn-quitar-pin');
+        if (btnQuitar) btnQuitar.remove();
+      }
+
+      const toggle = document.getElementById('toggle-tema-config');
+      if (toggle) toggle.checked = (localStorage.getItem(THEME_KEY) || 'claro') === 'oscuro';
+    }
+
+    function vaciarDatos() {
+      if (!confirm('¿Estás segura de que quieres eliminar TODOS los datos? Esta acción no se puede deshacer.')) return;
+      productos = {};
+      guardarDatos();
+      renderDashboard();
+      renderInventario();
+      mostrarToast('Datos eliminados correctamente', 'exito');
+    }
+
     // ========================
     // UTILIDADES
     // ========================
@@ -1653,6 +2568,36 @@
       setTimeout(() => {
         el.classList.remove('visible');
       }, 5000);
+    }
+
+    function mostrarToast(mensaje, tipo = 'info', duracion = 4000) {
+      const contenedor = document.getElementById('toast-container');
+      if (!contenedor) return;
+
+      const toast = document.createElement('div');
+      toast.className = 'toast toast-' + tipo;
+
+      const iconos = {
+        exito: '✓',
+        error: '✕',
+        advertencia: '⚠',
+        info: 'ℹ'
+      };
+
+      toast.innerHTML = `
+        <span style="font-size: 1.1rem;">${iconos[tipo] || 'ℹ'}</span>
+        <span>${escaparHtml(mensaje)}</span>
+        <button class="toast-cerrar" onclick="this.parentElement.remove()">×</button>
+      `;
+
+      contenedor.appendChild(toast);
+
+      setTimeout(() => {
+        toast.classList.add('saliendo');
+        setTimeout(() => {
+          if (toast.parentElement) toast.remove();
+        }, 300);
+      }, duracion);
     }
 
     function descargarArchivo(contenido, nombre, tipo) {
@@ -1672,24 +2617,31 @@
       const fecha = new Date().toISOString().split('T')[0];
       descargarArchivo(datos, `inventario_backup_${fecha}.json`, 'application/json');
       mostrarMensaje('mensaje-inventario', 'Backup descargado correctamente.', 'exito');
+      mostrarToast('Backup descargado correctamente', 'exito');
     }
 
     function exportarCSV() {
       const lista = Object.values(productos).sort((a, b) => (a.name || '').localeCompare(b.name || '', 'es', { sensitivity: 'base' }));
-      let csv = 'Codigo,Nombre,Descripcion,Ubicacion,Stock,Stock Minimo\n';
+      let csv = 'Codigo,Nombre,Descripcion,Categoria,Ubicacion,Stock,Stock Minimo,Lote,Fecha Vencimiento,Precio Costo,Precio Venta\n';
       lista.forEach(p => {
         csv += [
           escaparCsv(p.code),
           escaparCsv(p.name),
           escaparCsv(p.description),
+          escaparCsv(p.category),
           escaparCsv(p.location),
           p.quantity || 0,
-          p.minStock || 0
+          p.minStock || 0,
+          escaparCsv(p.lot),
+          escaparCsv(p.expiryDate),
+          (typeof p.costPrice === 'number' ? p.costPrice.toFixed(2) : '0.00'),
+          (typeof p.salePrice === 'number' ? p.salePrice.toFixed(2) : '0.00')
         ].join(',') + '\n';
       });
       const fecha = new Date().toISOString().split('T')[0];
       descargarArchivo('\ufeff' + csv, `inventario_${fecha}.csv`, 'text/csv;charset=utf-8;');
       mostrarMensaje('mensaje-inventario', 'CSV descargado correctamente.', 'exito');
+      mostrarToast('CSV descargado correctamente', 'exito');
     }
 
     function escaparCsv(valor) {
@@ -1721,13 +2673,28 @@
           migrarDatos();
           guardarDatos();
           renderInventario();
+          renderDashboard();
+          renderCategoriasFiltro();
           mostrarMensaje('mensaje-inventario', 'Backup importado correctamente.', 'exito');
+          mostrarToast('Backup importado correctamente', 'exito');
         } catch (err) {
           console.error(err);
           mostrarMensaje('mensaje-inventario', 'No se pudo importar el archivo. Verifica que sea un backup válido.', 'error');
+          mostrarToast('Error al importar backup', 'error');
         }
       };
       lector.readAsText(archivo);
+    }
+
+    function formatearMoneda(valor) {
+      return '$' + Math.round(valor).toLocaleString('es-CL');
+    }
+
+    function formatearFecha(fechaStr) {
+      if (!fechaStr) return '-';
+      const fecha = new Date(fechaStr);
+      if (isNaN(fecha.getTime())) return fechaStr;
+      return fecha.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
     }
 
     function escaparHtml(texto) {
