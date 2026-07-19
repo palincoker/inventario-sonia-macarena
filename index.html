@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Control de Inventario - Sonia Macarena</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="logo-128.png">
+  <meta name="theme-color" content="#2563eb">
+  <meta name="description" content="Sistema de control de inventario con escaneo QR, sincronizacion en la nube y gestion de stock.">
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <style>
     :root {
@@ -84,6 +88,41 @@
 
     header h1 { margin: 0; font-size: 1.25rem; font-weight: 700; letter-spacing: -0.01em; }
     header p { margin: 4px 0 0; font-size: 0.85rem; opacity: 0.9; }
+
+    .header-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      text-align: left;
+    }
+
+    .header-logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid rgba(255,255,255,0.4);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      background: white;
+    }
+
+    .header-titulos {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+
+    .header-titulos h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .header-titulos span {
+      font-size: 0.9rem;
+      opacity: 0.92;
+      font-weight: 500;
+    }
 
     .header-actions {
       position: absolute;
@@ -756,6 +795,8 @@
 
     @media (max-width: 480px) {
       header h1 { font-size: 1.05rem; }
+      .header-logo { width: 42px; height: 42px; }
+      .header-titulos span { font-size: 0.8rem; }
       .resumen-item .numero { font-size: 1.5rem; }
       .detalle-grid { grid-template-columns: 1fr; }
     }
@@ -796,7 +837,13 @@
         <svg id="icono-tema" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
       </button>
     </div>
-    <h1>📦 Control de Inventario Sonia Macarena</h1>
+    <div class="header-brand">
+      <img src="logo-128.png" alt="Logo" class="header-logo">
+      <div class="header-titulos">
+        <h1>Control de Inventario</h1>
+        <span>Sonia Macarena</span>
+      </div>
+    </div>
   </header>
 
   <main class="contenedor">
