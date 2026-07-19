@@ -6,20 +6,20 @@
   <title>Control de Inventario - Sonia Macarena</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="apple-touch-icon" href="logo-128.png">
-  <meta name="theme-color" content="#4f46e5">
+  <meta name="theme-color" content="#ec4899">
   <meta name="description" content="Sistema de control de inventario con escaneo QR, sincronizacion en la nube y gestion de stock.">
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <style>
 :root {
-      --color-primario: #4f46e5;
-      --color-primario-oscuro: #4338ca;
-      --color-primario-claro: #e0e7ff;
-      --color-fondo: #f8fafc;
-      --color-superficie: rgba(255, 255, 255, 0.86);
-      --color-superficie-secundaria: #f1f5f9;
-      --color-texto: #0f172a;
-      --color-texto-secundario: #64748b;
-      --color-borde: rgba(226, 232, 240, 0.8);
+      --color-primario: #ec4899;
+      --color-primario-oscuro: #db2777;
+      --color-primario-claro: #fce7f3;
+      --color-fondo: #fff5f7;
+      --color-superficie: rgba(255, 255, 255, 0.88);
+      --color-superficie-secundaria: #fff0f5;
+      --color-texto: #4a1625;
+      --color-texto-secundario: #9d4568;
+      --color-borde: rgba(236, 72, 153, 0.14);
       --color-exito: #10b981;
       --color-exito-oscuro: #059669;
       --color-exito-pastel: rgba(16, 185, 129, 0.12);
@@ -29,28 +29,28 @@
       --color-advertencia: #f59e0b;
       --color-advertencia-oscuro: #d97706;
       --color-advertencia-pastel: rgba(245, 158, 11, 0.12);
-      --color-info: #3b82f6;
-      --color-info-pastel: rgba(59, 130, 246, 0.12);
-      --radio: 18px;
-      --radio-pequeno: 12px;
-      --sombra-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
-      --sombra: 0 4px 6px -1px rgba(15, 23, 42, 0.05), 0 2px 4px -2px rgba(15, 23, 42, 0.03);
-      --sombra-lg: 0 20px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
-      --sombra-xl: 0 25px 50px -12px rgba(15, 23, 42, 0.12);
+      --color-info: #a855f7;
+      --color-info-pastel: rgba(168, 85, 247, 0.12);
+      --radio: 20px;
+      --radio-pequeno: 14px;
+      --sombra-sm: 0 1px 2px 0 rgba(74, 22, 37, 0.04);
+      --sombra: 0 4px 6px -1px rgba(74, 22, 37, 0.05), 0 2px 4px -2px rgba(74, 22, 37, 0.03);
+      --sombra-lg: 0 20px 25px -5px rgba(74, 22, 37, 0.08), 0 8px 10px -6px rgba(74, 22, 37, 0.04);
+      --sombra-xl: 0 25px 50px -12px rgba(74, 22, 37, 0.12);
       --transicion: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       --font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
 
     [data-theme="dark"] {
-      --color-primario: #6366f1;
-      --color-primario-oscuro: #818cf8;
-      --color-primario-claro: rgba(99, 102, 241, 0.2);
-      --color-fondo: #0f172a;
-      --color-superficie: rgba(30, 41, 59, 0.86);
-      --color-superficie-secundaria: rgba(51, 65, 85, 0.7);
-      --color-texto: #f8fafc;
-      --color-texto-secundario: #94a3b8;
-      --color-borde: rgba(71, 85, 105, 0.6);
+      --color-primario: #f472b6;
+      --color-primario-oscuro: #f9a8d4;
+      --color-primario-claro: rgba(244, 114, 182, 0.2);
+      --color-fondo: #2a0a1e;
+      --color-superficie: rgba(50, 15, 40, 0.86);
+      --color-superficie-secundaria: rgba(75, 25, 60, 0.7);
+      --color-texto: #fff0f5;
+      --color-texto-secundario: #d8a6be;
+      --color-borde: rgba(244, 114, 182, 0.22);
       --color-exito: #34d399;
       --color-exito-oscuro: #10b981;
       --color-exito-pastel: rgba(16, 185, 129, 0.15);
@@ -60,8 +60,8 @@
       --color-advertencia: #fbbf24;
       --color-advertencia-oscuro: #f59e0b;
       --color-advertencia-pastel: rgba(245, 158, 11, 0.15);
-      --color-info: #60a5fa;
-      --color-info-pastel: rgba(59, 130, 246, 0.15);
+      --color-info: #c084fc;
+      --color-info-pastel: rgba(192, 132, 252, 0.15);
       --sombra-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
       --sombra: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
       --sombra-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
@@ -77,7 +77,7 @@
     body {
       margin: 0;
       font-family: var(--font-sans);
-      background: linear-gradient(135deg, var(--color-fondo) 0%, #eef2ff 50%, var(--color-fondo) 100%);
+      background: linear-gradient(135deg, var(--color-fondo) 0%, #fce7f3 40%, #f3e8ff 70%, var(--color-fondo) 100%);
       background-attachment: fixed;
       color: var(--color-texto);
       min-height: 100vh;
@@ -89,11 +89,11 @@
     }
 
     [data-theme="dark"] body {
-      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+      background: linear-gradient(135deg, #2a0a1e 0%, #1e1b4b 50%, #2a0a1e 100%);
     }
 
     header {
-      background: rgba(255, 255, 255, 0.72);
+      background: rgba(255, 240, 245, 0.72);
       backdrop-filter: blur(20px) saturate(180%);
       -webkit-backdrop-filter: blur(20px) saturate(180%);
       color: var(--color-texto);
@@ -107,7 +107,7 @@
     }
 
     [data-theme="dark"] header {
-      background: rgba(15, 23, 42, 0.72);
+      background: rgba(50, 15, 40, 0.72);
       border-bottom-color: rgba(71, 85, 105, 0.5);
     }
 
@@ -118,11 +118,11 @@
       left: 0;
       right: 0;
       height: 3px;
-      background: linear-gradient(90deg, var(--color-primario) 0%, var(--color-info) 50%, var(--color-primario-oscuro) 100%);
+      background: linear-gradient(90deg, var(--color-primario) 0%, #f472b6 35%, var(--color-info) 70%, var(--color-primario-oscuro) 100%);
       opacity: 0.9;
     }
 
-    header h1 { margin: 0; font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; }
+    header h1 { margin: 0; font-size: 1.25rem; font-weight: 600; letter-spacing: -0.01em; }
     header p { margin: 4px 0 0; font-size: 0.85rem; opacity: 0.9; }
 
     .header-brand {
@@ -139,7 +139,7 @@
       object-fit: cover;
       border: 3px solid transparent;
       background: linear-gradient(white, white) padding-box, linear-gradient(135deg, var(--color-primario) 0%, var(--color-info) 100%) border-box;
-      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+      box-shadow: 0 4px 12px rgba(236, 72, 153, 0.2);
     }
 
     .header-titulos {
@@ -150,7 +150,7 @@
 
     .header-titulos h1 {
       font-size: 1.25rem;
-      font-weight: 700;
+      font-weight: 600;
       margin: 0;
       background: linear-gradient(135deg, var(--color-primario) 0%, var(--color-primario-oscuro) 100%);
       -webkit-background-clip: text;
@@ -174,8 +174,8 @@
     }
 
     .header-actions button {
-      background: rgba(79, 70, 229, 0.08);
-      border: 1px solid rgba(79, 70, 229, 0.15);
+      background: rgba(236, 72, 153, 0.08);
+      border: 1px solid rgba(236, 72, 153, 0.15);
       color: var(--color-primario);
       border-radius: var(--radio-pequeno);
       padding: 9px;
@@ -302,7 +302,7 @@
       text-decoration: none;
       width: 100%;
       margin-bottom: 10px;
-      box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2), 0 2px 4px -2px rgba(79, 70, 229, 0.15);
+      box-shadow: 0 4px 6px -1px rgba(236, 72, 153, 0.2), 0 2px 4px -2px rgba(236, 72, 153, 0.15);
       position: relative;
       overflow: hidden;
     }
@@ -317,7 +317,7 @@
 
     .btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.25), 0 4px 6px -4px rgba(79, 70, 229, 0.2);
+      box-shadow: 0 10px 15px -3px rgba(236, 72, 153, 0.25), 0 4px 6px -4px rgba(236, 72, 153, 0.2);
       filter: brightness(1.05);
     }
     .btn:active { transform: translateY(0); }
@@ -365,13 +365,13 @@
     input:focus, textarea:focus, select:focus {
       outline: none;
       border-color: var(--color-primario);
-      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
+      box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.12);
     }
 
     [data-theme="dark"] input:focus,
     [data-theme="dark"] textarea:focus,
     [data-theme="dark"] select:focus {
-      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+      box-shadow: 0 0 0 4px rgba(244, 114, 182, 0.2);
     }
 
     .lector-container {
@@ -420,7 +420,7 @@
     .busqueda-container {
       position: sticky;
       top: 86px;
-      background: rgba(248, 250, 252, 0.85);
+      background: rgba(255, 245, 247, 0.85);
       backdrop-filter: blur(10px);
       padding: 12px 0;
       z-index: 90;
@@ -428,7 +428,7 @@
     }
 
     [data-theme="dark"] .busqueda-container {
-      background: rgba(15, 23, 42, 0.85);
+      background: rgba(50, 15, 40, 0.85);
     }
 
     table {
@@ -476,8 +476,8 @@
 
     .fila-stock-bajo td { background: var(--color-advertencia-pastel); }
     .fila-sin-stock td { background: var(--color-peligro-pastel); }
-    .fila-vencimiento td { background: rgba(139, 92, 246, 0.08); }
-    .fila-seleccionada td { background: rgba(79, 70, 229, 0.1) !important; }
+    .fila-vencimiento td { background: rgba(168, 85, 247, 0.08); }
+    .fila-seleccionada td { background: rgba(236, 72, 153, 0.1) !important; }
 
     .codigo-celda {
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -510,14 +510,14 @@
     }
 
     .alerta-stock.vencimiento {
-      background: rgba(139, 92, 246, 0.12);
-      color: #7c3aed;
-      border: 1px solid rgba(139, 92, 246, 0.2);
+      background: rgba(168, 85, 247, 0.12);
+      color: #9333ea;
+      border: 1px solid rgba(168, 85, 247, 0.2);
     }
 
     [data-theme="dark"] .alerta-stock.critico { color: #f87171; }
     [data-theme="dark"] .alerta-stock.bajo { color: #fbbf24; }
-    [data-theme="dark"] .alerta-stock.vencimiento { color: #a78bfa; }
+    [data-theme="dark"] .alerta-stock.vencimiento { color: #c084fc; }
 
     .checkbox-seleccion {
       width: 20px;
@@ -590,7 +590,7 @@
       bottom: 0;
       left: 0;
       right: 0;
-      background: rgba(255, 255, 255, 0.78);
+      background: rgba(255, 240, 245, 0.78);
       backdrop-filter: blur(20px) saturate(180%);
       -webkit-backdrop-filter: blur(20px) saturate(180%);
       border-top: 1px solid var(--color-borde);
@@ -602,7 +602,7 @@
     }
 
     [data-theme="dark"] nav {
-      background: rgba(15, 23, 42, 0.78);
+      background: rgba(50, 15, 40, 0.78);
       border-top-color: rgba(71, 85, 105, 0.5);
     }
 
@@ -625,7 +625,7 @@
     }
 
     nav button.activo { color: var(--color-primario); }
-    nav button:hover { background: rgba(79, 70, 229, 0.06); }
+    nav button:hover { background: rgba(236, 72, 153, 0.06); }
 
     nav button.activo::before {
       content: "";
@@ -653,12 +653,12 @@
       background: linear-gradient(135deg, var(--color-primario) 0%, var(--color-primario-oscuro) 100%) !important;
       color: white !important;
       border-color: var(--color-primario) !important;
-      box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2), 0 2px 4px -2px rgba(79, 70, 229, 0.15) !important;
+      box-shadow: 0 4px 6px -1px rgba(236, 72, 153, 0.2), 0 2px 4px -2px rgba(236, 72, 153, 0.15) !important;
     }
 
     #input-pistola:focus {
       border-color: var(--color-primario);
-      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
+      box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.12);
     }
 
     .estado-pistola-leyendo {
@@ -711,10 +711,10 @@
       background: var(--color-primario-claro);
       color: var(--color-primario-oscuro);
       margin-top: 4px;
-      border: 1px solid rgba(79, 70, 229, 0.12);
+      border: 1px solid rgba(236, 72, 153, 0.12);
     }
 
-    [data-theme="dark"] .badge { color: #93c5fd; }
+    [data-theme="dark"] .badge { color: #f9a8d4; }
 
     .modal {
       position: fixed;
@@ -780,7 +780,7 @@
     .pin-circle.activo {
       background: var(--color-primario);
       border-color: var(--color-primario);
-      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.2);
+      box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.2);
     }
 
     .teclado-pin {
@@ -1037,11 +1037,16 @@
           <div class="numero" id="resumen-stock-bajo" style="color: var(--color-advertencia);">0</div>
           <div class="etiqueta">Stock bajo</div>
         </div>
-        <div class="resumen-item" style="background: rgba(139, 92, 246, 0.08);">
+        <div class="resumen-item" style="background: rgba(168, 85, 247, 0.08);">
           <div class="resumen-icon">⏰</div>
-          <div class="numero" id="resumen-por-vencer" style="color: #8b5cf6;">0</div>
+          <div class="numero" id="resumen-por-vencer" style="color: var(--color-info);">0</div>
           <div class="etiqueta">Por vencer</div>
         </div>
+      </div>
+
+      <div class="tarjeta">
+        <h3>📊 Stock por categoría</h3>
+        <canvas id="grafico-stock" width="800" height="320" style="width:100%; height:auto; display:block;"></canvas>
       </div>
 
       <button class="btn btn-exito" onclick="irAEscanear()">
@@ -1052,6 +1057,9 @@
       </button>
       <button class="btn btn-secundario" onclick="mostrarSeccion('historico')">
         <span>📜</span> Ver histórico
+      </button>
+      <button class="btn btn-secundario" onclick="generarInforme()">
+        <span>📊</span> Generar informe
       </button>
 
       <div class="tarjeta">
@@ -1184,6 +1192,11 @@
         </button>
         <button class="btn" onclick="nuevoProductoManual()">
           <span>➕</span> Nuevo
+        </button>
+      </div>
+      <div class="botones-grupo">
+        <button class="btn btn-secundario" onclick="generarInforme()">
+          <span>📊</span> Generar informe
         </button>
       </div>
 
@@ -1588,6 +1601,7 @@
         cargarDatos();
         inicializarFirebase();
         configurarEventosGlobales();
+      window.addEventListener('resize', renderGraficoStock);
         renderDashboard();
         renderCategoriasFiltro();
 
@@ -1782,6 +1796,9 @@
       localStorage.setItem(THEME_KEY, nuevo);
       aplicarTema(nuevo);
       mostrarToast('Tema ' + (nuevo === 'oscuro' ? 'oscuro' : 'claro') + ' activado', 'info');
+      if (document.getElementById('seccion-dashboard').classList.contains('activa')) {
+        renderGraficoStock();
+      }
     }
 
     function actualizarIconoTema(tema) {
@@ -2800,6 +2817,8 @@
       } else {
         contenedor.innerHTML = ultimos.slice(0, 5).map(h => renderItemHistorial(h)).join('');
       }
+
+      renderGraficoStock();
     }
 
     function esStockBajo(p) {
@@ -2901,7 +2920,7 @@
         const nivel = nivelStockBajo(p);
         const porVencer = estaPorVencer(p);
         const filaClase = (nivel === 'critico' ? 'fila-sin-stock' : nivel ? 'fila-stock-bajo' : porVencer ? 'fila-vencimiento' : '') + (productosSeleccionados.has(p.code) ? ' fila-seleccionada' : '');
-        const fotoMini = p.image ? `<img src="${p.image}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;margin-right:10px;flex-shrink:0;">` : `<div style="width:48px;height:48px;background:#e5e7eb;border-radius:8px;margin-right:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:1.2rem;">📦</div>`;
+        const fotoMini = p.image ? `<img src="${p.image}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;margin-right:10px;flex-shrink:0;">` : `<div style="width:48px;height:48px;background:#fce7f3;border-radius:8px;margin-right:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#db2777;font-size:1.2rem;">📦</div>`;
         const checked = productosSeleccionados.has(p.code) ? 'checked' : '';
         html += `<tr class="${filaClase}">
           <td style="text-align:center;" onclick="event.stopPropagation();">
@@ -3201,6 +3220,248 @@
       const div = document.createElement('div');
       div.textContent = texto;
       return div.innerHTML;
+    }
+
+    // ========================
+    // GRÁFICO DE STOCK NATIVO
+    // ========================
+    function renderGraficoStock() {
+      const canvas = document.getElementById('grafico-stock');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.max(320, Math.floor(rect.width * dpr));
+      canvas.height = Math.floor(320 * dpr);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(dpr, dpr);
+      const width = canvas.width / dpr;
+      const height = canvas.height / dpr;
+
+      const estilo = getComputedStyle(document.documentElement);
+      const colorTexto = estilo.getPropertyValue('--color-texto').trim() || '#4a1625';
+      const colorTextoSec = estilo.getPropertyValue('--color-texto-secundario').trim() || '#9d4568';
+      const colorBorde = estilo.getPropertyValue('--color-borde').trim() || 'rgba(236,72,153,0.14)';
+
+      ctx.clearRect(0, 0, width, height);
+
+      const datos = {};
+      Object.values(productos).forEach(p => {
+        const cat = p.category || 'Sin categoría';
+        datos[cat] = (datos[cat] || 0) + (p.quantity || 0);
+      });
+      const categorias = Object.keys(datos).sort((a, b) => datos[b] - datos[a]);
+
+      if (categorias.length === 0) {
+        ctx.fillStyle = colorTextoSec;
+        ctx.textAlign = 'center';
+        ctx.font = '16px system-ui, sans-serif';
+        ctx.fillText('No hay datos para mostrar', width / 2, height / 2);
+        return;
+      }
+
+      const maxValor = Math.max(...Object.values(datos)) || 1;
+      const padding = { top: 24, right: 20, bottom: 90, left: 50 };
+      const chartW = width - padding.left - padding.right;
+      const chartH = height - padding.top - padding.bottom;
+      const slot = chartW / categorias.length;
+      const barWidth = Math.min(56, slot * 0.65);
+      const colores = ['#ec4899', '#a855f7', '#f472b6', '#c084fc', '#db2777', '#8b5cf6', '#f9a8d4', '#d946ef'];
+
+      // Ejes
+      ctx.strokeStyle = colorBorde;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(padding.left, padding.top);
+      ctx.lineTo(padding.left, height - padding.bottom);
+      ctx.lineTo(width - padding.right, height - padding.bottom);
+      ctx.stroke();
+
+      // Líneas horizontales guía
+      ctx.strokeStyle = colorBorde;
+      ctx.setLineDash([4, 4]);
+      for (let i = 1; i <= 4; i++) {
+        const y = height - padding.bottom - (chartH * i / 4);
+        ctx.beginPath();
+        ctx.moveTo(padding.left, y);
+        ctx.lineTo(width - padding.right, y);
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
+
+      // Etiqueta eje Y
+      ctx.fillStyle = colorTextoSec;
+      ctx.font = '11px system-ui, sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText('Unidades', padding.left - 8, padding.top - 8);
+
+      categorias.forEach((cat, i) => {
+        const val = datos[cat];
+        const h = (val / maxValor) * chartH;
+        const x = padding.left + i * slot + (slot - barWidth) / 2;
+        const y = height - padding.bottom - h;
+        const color = colores[i % colores.length];
+
+        const grad = ctx.createLinearGradient(0, y, 0, height - padding.bottom);
+        grad.addColorStop(0, color);
+        grad.addColorStop(1, color + '80');
+        ctx.fillStyle = grad;
+
+        // Barra redondeada (con fallback)
+        if (typeof ctx.roundRect === 'function') {
+          ctx.beginPath();
+          ctx.roundRect(x, y, barWidth, h, 8);
+          ctx.fill();
+        } else {
+          const r = Math.min(8, barWidth / 2);
+          ctx.beginPath();
+          ctx.moveTo(x + r, y);
+          ctx.lineTo(x + barWidth - r, y);
+          ctx.quadraticCurveTo(x + barWidth, y, x + barWidth, y + r);
+          ctx.lineTo(x + barWidth, y + h);
+          ctx.lineTo(x, y + h);
+          ctx.lineTo(x, y + r);
+          ctx.quadraticCurveTo(x, y, x + r, y);
+          ctx.closePath();
+          ctx.fill();
+        }
+
+        // Valor encima
+        ctx.fillStyle = colorTexto;
+        ctx.font = 'bold 12px system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(String(val), x + barWidth / 2, y - 6);
+
+        // Etiqueta categoría inclinada
+        ctx.save();
+        ctx.translate(x + barWidth / 2, height - padding.bottom + 12);
+        ctx.rotate(Math.PI / 6);
+        ctx.font = '12px system-ui, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillStyle = colorTextoSec;
+        ctx.fillText(cat, 0, 0);
+        ctx.restore();
+      });
+    }
+
+    // ========================
+    // INFORME DESCARGABLE
+    // ========================
+    function generarInforme() {
+      const lista = Object.values(productos).sort((a, b) => (a.name || '').localeCompare(b.name || '', 'es', { sensitivity: 'base' }));
+      const totalProductos = lista.length;
+      const totalStock = lista.reduce((s, p) => s + (p.quantity || 0), 0);
+      const valorTotal = lista.reduce((s, p) => s + ((p.salePrice || 0) * (p.quantity || 0)), 0);
+      const stockBajo = lista.filter(p => esStockBajo(p)).sort((a, b) => (a.quantity || 0) - (b.quantity || 0));
+      const sinStock = lista.filter(p => esSinStock(p));
+      const porVencer = lista.filter(p => estaPorVencer(p)).sort((a, b) => diasParaVencer(a) - diasParaVencer(b));
+
+      const fecha = new Date().toISOString().split('T')[0];
+      const fechaHora = new Date().toLocaleString('es-ES', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      });
+
+      const fila = (p, i) => {
+        const dias = diasParaVencer(p);
+        let estado = 'Normal';
+        if (esSinStock(p)) estado = 'Sin stock';
+        else if (esStockBajo(p)) estado = 'Stock bajo';
+        if (dias !== null && dias <= 30) estado += dias < 0 ? ' · Vencido' : dias === 0 ? ' · Vence hoy' : ` · Vence en ${dias}d`;
+        return `<tr class="${i % 2 === 0 ? '' : 'alt'}">
+          <td>${escaparHtml(p.code)}</td>
+          <td><strong>${escaparHtml(p.name)}</strong></td>
+          <td>${escaparHtml(p.category || '-')}</td>
+          <td style="text-align:center">${p.quantity || 0}</td>
+          <td style="text-align:center">${p.minStock || 0}</td>
+          <td>${escaparHtml(formatearUbicacion(p))}</td>
+          <td>${escaparHtml(p.lot || '-')}</td>
+          <td>${formatearFecha(p.expiryDate)}</td>
+          <td style="text-align:right">$${((p.salePrice || 0) * (p.quantity || 0)).toLocaleString('es-CL')}</td>
+          <td><span class="estado ${estado.replace(/[^a-zA-ZñÑáéíóúü0-9 ]/g, '').replace(/ /g, '-')}">${estado}</span></td>
+        </tr>`;
+      };
+
+      const listaHtml = (items, vacioMsg) => {
+        if (items.length === 0) return `<p class="vacio">${vacioMsg}</p>`;
+        return `<ul>${items.map(p => {
+          const dias = diasParaVencer(p);
+          const extra = dias !== null ? (dias < 0 ? ` · Vencido hace ${Math.abs(dias)} días` : dias === 0 ? ' · Vence hoy' : ` · Vence en ${dias} días`) : '';
+          return `<li><strong>${escaparHtml(p.name)}</strong> (código ${escaparHtml(p.code)}) — Stock: ${p.quantity || 0}${extra}</li>`;
+        }).join('')}</ul>`;
+      };
+
+      const contenido = `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Informe de Inventario - ${fecha}</title>
+  <style>
+    :root { --rosa: #ec4899; --rosa-oscuro: #db2777; --lila: #a855f7; --fondo: #fff5f7; --texto: #4a1625; --texto-sec: #9d4568; }
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: linear-gradient(135deg, #fff5f7 0%, #fce7f3 50%, #f3e8ff 100%); color: var(--texto); margin: 0; padding: 24px; line-height: 1.6; }
+    .contenedor { max-width: 900px; margin: 0 auto; background: rgba(255,255,255,0.92); border-radius: 20px; padding: 32px; box-shadow: 0 20px 40px rgba(74,22,37,0.08); }
+    h1 { margin: 0 0 4px; font-weight: 600; background: linear-gradient(135deg, var(--rosa) 0%, var(--lila) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .fecha { color: var(--texto-sec); margin-bottom: 24px; }
+    .resumen { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 28px; }
+    .caja { background: #fff0f5; border-radius: 16px; padding: 18px; text-align: center; border: 1px solid rgba(236,72,153,0.12); }
+    .caja .numero { font-size: 1.8rem; font-weight: 700; color: var(--rosa-oscuro); }
+    .caja .etiqueta { font-size: 0.85rem; color: var(--texto-sec); }
+    h2 { color: var(--rosa-oscuro); font-size: 1.15rem; margin-top: 28px; border-bottom: 2px solid rgba(236,72,153,0.15); padding-bottom: 6px; }
+    ul { padding-left: 20px; }
+    li { margin-bottom: 6px; }
+    .vacio { color: var(--texto-sec); font-style: italic; }
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 0.92rem; }
+    th, td { padding: 10px; border-bottom: 1px solid rgba(236,72,153,0.12); text-align: left; }
+    th { background: #fce7f3; color: var(--rosa-oscuro); font-weight: 600; }
+    tr.alt { background: rgba(255,240,245,0.6); }
+    .estado { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; }
+    .estado-Normal { background: #d1fae5; color: #065f46; }
+    .estado-Stock-bajo { background: #fef3c7; color: #92400e; }
+    .estado-Sin-stock { background: #fee2e2; color: #991b1b; }
+    .estado-Sin-stock-Vencido, .estado-Stock-bajo-Vencido, .estado-Normal-Vencido { background: #f3e8ff; color: #6b21a8; }
+    @media print { body { background: #fff; } .contenedor { box-shadow: none; } }
+  </style>
+</head>
+<body>
+  <div class="contenedor">
+    <h1>Informe de Inventario</h1>
+    <p class="fecha">Generado el ${escaparHtml(fechaHora)}</p>
+
+    <div class="resumen">
+      <div class="caja"><div class="numero">${totalProductos}</div><div class="etiqueta">Productos</div></div>
+      <div class="caja"><div class="numero">${totalStock}</div><div class="etiqueta">Total unidades</div></div>
+      <div class="caja"><div class="numero">$${Math.round(valorTotal).toLocaleString('es-CL')}</div><div class="etiqueta">Valor total</div></div>
+      <div class="caja"><div class="numero">${sinStock.length}</div><div class="etiqueta">Sin stock</div></div>
+      <div class="caja"><div class="numero">${stockBajo.length}</div><div class="etiqueta">Stock bajo</div></div>
+      <div class="caja"><div class="numero">${porVencer.length}</div><div class="etiqueta">Por vencer</div></div>
+    </div>
+
+    <h2>⚠️ Productos con stock bajo</h2>
+    ${listaHtml(stockBajo, 'No hay productos con stock bajo.')}
+
+    <h2>⏰ Productos próximos a vencer</h2>
+    ${listaHtml(porVencer, 'No hay productos próximos a vencer.')}
+
+    <h2>🚨 Productos sin stock</h2>
+    ${listaHtml(sinStock, 'No hay productos sin stock.')}
+
+    <h2>📋 Inventario completo</h2>
+    <table>
+      <thead>
+        <tr><th>Código</th><th>Producto</th><th>Categoría</th><th>Stock</th><th>Mín.</th><th>Ubicación</th><th>Lote</th><th>Vencimiento</th><th>Valor</th><th>Estado</th></tr>
+      </thead>
+      <tbody>
+        ${lista.map(fila).join('')}
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>`;
+
+      descargarArchivo(contenido, `informe_inventario_${fecha}.html`, 'text/html;charset=utf-8');
+      mostrarToast('Informe descargado correctamente', 'exito');
     }
   </script>
 </body>
