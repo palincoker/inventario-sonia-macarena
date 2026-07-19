@@ -1,0 +1,1591 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Control de Inventario - Sonia Macarena</title>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <style>
+    :root {
+      --color-primario: #2563eb;
+      --color-primario-oscuro: #1d4ed8;
+      --color-fondo: #f3f4f6;
+      --color-superficie: #ffffff;
+      --color-texto: #111827;
+      --color-texto-secundario: #6b7280;
+      --color-borde: #e5e7eb;
+      --color-exito: #10b981;
+      --color-peligro: #ef4444;
+      --color-advertencia: #f59e0b;
+      --radio: 12px;
+      --sombra: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--color-fondo);
+      color: var(--color-texto);
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+
+    header {
+      background: var(--color-primario);
+      color: white;
+      padding: 16px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    header h1 { margin: 0; font-size: 1.2rem; }
+
+    .contenedor {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    .seccion { display: none; }
+    .seccion.activa { display: block; }
+
+    .tarjeta {
+      background: var(--color-superficie);
+      border-radius: var(--radio);
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: var(--sombra);
+    }
+
+    .tarjeta-resumen {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+      text-align: center;
+    }
+
+    .resumen-item {
+      background: #eff6ff;
+      border-radius: var(--radio);
+      padding: 16px;
+    }
+
+    .resumen-item .numero {
+      font-size: 2rem;
+      font-weight: bold;
+      color: var(--color-primario);
+    }
+
+    .resumen-item .etiqueta {
+      font-size: 0.85rem;
+      color: var(--color-texto-secundario);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: var(--color-primario);
+      color: white;
+      border: none;
+      border-radius: var(--radio);
+      padding: 12px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      text-decoration: none;
+      width: 100%;
+      margin-bottom: 8px;
+    }
+
+    .btn:hover { background: var(--color-primario-oscuro); }
+    .btn-exito { background: var(--color-exito); }
+    .btn-exito:hover { background: #059669; }
+    .btn-peligro { background: var(--color-peligro); }
+    .btn-peligro:hover { background: #dc2626; }
+    .btn-secundario { background: #e5e7eb; color: var(--color-texto); }
+    .btn-secundario:hover { background: #d1d5db; }
+    .btn-pequeno { padding: 8px 12px; font-size: 0.9rem; width: auto; margin-bottom: 0; }
+
+    .botones-grupo {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .botones-grupo .btn { margin-bottom: 0; }
+
+    label {
+      display: block;
+      margin-bottom: 4px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      color: var(--color-texto-secundario);
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--color-borde);
+      border-radius: var(--radio);
+      font-size: 1rem;
+      margin-bottom: 12px;
+      font-family: inherit;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--color-primario);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .lector-container {
+      width: 100%;
+      border-radius: var(--radio);
+      overflow: hidden;
+      margin-bottom: 12px;
+      background: #000;
+      min-height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #reader video {
+      width: 100% !important;
+      border-radius: var(--radio);
+    }
+
+    .mensaje {
+      padding: 12px;
+      border-radius: var(--radio);
+      margin-bottom: 12px;
+      display: none;
+    }
+
+    .mensaje.visible { display: block; }
+    .mensaje-exito { background: #d1fae5; color: #065f46; }
+    .mensaje-error { background: #fee2e2; color: #991b1b; }
+    .mensaje-info { background: #dbeafe; color: #1e40af; }
+
+    .busqueda-container {
+      position: sticky;
+      top: 60px;
+      background: var(--color-fondo);
+      padding: 8px 0;
+      z-index: 90;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--color-superficie);
+      border-radius: var(--radio);
+      overflow: hidden;
+      box-shadow: var(--sombra);
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--color-borde);
+    }
+
+    th {
+      background: #f9fafb;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--color-texto-secundario);
+    }
+
+    tr:hover { background: #f9fafb; }
+
+    .codigo-celda {
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: var(--color-texto-secundario);
+    }
+
+    .alerta-stock {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-top: 4px;
+    }
+
+    .alerta-stock.critico {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .alerta-stock.bajo {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .fila-stock-bajo td {
+      background: #fff7ed;
+    }
+
+    .vacio {
+      text-align: center;
+      padding: 40px;
+      color: var(--color-texto-secundario);
+    }
+
+    .historial-item {
+      border-left: 4px solid var(--color-primario);
+      padding-left: 12px;
+      margin-bottom: 12px;
+    }
+
+    .historial-item.entrada { border-color: var(--color-exito); }
+    .historial-item.salida { border-color: var(--color-peligro); }
+    .historial-item.edicion { border-color: var(--color-advertencia); }
+
+    .historial-fecha {
+      font-size: 0.8rem;
+      color: var(--color-texto-secundario);
+    }
+
+    .historial-cantidad {
+      font-weight: bold;
+    }
+
+    nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--color-superficie);
+      border-top: 1px solid var(--color-borde);
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 0;
+      z-index: 100;
+      box-shadow: 0 -2px 4px rgba(0,0,0,0.05);
+    }
+
+    nav button {
+      background: none;
+      border: none;
+      color: var(--color-texto-secundario);
+      font-size: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      padding: 4px 8px;
+      flex: 1;
+    }
+
+    nav button.activo { color: var(--color-primario); }
+
+    nav button svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .oculto { display: none !important; }
+
+    .btn-modo-activo {
+      background: var(--color-primario) !important;
+      color: white !important;
+    }
+
+    #input-pistola:focus {
+      border-color: var(--color-primario);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+    }
+
+    .estado-pistola-leyendo {
+      color: var(--color-primario) !important;
+      font-weight: 600;
+    }
+
+    .detalle-codigo {
+      font-family: monospace;
+      background: #f3f4f6;
+      padding: 8px 12px;
+      border-radius: var(--radio);
+      display: inline-block;
+      margin-bottom: 12px;
+      font-size: 1.1rem;
+    }
+
+    .detalle-stock {
+      font-size: 2rem;
+      font-weight: bold;
+      color: var(--color-primario);
+      margin: 8px 0;
+    }
+
+    .filtros {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .filtros select, .filtros input {
+      flex: 1;
+      min-width: 120px;
+      margin-bottom: 0;
+    }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 16px;
+    }
+
+    .modal.visible { display: flex; }
+
+    .modal-contenido {
+      background: var(--color-superficie);
+      border-radius: var(--radio);
+      padding: 20px;
+      width: 100%;
+      max-width: 400px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-titulo {
+      margin-top: 0;
+      font-size: 1.2rem;
+    }
+
+    @media (min-width: 600px) {
+      .tarjeta-resumen { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+      .btn { width: auto; }
+      .botones-grupo .btn { flex: 1; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Integración LULU -->
+  <script>
+    (function() {
+      window.__LULU_EMBEDDED__ = window.self !== window.top;
+      if (typeof window.__LULU_IMPORT__ === 'object' && window.__LULU_IMPORT__ !== null) {
+        try {
+          const STORAGE_KEY = 'inventario_sonia_macarena_v1';
+          const existente = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+          const importado = window.__LULU_IMPORT__;
+          const fusionado = { ...existente, ...importado };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(fusionado));
+          window.__LULU_IMPORT_OK__ = Object.keys(fusionado).length;
+        } catch (e) {
+          console.error('Error importando datos LULU:', e);
+          window.__LULU_IMPORT_ERROR__ = e.message;
+        }
+      }
+    })();
+  </script>
+
+  <header>
+    <h1>📦 Control de Inventario Sonia Macarena</h1>
+  </header>
+
+  <main class="contenedor">
+    <!-- DASHBOARD -->
+    <section id="seccion-dashboard" class="seccion activa">
+      <div class="tarjeta tarjeta-resumen">
+        <div class="resumen-item">
+          <div class="numero" id="resumen-total">0</div>
+          <div class="etiqueta">Productos</div>
+        </div>
+        <div class="resumen-item">
+          <div class="numero" id="resumen-stock">0</div>
+          <div class="etiqueta">Total unidades</div>
+        </div>
+        <div class="resumen-item">
+          <div class="numero" id="resumen-entradas">0</div>
+          <div class="etiqueta">Entradas hoy</div>
+        </div>
+        <div class="resumen-item">
+          <div class="numero" id="resumen-salidas">0</div>
+          <div class="etiqueta">Salidas hoy</div>
+        </div>
+        <div class="resumen-item" style="background: #fff7ed;">
+          <div class="numero" id="resumen-stock-bajo" style="color: var(--color-advertencia);">0</div>
+          <div class="etiqueta">Stock bajo</div>
+        </div>
+      </div>
+
+      <button class="btn btn-exito" onclick="irAEscanear()">
+        <span>📷</span> Escanear código
+      </button>
+      <button class="btn" onclick="mostrarSeccion('inventario')">
+        <span>📋</span> Ver inventario
+      </button>
+      <button class="btn btn-secundario" onclick="mostrarSeccion('historico')">
+        <span>📜</span> Ver histórico
+      </button>
+
+      <div class="tarjeta">
+        <h3>⚠️ Alertas de stock bajo</h3>
+        <div id="alertas-stock-bajo">
+          <p class="vacio">No hay productos con stock bajo.</p>
+        </div>
+      </div>
+
+      <div class="tarjeta">
+        <h3>Últimos movimientos</h3>
+        <div id="ultimos-movimientos">
+          <p class="vacio">Aún no hay movimientos registrados.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ESCANEAR -->
+    <section id="seccion-escanear" class="seccion">
+      <div class="tarjeta">
+        <h2>Escanear código QR o de barras</h2>
+        <p style="color: var(--color-texto-secundario); font-size: 0.9rem;" id="texto-ayuda-escaneo">
+          Elige cómo quieres capturar el código.
+        </p>
+
+        <div id="mensaje-escanear" class="mensaje"></div>
+
+        <div class="botones-grupo">
+          <button class="btn" id="btn-modo-camara" onclick="cambiarModoEscaneo('camara')">
+            <span>📷</span> Cámara
+          </button>
+          <button class="btn btn-secundario" id="btn-modo-pistola" onclick="cambiarModoEscaneo('pistola')">
+            <span>🔫</span> Pistola escáner
+          </button>
+        </div>
+
+        <!-- PANEL CÁMARA -->
+        <div id="panel-camara">
+          <div id="lector-container" class="lector-container">
+            <div id="reader"></div>
+          </div>
+
+          <div class="botones-grupo">
+            <button class="btn btn-exito" id="btn-iniciar-escaneo" onclick="iniciarEscaneo()">
+              <span>▶️</span> Iniciar cámara
+            </button>
+            <button class="btn btn-peligro" id="btn-detener-escaneo" onclick="detenerEscaneo()" disabled>
+              <span>⏹️</span> Detener
+            </button>
+          </div>
+        </div>
+
+        <!-- PANEL PISTOLA ESCÁNER -->
+        <div id="panel-pistola" class="oculto">
+          <div class="tarjeta" style="background: #eff6ff; border: 2px dashed var(--color-primario);">
+            <div style="text-align: center; margin-bottom: 12px;">
+              <strong>Modo pistola escáner activo</strong>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--color-texto-secundario); margin-top: 0;">
+              Apunta con la pistola Motorola y presiona el gatillo. El código se capturará automáticamente.
+            </p>
+            <input
+              type="text"
+              id="input-pistola"
+              placeholder="Esperando código..."
+              autocomplete="off"
+              autocorrect="off"
+              autocapitalize="off"
+              spellcheck="false"
+              style="font-family: monospace; text-align: center; font-size: 1.1rem;"
+            >
+            <div id="estado-pistola" style="text-align: center; font-size: 0.85rem; color: var(--color-texto-secundario);">
+              Escáner listo
+            </div>
+            <button class="btn btn-secundario" onclick="abrirDiagnosticoPistola()" style="margin-top: 12px; margin-bottom: 0;">
+              <span>🔧</span> Probar pistola
+            </button>
+          </div>
+        </div>
+
+        <hr style="border: none; border-top: 1px solid var(--color-borde); margin: 16px 0;">
+
+        <h3>O ingresa el código manualmente</h3>
+        <input type="text" id="input-codigo-manual" placeholder="Escribe o pega el código">
+        <button class="btn" onclick="procesarCodigoManual()">
+          <span>🔍</span> Buscar / Crear
+        </button>
+
+        <hr style="border: none; border-top: 1px solid var(--color-borde); margin: 16px 0;">
+
+        <h3>O escanea desde una imagen</h3>
+        <input type="file" id="input-imagen" accept="image/*" onchange="escanearDesdeImagen(this)">
+      </div>
+    </section>
+
+    <!-- INVENTARIO -->
+    <section id="seccion-inventario" class="seccion">
+      <div class="busqueda-container">
+        <input type="text" id="input-busqueda" placeholder="Buscar por nombre, código o ubicación..." oninput="renderInventario()">
+      </div>
+
+      <div id="mensaje-inventario" class="mensaje"></div>
+
+      <div class="botones-grupo">
+        <button class="btn btn-exito" onclick="irAEscanear()">
+          <span>📷</span> Escanear
+        </button>
+        <button class="btn" onclick="nuevoProductoManual()">
+          <span>➕</span> Nuevo
+        </button>
+      </div>
+
+      <div class="tarjeta">
+        <h3>Exportar / Importar datos</h3>
+        <p style="font-size: 0.85rem; color: var(--color-texto-secundario); margin-top: 0;">
+          Guarda una copia de seguridad o restáurala desde un archivo.
+        </p>
+        <div class="botones-grupo">
+          <button class="btn btn-secundario" onclick="exportarBackup()">
+            <span>💾</span> Backup
+          </button>
+          <button class="btn btn-secundario" onclick="exportarCSV()">
+            <span>📄</span> CSV
+          </button>
+          <button class="btn btn-secundario" onclick="document.getElementById('input-importar').click()">
+            <span>📥</span> Importar
+          </button>
+        </div>
+        <input type="file" id="input-importar" class="oculto" accept=".json,application/json" onchange="importarBackup(this)">
+      </div>
+
+      <div id="lista-inventario">
+        <p class="vacio">No hay productos en el inventario.</p>
+      </div>
+    </section>
+
+    <!-- DETALLE -->
+    <section id="seccion-detalle" class="seccion">
+      <div class="tarjeta">
+        <button class="btn btn-secundario btn-pequeno" onclick="volverAtras()" style="margin-bottom: 12px;">
+          ← Volver
+        </button>
+
+        <h2 id="detalle-titulo">Detalle del producto</h2>
+        <div id="mensaje-detalle" class="mensaje"></div>
+        <div class="detalle-codigo" id="detalle-codigo"></div>
+        <div class="detalle-stock" id="detalle-stock"></div>
+
+        <label for="detalle-nombre">Nombre</label>
+        <input type="text" id="detalle-nombre">
+
+        <label for="detalle-descripcion">Descripción</label>
+        <textarea id="detalle-descripcion" rows="2"></textarea>
+
+        <label for="detalle-ubicacion">Ubicación</label>
+        <input type="text" id="detalle-ubicacion">
+
+        <label for="detalle-stock-minimo">Stock mínimo (alerta cuando el stock sea igual o menor)</label>
+        <input type="number" id="detalle-stock-minimo" min="0" value="0">
+
+        <div class="botones-grupo">
+          <button class="btn btn-exito" onclick="guardarProducto()">
+            💾 Guardar
+          </button>
+          <button class="btn btn-peligro" onclick="eliminarProducto()">
+            🗑️ Eliminar
+          </button>
+        </div>
+
+        <hr style="border: none; border-top: 1px solid var(--color-borde); margin: 16px 0;">
+
+        <h3>Movimiento rápido</h3>
+        <div class="botones-grupo">
+          <button class="btn btn-exito" onclick="abrirModalMovimiento('entrada')">
+            ➕ Entrada
+          </button>
+          <button class="btn btn-peligro" onclick="abrirModalMovimiento('salida')">
+            ➖ Salida
+          </button>
+        </div>
+      </div>
+
+      <div class="tarjeta">
+        <h3>Historial del producto</h3>
+        <div id="detalle-historial"></div>
+      </div>
+    </section>
+
+    <!-- HISTÓRICO -->
+    <section id="seccion-historico" class="seccion">
+      <div class="tarjeta">
+        <h2>Histórico de movimientos</h2>
+        <div class="filtros">
+          <select id="filtro-tipo" onchange="renderHistorico()">
+            <option value="">Todos los tipos</option>
+            <option value="entrada">Entradas</option>
+            <option value="salida">Salidas</option>
+            <option value="edicion">Ediciones</option>
+            <option value="alta">Altas</option>
+          </select>
+          <input type="date" id="filtro-fecha" onchange="renderHistorico()">
+        </div>
+        <button class="btn btn-secundario" onclick="limpiarFiltrosHistorico()">
+          Limpiar filtros
+        </button>
+      </div>
+      <div id="lista-historico">
+        <p class="vacio">No hay movimientos registrados.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL MOVIMIENTO -->
+  <div id="modal-movimiento" class="modal">
+    <div class="modal-contenido">
+      <h3 class="modal-titulo" id="modal-movimiento-titulo">Registrar movimiento</h3>
+      <div id="mensaje-modal-movimiento" class="mensaje"></div>
+      <label for="movimiento-cantidad">Cantidad</label>
+      <input type="number" id="movimiento-cantidad" min="1" value="1">
+      <label for="movimiento-nota">Nota (opcional)</label>
+      <input type="text" id="movimiento-nota" placeholder="Ej: Compra, venta, ajuste">
+      <div class="botones-grupo">
+        <button class="btn" onclick="cerrarModalMovimiento()">Cancelar</button>
+        <button class="btn btn-exito" id="modal-movimiento-confirmar" onclick="confirmarMovimiento()">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DIAGNOSTICO PISTOLA -->
+  <div id="modal-diagnostico" class="modal">
+    <div class="modal-contenido">
+      <h3 class="modal-titulo">Diagnóstico de pistola</h3>
+      <p style="font-size: 0.85rem; color: var(--color-texto-secundario);">
+        Haz clic en el recuadro de abajo y escanea un código con la pistola. Se mostrará exactamente lo que recibe el navegador.
+      </p>
+      <textarea id="diagnostico-input" rows="3" placeholder="Esperando escaneo..." style="font-family: monospace;"></textarea>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <label style="margin: 0; font-size: 0.85rem;">
+          <input type="checkbox" id="diagnostico-sufijo" checked> Mostrar Enter/Tab como [ENTER]/[TAB]
+        </label>
+      </div>
+      <div class="tarjeta" style="max-height: 200px; overflow-y: auto; margin-bottom: 12px; background: #f9fafb;">
+        <div id="diagnostico-log" style="font-family: monospace; font-size: 0.8rem; white-space: pre-wrap;"></div>
+      </div>
+      <div class="botones-grupo">
+        <button class="btn" onclick="cerrarDiagnosticoPistola()">Cerrar</button>
+        <button class="btn btn-peligro" onclick="limpiarDiagnosticoPistola()">Limpiar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAVEGACIÓN INFERIOR -->
+  <nav>
+    <button id="nav-dashboard" class="activo" onclick="mostrarSeccion('dashboard')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+      Inicio
+    </button>
+    <button id="nav-escanear" onclick="irAEscanear()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+      Escanear
+    </button>
+    <button id="nav-inventario" onclick="mostrarSeccion('inventario')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+      Inventario
+    </button>
+    <button id="nav-historico" onclick="mostrarSeccion('historico')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+      Histórico
+    </button>
+  </nav>
+
+  <script>
+    // ========================
+    // CONFIGURACIÓN Y ESTADO
+    // ========================
+    const STORAGE_KEY = 'inventario_sonia_macarena_v1';
+    let productos = {};
+    let escaner = null;
+    let escaneoActivo = false;
+    let productoActual = null;
+    let tipoMovimientoPendiente = null;
+    let seccionAnterior = 'dashboard';
+
+    // Estado para pistola escáner (teclado HID)
+    let escanerPistolaActivo = false;
+    let bufferPistola = '';
+    let ultimoTiempoPistola = 0;
+    let timeoutPistola = null;
+    const TIEMPO_MAX_ENTRE_TECLAS = 80; // ms
+
+    // ========================
+    // INICIALIZACIÓN
+    // ========================
+    document.addEventListener('DOMContentLoaded', () => {
+      try {
+        cargarDatos();
+        renderDashboard();
+        document.addEventListener('keydown', onKeydownPistola);
+
+        const inputPistola = document.getElementById('input-pistola');
+        if (inputPistola) {
+          // Captura directa desde el input de la pistola (modo mas confiable)
+          inputPistola.addEventListener('input', onInputPistola);
+          inputPistola.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && escanerPistolaActivo) {
+              e.preventDefault();
+            }
+          });
+
+          // Mantener el foco en el input mientras el modo pistola este activo
+          inputPistola.addEventListener('blur', () => {
+            if (escanerPistolaActivo) {
+              setTimeout(() => inputPistola.focus(), 50);
+            }
+          });
+        }
+
+        // Confirmar modal de movimiento con Enter
+        const modalCantidad = document.getElementById('movimiento-cantidad');
+        const modalNota = document.getElementById('movimiento-nota');
+        const confirmarConEnter = (e) => {
+          if (e.key === 'Enter') confirmarMovimiento();
+        };
+        if (modalCantidad) modalCantidad.addEventListener('keydown', confirmarConEnter);
+        if (modalNota) modalNota.addEventListener('keydown', confirmarConEnter);
+
+        // Diagnostico de pistola
+        const diagnosticoInput = document.getElementById('diagnostico-input');
+        if (diagnosticoInput) {
+          diagnosticoInput.addEventListener('keydown', (e) => {
+            const mostrarSufijo = document.getElementById('diagnostico-sufijo').checked;
+            if (e.key === 'Enter') {
+              if (mostrarSufijo) {
+                e.preventDefault();
+                diagnosticoInput.value += '[ENTER]';
+                logDiagnosticoPistola('Tecla: [ENTER] (codigo 13)');
+              } else {
+                logDiagnosticoPistola('Tecla: [ENTER] (codigo 13)');
+              }
+            } else if (e.key === 'Tab') {
+              if (mostrarSufijo) {
+                e.preventDefault();
+                diagnosticoInput.value += '[TAB]';
+                logDiagnosticoPistola('Tecla: [TAB] (codigo 9)');
+              } else {
+                logDiagnosticoPistola('Tecla: [TAB] (codigo 9)');
+              }
+            } else {
+              logDiagnosticoPistola('Tecla: "' + e.key + '" (codigo ' + e.keyCode + ')');
+            }
+          });
+          diagnosticoInput.addEventListener('input', (e) => {
+            logDiagnosticoPistola('Input actual: "' + e.target.value + '"');
+          });
+        }
+      } catch (err) {
+        console.error('Error al iniciar la aplicacion:', err);
+      }
+    });
+
+    function cargarDatos() {
+      try {
+        const guardado = localStorage.getItem(STORAGE_KEY);
+        if (guardado) {
+          productos = JSON.parse(guardado);
+          migrarDatos();
+        }
+      } catch (e) {
+        console.error('Error al cargar datos:', e);
+        productos = {};
+      }
+    }
+
+    function migrarDatos() {
+      Object.keys(productos).forEach(codigo => {
+        const p = productos[codigo];
+        if (!p.code) p.code = codigo;
+        if (typeof p.quantity !== 'number') p.quantity = parseInt(p.quantity, 10) || 0;
+        if (!p.history) p.history = [];
+        if (typeof p.minStock !== 'number') p.minStock = 0;
+        if (!p.createdAt) p.createdAt = new Date().toISOString();
+      });
+    }
+
+    function guardarDatos() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(productos));
+      } catch (e) {
+        console.error('Error al guardar datos:', e);
+        mostrarMensaje('mensaje-escanear', 'No se pudieron guardar los datos. El almacenamiento puede estar lleno.', 'error');
+      }
+    }
+
+    // ========================
+    // NAVEGACIÓN
+    // ========================
+    function mostrarSeccion(seccion) {
+      seccionAnterior = document.querySelector('.seccion.activa')?.id.replace('seccion-', '') || 'dashboard';
+
+      document.querySelectorAll('.seccion').forEach(el => el.classList.remove('activa'));
+      document.getElementById('seccion-' + seccion).classList.add('activa');
+
+      document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('activo'));
+      const navBtn = document.getElementById('nav-' + seccion);
+      if (navBtn) navBtn.classList.add('activo');
+
+      window.scrollTo(0, 0);
+
+      if (seccion === 'dashboard') renderDashboard();
+      if (seccion === 'inventario') renderInventario();
+      if (seccion === 'historico') renderHistorico();
+    }
+
+    function volverAtras() {
+      mostrarSeccion(seccionAnterior || 'inventario');
+    }
+
+    function irAEscanear() {
+      document.getElementById('input-codigo-manual').value = '';
+      mostrarSeccion('escanear');
+      cambiarModoEscaneo('pistola');
+    }
+
+    // ========================
+    // ESCANEO CON CÁMARA
+    // ========================
+    function iniciarEscaneo() {
+      const mensajeId = 'mensaje-escanear';
+
+      if (escaneoActivo) return;
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        mostrarMensaje(mensajeId, 'Tu navegador no permite acceder a la cámara. Usa la opción manual o una imagen.', 'error');
+        return;
+      }
+
+      const contenedor = document.getElementById('reader');
+      contenedor.innerHTML = '';
+
+      escaner = new Html5Qrcode('reader');
+      const config = {
+        fps: 10,
+        qrbox: { width: 250, height: 250 },
+        formatsToSupport: undefined // Todos los formatos soportados
+      };
+
+      escaner.start(
+        { facingMode: 'environment' },
+        config,
+        (codigo) => {
+          onCodigoDetectado(codigo);
+        },
+        (error) => {
+          // Errores de escaneo son normales mientras no hay código
+        }
+      )
+      .then(() => {
+        escaneoActivo = true;
+        document.getElementById('btn-iniciar-escaneo').disabled = true;
+        document.getElementById('btn-detener-escaneo').disabled = false;
+        mostrarMensaje(mensajeId, 'Cámara activa. Apunta al código QR o de barras.', 'info');
+      })
+      .catch((err) => {
+        console.error(err);
+        mostrarMensaje(mensajeId, 'No se pudo iniciar la cámara. Asegúrate de dar permiso o usa el ingreso manual.', 'error');
+      });
+    }
+
+    function detenerEscaneo() {
+      if (!escaner || !escaneoActivo) return;
+
+      escaner.stop().then(() => {
+        escaneoActivo = false;
+        document.getElementById('btn-iniciar-escaneo').disabled = false;
+        document.getElementById('btn-detener-escaneo').disabled = true;
+        document.getElementById('reader').innerHTML = '';
+      }).catch((err) => {
+        console.error(err);
+      });
+    }
+
+    function escanearDesdeImagen(input) {
+      const mensajeId = 'mensaje-escanear';
+      const archivo = input.files[0];
+      if (!archivo) return;
+
+      const escanerImagen = new Html5Qrcode('reader');
+      escanerImagen.scanFile(archivo, true)
+        .then(codigo => {
+          onCodigoDetectado(codigo);
+        })
+        .catch(err => {
+          console.error(err);
+          mostrarMensaje(mensajeId, 'No se detectó ningún código en la imagen.', 'error');
+        });
+    }
+
+    function procesarCodigoManual() {
+      const codigo = document.getElementById('input-codigo-manual').value.trim();
+      if (!codigo) {
+        mostrarMensaje('mensaje-escanear', 'Ingresa un código válido.', 'error');
+        return;
+      }
+      onCodigoDetectado(codigo);
+    }
+
+    function onCodigoDetectado(codigo) {
+      detenerEscaneo();
+
+      if (productos[codigo]) {
+        abrirDetalle(codigo);
+        mostrarMensaje('mensaje-escanear', 'Producto encontrado: ' + productos[codigo].name, 'exito');
+      } else {
+        prepararNuevoProducto(codigo);
+      }
+    }
+
+    // ========================
+    // ESCANEO CON PISTOLA (HID)
+    // ========================
+    function cambiarModoEscaneo(modo) {
+      const panelCamara = document.getElementById('panel-camara');
+      const panelPistola = document.getElementById('panel-pistola');
+      const btnCamara = document.getElementById('btn-modo-camara');
+      const btnPistola = document.getElementById('btn-modo-pistola');
+      const inputPistola = document.getElementById('input-pistola');
+
+      if (modo === 'pistola') {
+        panelCamara.classList.add('oculto');
+        panelPistola.classList.remove('oculto');
+        btnCamara.classList.remove('btn-modo-activo');
+        btnPistola.classList.add('btn-modo-activo');
+        escanerPistolaActivo = true;
+        if (inputPistola) inputPistola.focus();
+      } else {
+        panelCamara.classList.remove('oculto');
+        panelPistola.classList.add('oculto');
+        btnCamara.classList.add('btn-modo-activo');
+        btnPistola.classList.remove('btn-modo-activo');
+        escanerPistolaActivo = false;
+        detenerEscaneo();
+      }
+    }
+
+    // Captura principal: lee directamente los caracteres que llegan al input pistola
+    function onInputPistola(e) {
+      if (!escanerPistolaActivo) return;
+
+      const input = e.target;
+      const valor = input.value;
+      const estadoPistola = document.getElementById('estado-pistola');
+
+      if (estadoPistola) {
+        estadoPistola.textContent = 'Leyendo codigo...';
+        estadoPistola.classList.add('estado-pistola-leyendo');
+      }
+
+      if (timeoutPistola) clearTimeout(timeoutPistola);
+
+      // La mayoria de las pistolas envian Enter (\n o \r), Tab (\t) o nada al final
+      if (/[\n\r\t]$/.test(valor)) {
+        const codigo = valor.replace(/[\n\r\t]+$/, '').trim();
+        if (codigo.length >= 1) {
+          procesarCodigoPistola(codigo);
+          input.value = '';
+        }
+        return;
+      }
+
+      // Respaldo: si no hay terminador, procesar tras una pausa
+      timeoutPistola = setTimeout(() => {
+        const codigo = input.value.trim();
+        if (codigo.length >= 3) {
+          procesarCodigoPistola(codigo);
+          input.value = '';
+        }
+      }, 300);
+    }
+
+    // Respaldo global por si el foco no esta en el input pistola
+    function onKeydownPistola(e) {
+      if (!escanerPistolaActivo) return;
+
+      // Solo actuar si el foco no esta ya en el input de la pistola
+      if (document.activeElement && document.activeElement.id === 'input-pistola') {
+        return;
+      }
+
+      // No interceptar cuando se escribe en otros campos editables
+      const tagActivo = document.activeElement && document.activeElement.tagName
+        ? document.activeElement.tagName.toLowerCase()
+        : '';
+      const esInputEditable = ['input', 'textarea', 'select'].indexOf(tagActivo) !== -1;
+      if (esInputEditable) {
+        return;
+      }
+
+      const ahora = Date.now();
+      const inputPistola = document.getElementById('input-pistola');
+
+      if (e.key === 'Enter' || (e.key === 'Tab' && bufferPistola.length > 0)) {
+        if (bufferPistola.length > 0) {
+          e.preventDefault();
+          procesarCodigoPistola(bufferPistola);
+          bufferPistola = '';
+          if (timeoutPistola) clearTimeout(timeoutPistola);
+        }
+        return;
+      }
+
+      if (e.key.length !== 1 || e.ctrlKey || e.altKey || e.metaKey) {
+        return;
+      }
+
+      if (ahora - ultimoTiempoPistola > TIEMPO_MAX_ENTRE_TECLAS) {
+        bufferPistola = '';
+      }
+
+      bufferPistola += e.key;
+      ultimoTiempoPistola = ahora;
+
+      if (inputPistola) {
+        inputPistola.value = bufferPistola;
+        inputPistola.focus();
+      }
+
+      if (timeoutPistola) clearTimeout(timeoutPistola);
+      timeoutPistola = setTimeout(() => {
+        if (bufferPistola.length >= 3) {
+          procesarCodigoPistola(bufferPistola);
+        }
+        bufferPistola = '';
+      }, 300);
+    }
+
+    function procesarCodigoPistola(codigo) {
+      const estadoPistola = document.getElementById('estado-pistola');
+      const inputPistola = document.getElementById('input-pistola');
+
+      if (estadoPistola) {
+        estadoPistola.textContent = 'Codigo recibido: ' + codigo;
+        estadoPistola.classList.remove('estado-pistola-leyendo');
+      }
+      if (inputPistola) inputPistola.value = codigo;
+
+      onCodigoDetectado(codigo);
+
+      // Limpiar el campo tras un momento para el siguiente escaneo
+      setTimeout(() => {
+        if (inputPistola) inputPistola.value = '';
+        if (estadoPistola) estadoPistola.textContent = 'Escaner listo';
+      }, 1500);
+    }
+
+    // ========================
+    // DIAGNOSTICO DE PISTOLA
+    // ========================
+    function abrirDiagnosticoPistola() {
+      document.getElementById('modal-diagnostico').classList.add('visible');
+      const input = document.getElementById('diagnostico-input');
+      input.value = '';
+      input.focus();
+    }
+
+    function cerrarDiagnosticoPistola() {
+      document.getElementById('modal-diagnostico').classList.remove('visible');
+    }
+
+    function limpiarDiagnosticoPistola() {
+      document.getElementById('diagnostico-input').value = '';
+      document.getElementById('diagnostico-log').textContent = '';
+      document.getElementById('diagnostico-input').focus();
+    }
+
+    function logDiagnosticoPistola(texto) {
+      const log = document.getElementById('diagnostico-log');
+      if (!log) return;
+      const linea = '[' + new Date().toLocaleTimeString('es-ES') + '] ' + texto;
+      log.textContent = linea + '\n' + log.textContent;
+    }
+
+    // ========================
+    // PRODUCTOS
+    // ========================
+    function prepararNuevoProducto(codigo) {
+      productoActual = codigo;
+      document.getElementById('detalle-codigo').textContent = codigo;
+      document.getElementById('detalle-stock').textContent = 'Nuevo producto';
+      document.getElementById('detalle-nombre').value = '';
+      document.getElementById('detalle-descripcion').value = '';
+      document.getElementById('detalle-ubicacion').value = '';
+      document.getElementById('detalle-stock-minimo').value = '0';
+      document.getElementById('detalle-historial').innerHTML = '<p class="vacio">Aún no hay historial.</p>';
+      document.getElementById('detalle-titulo').textContent = 'Nuevo producto';
+      mostrarSeccion('detalle');
+    }
+
+    function nuevoProductoManual() {
+      const codigo = prompt('Ingresa el código del nuevo producto:');
+      if (codigo && codigo.trim()) {
+        const codigoLimpio = codigo.trim();
+        if (productos[codigoLimpio]) {
+          abrirDetalle(codigoLimpio);
+        } else {
+          prepararNuevoProducto(codigoLimpio);
+        }
+      }
+    }
+
+    function abrirDetalle(codigo) {
+      const p = productos[codigo];
+      if (!p) return;
+
+      productoActual = codigo;
+      document.getElementById('detalle-titulo').textContent = 'Detalle del producto';
+      document.getElementById('detalle-codigo').textContent = codigo;
+      document.getElementById('detalle-stock').textContent = p.quantity + ' unidad' + (p.quantity !== 1 ? 'es' : '');
+      document.getElementById('detalle-nombre').value = p.name || '';
+      document.getElementById('detalle-descripcion').value = p.description || '';
+      document.getElementById('detalle-ubicacion').value = p.location || '';
+      document.getElementById('detalle-stock-minimo').value = (typeof p.minStock === 'number' ? p.minStock : 0);
+
+      renderHistorialProducto(codigo);
+      mostrarSeccion('detalle');
+    }
+
+    function guardarProducto() {
+      if (!productoActual) return;
+
+      const nombre = document.getElementById('detalle-nombre').value.trim();
+      const descripcion = document.getElementById('detalle-descripcion').value.trim();
+      const ubicacion = document.getElementById('detalle-ubicacion').value.trim();
+      const stockMinimo = parseInt(document.getElementById('detalle-stock-minimo').value, 10) || 0;
+
+      if (!nombre) {
+        mostrarMensaje('mensaje-detalle', 'El nombre del producto es obligatorio.', 'error');
+        return;
+      }
+
+      const esNuevo = !productos[productoActual];
+
+      if (!productos[productoActual]) {
+        productos[productoActual] = {
+          code: productoActual,
+          name: nombre,
+          description: descripcion,
+          location: ubicacion,
+          quantity: 0,
+          minStock: stockMinimo,
+          createdAt: new Date().toISOString(),
+          history: []
+        };
+        registrarMovimiento(productoActual, 'alta', 0, 'Alta del producto');
+      } else {
+        productos[productoActual].name = nombre;
+        productos[productoActual].description = descripcion;
+        productos[productoActual].location = ubicacion;
+        productos[productoActual].minStock = stockMinimo;
+        registrarMovimiento(productoActual, 'edicion', 0, 'Edición de datos');
+      }
+
+      guardarDatos();
+      mostrarSeccion('inventario');
+    }
+
+    function eliminarProducto() {
+      if (!productoActual) return;
+      if (!confirm('¿Estás segura de eliminar este producto? Se perderá todo su historial.')) return;
+
+      delete productos[productoActual];
+      guardarDatos();
+      productoActual = null;
+      mostrarSeccion('inventario');
+    }
+
+    // ========================
+    // MOVIMIENTOS
+    // ========================
+    function abrirModalMovimiento(tipo) {
+      tipoMovimientoPendiente = tipo;
+      const titulo = tipo === 'entrada' ? 'Registrar entrada' : 'Registrar salida';
+      document.getElementById('modal-movimiento-titulo').textContent = titulo;
+      document.getElementById('movimiento-cantidad').value = '1';
+      document.getElementById('movimiento-nota').value = '';
+      const msg = document.getElementById('mensaje-modal-movimiento');
+      if (msg) msg.classList.remove('visible');
+      document.getElementById('modal-movimiento').classList.add('visible');
+      setTimeout(() => document.getElementById('movimiento-cantidad').focus(), 50);
+    }
+
+    function cerrarModalMovimiento() {
+      document.getElementById('modal-movimiento').classList.remove('visible');
+      tipoMovimientoPendiente = null;
+    }
+
+    function confirmarMovimiento() {
+      if (!productoActual || !tipoMovimientoPendiente) return;
+
+      const cantidad = parseInt(document.getElementById('movimiento-cantidad').value, 10);
+      const nota = document.getElementById('movimiento-nota').value.trim();
+
+      if (isNaN(cantidad) || cantidad <= 0) {
+        mostrarMensaje('mensaje-modal-movimiento', 'Ingresa una cantidad válida mayor a 0.', 'error');
+        return;
+      }
+
+      if (tipoMovimientoPendiente === 'salida') {
+        if (cantidad > productos[productoActual].quantity) {
+          mostrarMensaje('mensaje-modal-movimiento', 'No hay suficiente stock para esta salida.', 'error');
+          return;
+        }
+        productos[productoActual].quantity -= cantidad;
+      } else {
+        productos[productoActual].quantity += cantidad;
+      }
+
+      registrarMovimiento(productoActual, tipoMovimientoPendiente, cantidad, nota || undefined);
+      guardarDatos();
+      cerrarModalMovimiento();
+      abrirDetalle(productoActual);
+      mostrarMensaje('mensaje-detalle', 'Movimiento registrado correctamente.', 'exito');
+    }
+
+    function registrarMovimiento(codigo, tipo, cantidad, nota) {
+      if (!productos[codigo]) return;
+
+      productos[codigo].history.unshift({
+        date: new Date().toISOString(),
+        type: tipo,
+        quantity: cantidad,
+        note: nota || ''
+      });
+    }
+
+    function anularMovimiento(codigo, idx) {
+      const p = productos[codigo];
+      if (!p || !p.history || !p.history[idx]) return;
+
+      const mov = p.history[idx];
+      if (mov.type !== 'entrada' && mov.type !== 'salida') return;
+
+      if (!confirm(`¿Anular este movimiento de ${mov.type} por ${mov.quantity} unidad${mov.quantity !== 1 ? 'es' : ''}?`)) {
+        return;
+      }
+
+      if (mov.type === 'entrada') {
+        if (p.quantity < mov.quantity) {
+          alert('No se puede anular: el stock actual es menor que la cantidad ingresada.');
+          return;
+        }
+        p.quantity -= mov.quantity;
+      } else {
+        p.quantity += mov.quantity;
+      }
+
+      mov.anulado = true;
+      registrarMovimiento(codigo, 'edicion', 0, `Anulación de ${mov.type} por ${mov.quantity}. Nota original: ${mov.note || '(sin nota)'}`);
+      guardarDatos();
+      abrirDetalle(codigo);
+      mostrarMensaje('mensaje-detalle', 'Movimiento anulado correctamente.', 'exito');
+    }
+
+    // ========================
+    // RENDERIZADO
+    // ========================
+    function renderDashboard() {
+      const lista = Object.values(productos);
+      const totalProductos = lista.length;
+      const totalStock = lista.reduce((sum, p) => sum + (p.quantity || 0), 0);
+
+      const hoy = new Date().toISOString().split('T')[0];
+      let entradasHoy = 0;
+      let salidasHoy = 0;
+
+      lista.forEach(p => {
+        (p.history || []).forEach(h => {
+          if (h.date.startsWith(hoy)) {
+            if (h.type === 'entrada') entradasHoy += h.quantity;
+            if (h.type === 'salida') salidasHoy += h.quantity;
+          }
+        });
+      });
+
+      const stockBajo = lista.filter(p => esStockBajo(p)).sort((a, b) => (a.quantity || 0) - (b.quantity || 0));
+
+      document.getElementById('resumen-total').textContent = totalProductos;
+      document.getElementById('resumen-stock').textContent = totalStock;
+      document.getElementById('resumen-entradas').textContent = entradasHoy;
+      document.getElementById('resumen-salidas').textContent = salidasHoy;
+      document.getElementById('resumen-stock-bajo').textContent = stockBajo.length;
+
+      const contenedorAlertas = document.getElementById('alertas-stock-bajo');
+      if (stockBajo.length === 0) {
+        contenedorAlertas.innerHTML = '<p class="vacio">No hay productos con stock bajo.</p>';
+      } else {
+        contenedorAlertas.innerHTML = stockBajo.slice(0, 5).map(p => `
+          <div class="historial-item ${p.quantity === 0 ? 'salida' : 'edicion'}" style="cursor: pointer;" onclick="abrirDetalle('${p.code}')">
+            <div style="font-weight: 500;">${escaparHtml(p.name)}</div>
+            <div style="font-size: 0.85rem; color: var(--color-texto-secundario);">
+              Stock: <strong>${p.quantity || 0}</strong> / Mínimo: ${p.minStock || 0}
+            </div>
+          </div>
+        `).join('');
+      }
+
+      const ultimos = [];
+      lista.forEach(p => {
+        (p.history || []).forEach(h => {
+          ultimos.push({ ...h, producto: p.name, code: p.code });
+        });
+      });
+      ultimos.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      const contenedor = document.getElementById('ultimos-movimientos');
+      if (ultimos.length === 0) {
+        contenedor.innerHTML = '<p class="vacio">Aún no hay movimientos registrados.</p>';
+      } else {
+        contenedor.innerHTML = ultimos.slice(0, 5).map(h => renderItemHistorial(h)).join('');
+      }
+    }
+
+    function esStockBajo(p) {
+      const min = typeof p.minStock === 'number' ? p.minStock : 0;
+      if (min <= 0) return false;
+      return (p.quantity || 0) <= min;
+    }
+
+    function nivelStockBajo(p) {
+      const qty = p.quantity || 0;
+      const min = typeof p.minStock === 'number' ? p.minStock : 0;
+      if (min <= 0) return null;
+      if (qty === 0) return 'critico';
+      if (qty <= min) return 'bajo';
+      return null;
+    }
+
+    function renderAlertaStock(p) {
+      const nivel = nivelStockBajo(p);
+      if (!nivel) return '';
+      const texto = nivel === 'critico' ? 'Sin stock' : 'Stock bajo';
+      return `<div class="alerta-stock ${nivel}">⚠️ ${texto}</div>`;
+    }
+
+    function renderInventario() {
+      const busqueda = document.getElementById('input-busqueda').value.toLowerCase().trim();
+      const lista = Object.values(productos).filter(p => {
+        const texto = (p.name + ' ' + p.code + ' ' + p.location + ' ' + p.description).toLowerCase();
+        return texto.includes(busqueda);
+      });
+
+      lista.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'es', { sensitivity: 'base' }));
+
+      const contenedor = document.getElementById('lista-inventario');
+      if (lista.length === 0) {
+        contenedor.innerHTML = '<p class="vacio">No se encontraron productos.</p>';
+        return;
+      }
+
+      let html = '<table><thead><tr><th>Producto</th><th>Stock</th><th>Ubicación</th></tr></thead><tbody>';
+      lista.forEach(p => {
+        const nivel = nivelStockBajo(p);
+        html += `<tr onclick="abrirDetalle('${p.code}')" style="cursor: pointer;" class="${nivel ? 'fila-stock-bajo' : ''}">
+          <td>
+            <div style="font-weight: 500;">${escaparHtml(p.name)}</div>
+            <div class="codigo-celda">${escaparHtml(p.code)}</div>
+            ${renderAlertaStock(p)}
+          </td>
+          <td style="font-weight: bold;">${p.quantity || 0}</td>
+          <td>${escaparHtml(p.location || '-')}</td>
+        </tr>`;
+      });
+      html += '</tbody></table>';
+      contenedor.innerHTML = html;
+    }
+
+    function renderHistorialProducto(codigo) {
+      const p = productos[codigo];
+      const contenedor = document.getElementById('detalle-historial');
+      if (!p || !p.history || p.history.length === 0) {
+        contenedor.innerHTML = '<p class="vacio">Aún no hay historial.</p>';
+        return;
+      }
+      contenedor.innerHTML = p.history.map((h, idx) => renderItemHistorial(h, false, true, idx, codigo)).join('');
+    }
+
+    function renderHistorico() {
+      const tipoFiltro = document.getElementById('filtro-tipo').value;
+      const fechaFiltro = document.getElementById('filtro-fecha').value;
+
+      let todos = [];
+      Object.values(productos).forEach(p => {
+        (p.history || []).forEach(h => {
+          todos.push({ ...h, producto: p.name, code: p.code });
+        });
+      });
+
+      todos.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      const filtrados = todos.filter(h => {
+        if (tipoFiltro && h.type !== tipoFiltro) return false;
+        if (fechaFiltro && !h.date.startsWith(fechaFiltro)) return false;
+        return true;
+      });
+
+      const contenedor = document.getElementById('lista-historico');
+      if (filtrados.length === 0) {
+        contenedor.innerHTML = '<p class="vacio">No hay movimientos con los filtros seleccionados.</p>';
+        return;
+      }
+
+      contenedor.innerHTML = filtrados.map(h => renderItemHistorial(h, true)).join('');
+    }
+
+    function renderItemHistorial(h, mostrarProducto = false, permitirAnular = false, idx = null, code = null) {
+      const fecha = new Date(h.date);
+      const fechaStr = fecha.toLocaleString('es-ES', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      });
+
+      const tipoTexto = {
+        entrada: '➕ Entrada',
+        salida: '➖ Salida',
+        edicion: '✏️ Edición',
+        alta: '🆕 Alta'
+      }[h.type] || h.type;
+
+      const puedeAnular = permitirAnular && idx !== null && code && (h.type === 'entrada' || h.type === 'salida');
+
+      return `<div class="historial-item ${h.type}">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+          <div>
+            <div class="historial-fecha">${fechaStr}</div>
+            <div>
+              <strong>${tipoTexto}</strong>
+              ${h.quantity > 0 ? `<span class="historial-cantidad"> ${h.quantity}</span>` : ''}
+              ${mostrarProducto ? `<br><small>${escaparHtml(h.producto || '')}</small>` : ''}
+            </div>
+          </div>
+          ${puedeAnular ? `<button class="btn btn-peligro btn-pequeno" onclick="event.stopPropagation(); anularMovimiento('${code}', ${idx})">↩️ Anular</button>` : ''}
+        </div>
+        ${h.note ? `<div style="color: var(--color-texto-secundario); font-size: 0.9rem;">${escaparHtml(h.note)}</div>` : ''}
+      </div>`;
+    }
+
+    function limpiarFiltrosHistorico() {
+      document.getElementById('filtro-tipo').value = '';
+      document.getElementById('filtro-fecha').value = '';
+      renderHistorico();
+    }
+
+    // ========================
+    // UTILIDADES
+    // ========================
+    function mostrarMensaje(elementId, mensaje, tipo) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      el.textContent = mensaje;
+      el.className = 'mensaje visible mensaje-' + tipo;
+      setTimeout(() => {
+        el.classList.remove('visible');
+      }, 5000);
+    }
+
+    function descargarArchivo(contenido, nombre, tipo) {
+      const blob = new Blob([contenido], { type: tipo });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = nombre;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function exportarBackup() {
+      const datos = JSON.stringify(productos, null, 2);
+      const fecha = new Date().toISOString().split('T')[0];
+      descargarArchivo(datos, `inventario_backup_${fecha}.json`, 'application/json');
+      mostrarMensaje('mensaje-inventario', 'Backup descargado correctamente.', 'exito');
+    }
+
+    function exportarCSV() {
+      const lista = Object.values(productos).sort((a, b) => (a.name || '').localeCompare(b.name || '', 'es', { sensitivity: 'base' }));
+      let csv = 'Codigo,Nombre,Descripcion,Ubicacion,Stock,Stock Minimo\n';
+      lista.forEach(p => {
+        csv += [
+          escaparCsv(p.code),
+          escaparCsv(p.name),
+          escaparCsv(p.description),
+          escaparCsv(p.location),
+          p.quantity || 0,
+          p.minStock || 0
+        ].join(',') + '\n';
+      });
+      const fecha = new Date().toISOString().split('T')[0];
+      descargarArchivo('\ufeff' + csv, `inventario_${fecha}.csv`, 'text/csv;charset=utf-8;');
+      mostrarMensaje('mensaje-inventario', 'CSV descargado correctamente.', 'exito');
+    }
+
+    function escaparCsv(valor) {
+      if (valor == null) return '';
+      const texto = String(valor).replace(/"/g, '""');
+      if (/[;,\n\r"]/.test(texto)) {
+        return '"' + texto + '"';
+      }
+      return texto;
+    }
+
+    function importarBackup(input) {
+      const archivo = input.files[0];
+      input.value = '';
+      if (!archivo) return;
+
+      if (!confirm('¿Estás segura de que quieres reemplazar todos los datos actuales con los del archivo? Los datos actuales se perderán.')) {
+        return;
+      }
+
+      const lector = new FileReader();
+      lector.onload = (e) => {
+        try {
+          const datos = JSON.parse(e.target.result);
+          if (typeof datos !== 'object' || datos === null || Array.isArray(datos)) {
+            throw new Error('El archivo no tiene el formato esperado.');
+          }
+          productos = datos;
+          migrarDatos();
+          guardarDatos();
+          renderInventario();
+          mostrarMensaje('mensaje-inventario', 'Backup importado correctamente.', 'exito');
+        } catch (err) {
+          console.error(err);
+          mostrarMensaje('mensaje-inventario', 'No se pudo importar el archivo. Verifica que sea un backup válido.', 'error');
+        }
+      };
+      lector.readAsText(archivo);
+    }
+
+    function escaparHtml(texto) {
+      if (!texto) return '';
+      const div = document.createElement('div');
+      div.textContent = texto;
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>
