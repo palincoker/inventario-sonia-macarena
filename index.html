@@ -2196,6 +2196,28 @@
       mostrarToast(`Se descontaron ${cantidad} unidades de "${escaparHtml(p.name)}"`, 'exito');
     }
 
+    function editarStockRapido(codigo) {
+      const p = productos[codigo];
+      if (!p) return;
+      const valor = prompt(`Editar stock de "${p.name}".\nStock actual: ${p.quantity}\n\nIngresa el nuevo stock:`, String(p.quantity));
+      if (valor === null) return;
+      const nuevoStock = parseInt(valor, 10);
+      if (isNaN(nuevoStock) || nuevoStock < 0) {
+        mostrarToast('Ingresa un número válido mayor o igual a 0.', 'error');
+        return;
+      }
+      const diferencia = nuevoStock - p.quantity;
+      p.quantity = nuevoStock;
+      const nota = diferencia === 0
+        ? 'Ajuste rápido de stock sin cambio'
+        : `Ajuste rápido de stock: ${diferencia > 0 ? '+' : ''}${diferencia}`;
+      registrarMovimiento(codigo, 'edicion', Math.abs(diferencia), nota);
+      guardarDatos();
+      renderInventario();
+      renderDashboard();
+      mostrarToast(`Stock de "${escaparHtml(p.name)}" actualizado a ${nuevoStock}`, 'exito');
+    }
+
     function eliminarProductoRapido(codigo) {
       const p = productos[codigo];
       if (!p) return;
@@ -2527,11 +2549,12 @@
               </div>
             </div>
           </td>
-          <td onclick="abrirDetalle('${p.code}')" style="cursor: pointer; font-weight: 800;">${p.quantity || 0}</td>
+          <td ondblclick="event.stopPropagation(); editarStockRapido('${p.code}')" title="Doble clic para editar stock" style="cursor: pointer; font-weight: 800;" onclick="abrirDetalle('${p.code}')">${p.quantity || 0}</td>
           <td onclick="abrirDetalle('${p.code}')" style="cursor: pointer; font-size:0.9rem;">${escaparHtml(formatearUbicacion(p))}</td>
           <td style="white-space: nowrap; text-align: center;">
             <button class="btn btn-exito btn-pequeno" style="width: auto; padding: 6px 10px;" onclick="event.stopPropagation(); entradaRapida('${p.code}')" title="Entrada">➕</button>
             <button class="btn btn-peligro btn-pequeno" style="width: auto; padding: 6px 10px;" onclick="event.stopPropagation(); salidaRapida('${p.code}')" title="Salida / Descontar">➖</button>
+            <button class="btn btn-secundario btn-pequeno" style="width: auto; padding: 6px 10px;" onclick="event.stopPropagation(); abrirDetalle('${p.code}')" title="Editar">✏️</button>
             <button class="btn btn-peligro btn-pequeno" style="width: auto; padding: 6px 10px; background: #7f1d1d;" onclick="event.stopPropagation(); eliminarProductoRapido('${p.code}')" title="Eliminar">🗑️</button>
           </td>
         </tr>`;
