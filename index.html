@@ -375,6 +375,7 @@
     }
 
     .lector-container {
+      position: relative;
       width: 100%;
       border-radius: var(--radio);
       overflow: hidden;
@@ -1107,6 +1108,7 @@
         <div id="panel-camara">
           <div id="lector-container" class="lector-container">
             <div id="reader"></div>
+            <div id="flash-escaneo" style="position:absolute; top:0; left:0; right:0; bottom:0; background:white; opacity:0; pointer-events:none; transition:opacity 0.15s ease; z-index:10; border-radius:var(--radio);"></div>
           </div>
 
           <div class="botones-grupo">
@@ -2127,20 +2129,41 @@
     }
 
     function feedbackEscaneoExitoso() {
-      if (navigator.vibrate) navigator.vibrate(80);
+      // Vibracion: doble pulso corto para mayor sensacion de confirmacion
+      if (navigator.vibrate) {
+        navigator.vibrate([60, 40, 80]);
+      }
+
+      // Sonido: dos tonos agudos tipo "beep-beep" de confirmacion
       try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.frequency.value = 880;
-        gain.gain.setValueAtTime(0.1, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
-        osc.start();
-        osc.stop(ctx.currentTime + 0.15);
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const t = ctx.currentTime;
+
+        [880, 1175].forEach((freq, i) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.type = 'sine';
+          osc.frequency.value = freq;
+          const start = t + i * 0.08;
+          gain.gain.setValueAtTime(0, start);
+          gain.gain.linearRampToValueAtTime(0.12, start + 0.01);
+          gain.gain.exponentialRampToValueAtTime(0.001, start + 0.12);
+          osc.start(start);
+          osc.stop(start + 0.13);
+        });
       } catch (e) {
         // Ignorar errores de audio
+      }
+
+      // Flash visual blanco sobre el visor de camara
+      const flash = document.getElementById('flash-escaneo');
+      if (flash) {
+        flash.style.opacity = '0.9';
+        setTimeout(() => { flash.style.opacity = '0'; }, 100);
       }
     }
 
