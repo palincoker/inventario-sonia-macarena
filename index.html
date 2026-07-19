@@ -379,6 +379,35 @@
     .fila-stock-bajo td { background: rgba(245, 158, 11, 0.04); }
     .fila-sin-stock td { background: rgba(239, 68, 68, 0.04); }
     .fila-vencimiento td { background: rgba(139, 92, 246, 0.04); }
+    .fila-seleccionada td { background: rgba(37, 99, 235, 0.08) !important; }
+
+    .checkbox-seleccion {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      accent-color: var(--color-primario);
+    }
+
+    .acciones-masivas {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+      padding: 12px;
+      background: var(--color-superficie);
+      border-radius: var(--radio);
+      box-shadow: var(--sombra);
+      border: 1px solid var(--color-borde);
+    }
+
+    .acciones-masivas.visible { display: flex; }
+
+    .acciones-masivas .contador {
+      font-weight: 700;
+      color: var(--color-primario);
+      margin-right: auto;
+    }
 
     .vacio {
       text-align: center;
@@ -925,6 +954,22 @@
       </div>
 
       <div id="mensaje-inventario" class="mensaje"></div>
+
+      <div id="acciones-masivas" class="acciones-masivas">
+        <span class="contador" id="contador-seleccion">0 seleccionados</span>
+        <button class="btn btn-exito btn-pequeno" onclick="entradaMasiva()" title="Sumar stock a todos los seleccionados">
+          ➕ Entrada
+        </button>
+        <button class="btn btn-peligro btn-pequeno" onclick="salidaMasiva()" title="Restar stock a todos los seleccionados">
+          ➖ Salida
+        </button>
+        <button class="btn btn-peligro btn-pequeno" style="background: #7f1d1d;" onclick="eliminarSeleccionados()" title="Eliminar todos los seleccionados">
+          🗑️ Eliminar
+        </button>
+        <button class="btn btn-secundario btn-pequeno" onclick="limpiarSeleccion()">
+          Cancelar
+        </button>
+      </div>
 
       <div class="botones-grupo">
         <button class="btn btn-exito" onclick="irAEscanear()">
@@ -2231,6 +2276,119 @@
       mostrarToast(`"${escaparHtml(p.name)}" eliminado correctamente`, 'exito');
     }
 
+    // ========================
+    // SELECCION Y ACCIONES MASIVAS
+    // ========================
+    function seleccionarProducto(codigo, seleccionado) {
+      if (seleccionado) {
+        productosSeleccionados.add(codigo);
+      } else {
+        productosSeleccionados.delete(codigo);
+      }
+      actualizarBarraAccionesMasivas();
+      renderInventario();
+    }
+
+    function toggleSeleccionTodos(seleccionar) {
+      const lista = Object.values(productos).filter(p => filtrarProductoVisible(p));
+      lista.forEach(p => {
+        if (seleccionar) productosSeleccionados.add(p.code);
+        else productosSeleccionados.delete(p.code);
+      });
+      actualizarBarraAccionesMasivas();
+      renderInventario();
+    }
+
+    function filtrarProductoVisible(p) {
+      const busqueda = document.getElementById('input-busqueda').value.toLowerCase().trim();
+      const categoriaFiltro = document.getElementById('filtro-categoria').value;
+      const estadoFiltro = document.getElementById('filtro-estado').value;
+      const ubicacionTexto = (p.locationArea + ' ' + p.locationShelf + ' ' + p.locationLevel + ' ' + p.locationPosition + ' ' + (p.location || '')).toLowerCase();
+      const texto = (p.name + ' ' + p.code + ' ' + p.description + ' ' + p.lot + ' ' + p.category + ' ' + ubicacionTexto).toLowerCase();
+      if (busqueda && !texto.includes(busqueda)) return false;
+      if (categoriaFiltro && p.category !== categoriaFiltro) return false;
+      if (estadoFiltro === 'stock-bajo' && !esStockBajo(p)) return false;
+      if (estadoFiltro === 'sin-stock' && !esSinStock(p)) return false;
+      if (estadoFiltro === 'por-vencer' && !estaPorVencer(p)) return false;
+      return true;
+    }
+
+    function actualizarBarraAccionesMasivas() {
+      const barra = document.getElementById('acciones-masivas');
+      const contador = document.getElementById('contador-seleccion');
+      if (productosSeleccionados.size > 0) {
+        barra.classList.add('visible');
+        contador.textContent = productosSeleccionados.size + (productosSeleccionados.size === 1 ? ' seleccionado' : ' seleccionados');
+      } else {
+        barra.classList.remove('visible');
+      }
+    }
+
+    function limpiarSeleccion() {
+      productosSeleccionados.clear();
+      actualizarBarraAccionesMasivas();
+      renderInventario();
+    }
+
+    function entradaMasiva() {
+      if (productosSeleccionados.size === 0) return;
+      const cantidad = parseInt(prompt(`¿Cuántas unidades deseas agregar a ${productosSeleccionados.size} productos?`, '1'), 10);
+      if (isNaN(cantidad) || cantidad <= 0) return;
+      let contador = 0;
+      productosSeleccionados.forEach(codigo => {
+        const p = productos[codigo];
+        if (!p) return;
+        p.quantity += cantidad;
+        registrarMovimiento(codigo, 'entrada', cantidad, 'Entrada masiva desde inventario');
+        contador++;
+      });
+      guardarDatos();
+      limpiarSeleccion();
+      renderDashboard();
+      mostrarToast(`Se agregaron ${cantidad} unidades a ${contador} productos`, 'exito');
+    }
+
+    function salidaMasiva() {
+      if (productosSeleccionados.size === 0) return;
+      const cantidad = parseInt(prompt(`¿Cuántas unidades deseas descontar de ${productosSeleccionados.size} productos?`, '1'), 10);
+      if (isNaN(cantidad) || cantidad <= 0) return;
+      let contador = 0;
+      let omitidos = 0;
+      productosSeleccionados.forEach(codigo => {
+        const p = productos[codigo];
+        if (!p) return;
+        if (cantidad > p.quantity) {
+          omitidos++;
+          return;
+        }
+        p.quantity -= cantidad;
+        registrarMovimiento(codigo, 'salida', cantidad, 'Salida masiva desde inventario');
+        contador++;
+      });
+      guardarDatos();
+      limpiarSeleccion();
+      renderDashboard();
+      let mensaje = `Se descontaron ${cantidad} unidades de ${contador} productos`;
+      if (omitidos > 0) mensaje += ` (${omitidos} omitidos por stock insuficiente)`;
+      mostrarToast(mensaje, omitidos > 0 ? 'advertencia' : 'exito');
+    }
+
+    function eliminarSeleccionados() {
+      if (productosSeleccionados.size === 0) return;
+      if (!confirm(`¿Estás segura de eliminar ${productosSeleccionados.size} productos? Se perderá todo su historial.`)) return;
+      let contador = 0;
+      productosSeleccionados.forEach(codigo => {
+        if (productos[codigo]) {
+          delete productos[codigo];
+          contador++;
+        }
+      });
+      guardarDatos();
+      limpiarSeleccion();
+      renderDashboard();
+      mostrarToast(`${contador} productos eliminados`, 'exito');
+    }
+
     function ajustarStock() {
       if (!productoActual || !productos[productoActual]) return;
       const p = productos[productoActual];
@@ -2530,13 +2688,18 @@
         return;
       }
 
-      let html = '<table><thead><tr><th>Producto</th><th>Stock</th><th>Ubicación</th><th style="text-align:center;">Acciones</th></tr></thead><tbody>';
+      const todosSeleccionados = lista.length > 0 && lista.every(p => productosSeleccionados.has(p.code));
+      let html = `<table><thead><tr><th style="width:40px; text-align:center;"><input type="checkbox" class="checkbox-seleccion" ${todosSeleccionados ? 'checked' : ''} onchange="toggleSeleccionTodos(this.checked)" title="Seleccionar todos"></th><th>Producto</th><th style="width:80px;">Stock</th><th>Ubicación</th><th style="text-align:center;">Acciones</th></tr></thead><tbody>`;
       lista.forEach(p => {
         const nivel = nivelStockBajo(p);
         const porVencer = estaPorVencer(p);
-        const filaClase = nivel === 'critico' ? 'fila-sin-stock' : nivel ? 'fila-stock-bajo' : porVencer ? 'fila-vencimiento' : '';
+        const filaClase = (nivel === 'critico' ? 'fila-sin-stock' : nivel ? 'fila-stock-bajo' : porVencer ? 'fila-vencimiento' : '') + (productosSeleccionados.has(p.code) ? ' fila-seleccionada' : '');
         const fotoMini = p.image ? `<img src="${p.image}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;margin-right:10px;flex-shrink:0;">` : `<div style="width:48px;height:48px;background:#e5e7eb;border-radius:8px;margin-right:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:1.2rem;">📦</div>`;
+        const checked = productosSeleccionados.has(p.code) ? 'checked' : '';
         html += `<tr class="${filaClase}">
+          <td style="text-align:center;" onclick="event.stopPropagation();">
+            <input type="checkbox" class="checkbox-seleccion" ${checked} onchange="seleccionarProducto('${p.code}', this.checked)">
+          </td>
           <td onclick="abrirDetalle('${p.code}')" style="cursor: pointer;">
             <div style="display:flex;align-items:center;">
               ${fotoMini}
@@ -2549,7 +2712,7 @@
               </div>
             </div>
           </td>
-          <td ondblclick="event.stopPropagation(); editarStockRapido('${p.code}')" title="Doble clic para editar stock" style="cursor: pointer; font-weight: 800;" onclick="abrirDetalle('${p.code}')">${p.quantity || 0}</td>
+          <td ondblclick="event.stopPropagation(); editarStockRapido('${p.code}')" title="Doble clic para editar stock" style="cursor: pointer; font-weight: 800; text-align:center;" onclick="abrirDetalle('${p.code}')">${p.quantity || 0}</td>
           <td onclick="abrirDetalle('${p.code}')" style="cursor: pointer; font-size:0.9rem;">${escaparHtml(formatearUbicacion(p))}</td>
           <td style="white-space: nowrap; text-align: center;">
             <button class="btn btn-exito btn-pequeno" style="width: auto; padding: 6px 10px;" onclick="event.stopPropagation(); entradaRapida('${p.code}')" title="Entrada">➕</button>
