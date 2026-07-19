@@ -9,6 +9,7 @@
   <meta name="theme-color" content="#ec4899">
   <meta name="description" content="Sistema de control de inventario con escaneo QR, sincronizacion en la nube y gestion de stock.">
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
 :root {
       --color-primario: #ec4899;
@@ -1336,6 +1337,9 @@
           <button class="btn" onclick="duplicarProducto()">
             📋 Duplicar
           </button>
+          <button class="btn" onclick="generarEtiquetaQrProducto()">
+            🏷️ Etiqueta QR
+          </button>
           <button class="btn btn-peligro" onclick="eliminarProducto()">
             🗑️ Eliminar
           </button>
@@ -1483,6 +1487,22 @@
       <div class="botones-grupo">
         <button class="btn btn-secundario" onclick="cerrarDiagnosticoPistola()">Cerrar</button>
         <button class="btn btn-peligro" onclick="limpiarDiagnosticoPistola()">Limpiar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL ETIQUETA QR -->
+  <div id="modal-qr" class="modal">
+    <div class="modal-contenido" style="text-align: center;">
+      <h3 class="modal-titulo">Etiqueta QR del producto</h3>
+      <p style="font-size: 0.85rem; color: var(--color-texto-secundario); margin-top: -8px;">
+        Escanea este codigo con la camara de la app para cargar el producto automaticamente.
+      </p>
+      <div id="qr-etiqueta-contenedor" style="display: flex; justify-content: center; margin: 16px 0;"></div>
+      <div id="qr-etiqueta-datos" style="font-family: ui-monospace, monospace; font-size: 0.75rem; color: var(--color-texto-secundario); word-break: break-all; text-align: left; background: var(--color-superficie-secundaria); padding: 10px; border-radius: var(--radio-pequeno); margin-bottom: 12px; max-height: 100px; overflow-y: auto;"></div>
+      <div class="botones-grupo">
+        <button class="btn btn-secundario" onclick="cerrarModalQr()">Cerrar</button>
+        <button class="btn" onclick="imprimirEtiquetaQr()">🖨️ Imprimir</button>
       </div>
     </div>
   </div>
@@ -2062,9 +2082,12 @@
           if (datos) {
             procesarCodigoConDatos(codigo, datos);
           } else {
+            mostrarToast('No se encontro informacion publica para este codigo. Completa los datos manualmente.', 'advertencia');
             procesarCodigoConDatos(codigo, null);
           }
-        }).catch(() => {
+        }).catch((err) => {
+          console.error(err);
+          mostrarToast('No se pudo consultar la base de datos. Revisa tu conexion.', 'error');
           procesarCodigoConDatos(codigo, null);
         });
         return;
@@ -2494,6 +2517,64 @@
       guardarDatos();
       mostrarToast('Producto duplicado correctamente', 'exito');
       abrirDetalle(codigoLimpio);
+    }
+
+    function generarEtiquetaQrProducto() {
+      if (!productoActual || !productos[productoActual]) return;
+      const p = productos[productoActual];
+      const datosEtiqueta = {
+        code: p.code,
+        name: p.name,
+        description: p.description || '',
+        category: p.category || '',
+        costPrice: p.costPrice || 0,
+        salePrice: p.salePrice || 0,
+        minStock: p.minStock || 0,
+        locationArea: p.locationArea || '',
+        locationShelf: p.locationShelf || '',
+        locationLevel: p.locationLevel || '',
+        locationPosition: p.locationPosition || '',
+        lot: p.lot || '',
+        expiryDate: p.expiryDate || ''
+      };
+      const jsonStr = JSON.stringify(datosEtiqueta);
+
+      const contenedor = document.getElementById('qr-etiqueta-contenedor');
+      contenedor.innerHTML = '';
+      new QRCode(contenedor, {
+        text: jsonStr,
+        width: 220,
+        height: 220,
+        colorDark: '#111827',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+
+      document.getElementById('qr-etiqueta-datos').textContent = jsonStr;
+      document.getElementById('modal-qr').classList.add('visible');
+    }
+
+    function cerrarModalQr() {
+      document.getElementById('modal-qr').classList.remove('visible');
+    }
+
+    function imprimirEtiquetaQr() {
+      const ventana = window.open('', '_blank');
+      const p = productos[productoActual];
+      const qrHtml = document.getElementById('qr-etiqueta-contenedor').innerHTML;
+      ventana.document.write(`
+        <html>
+          <head><title>Etiqueta ${p.name}</title></head>
+          <body style="display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:sans-serif; padding:20px;">
+            <h3 style="margin:0 0 8px;">${escaparHtml(p.name)}</h3>
+            <div style="margin-bottom:8px;">${qrHtml}</div>
+            <p style="margin:0; font-size:0.8rem; color:#666;">Cod: ${escaparHtml(p.code)}</p>
+          </body>
+        </html>
+      `);
+      ventana.document.close();
+      ventana.focus();
+      setTimeout(() => ventana.print(), 300);
     }
 
     function mostrarPreviewFoto(base64) {
