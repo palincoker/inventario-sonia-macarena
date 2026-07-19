@@ -403,6 +403,14 @@
     })();
   </script>
 
+  <script>
+    // Si se abre el archivo local directamente (file://), redirigir a la
+    // version online para garantizar que la pagina sea identica y sincronice.
+    if (window.location.protocol === 'file:') {
+      window.location.replace('https://palincoker.github.io/inventario-sonia-macarena/');
+    }
+  </script>
+
   <header>
     <h1>📦 Control de Inventario Sonia Macarena</h1>
   </header>
