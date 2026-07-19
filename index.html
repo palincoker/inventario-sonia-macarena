@@ -620,6 +620,9 @@
           <button class="btn btn-peligro" onclick="abrirModalMovimiento('salida')">
             ➖ Salida
           </button>
+          <button class="btn btn-secundario" onclick="ajustarStock()">
+            🔧 Ajustar stock
+          </button>
         </div>
       </div>
 
@@ -1280,6 +1283,73 @@
       mostrarSeccion('inventario');
     }
 
+    function entradaRapida(codigo) {
+      const p = productos[codigo];
+      if (!p) return;
+      const cantidad = parseInt(prompt(`¿Cuántas unidades deseas agregar a "${p.name}"?`, '1'), 10);
+      if (isNaN(cantidad) || cantidad <= 0) return;
+
+      p.quantity += cantidad;
+      registrarMovimiento(codigo, 'entrada', cantidad, 'Entrada rápida desde inventario');
+      guardarDatos();
+      renderInventario();
+      renderDashboard();
+      mostrarMensaje('mensaje-inventario', `Se agregaron ${cantidad} unidades a "${p.name}"`, 'exito');
+    }
+
+    function salidaRapida(codigo) {
+      const p = productos[codigo];
+      if (!p) return;
+      const cantidad = parseInt(prompt(`¿Cuántas unidades deseas descontar de "${p.name}"?`, '1'), 10);
+      if (isNaN(cantidad) || cantidad <= 0) return;
+      if (cantidad > p.quantity) {
+        alert(`No hay suficiente stock. Stock actual de "${p.name}": ${p.quantity}`);
+        return;
+      }
+
+      p.quantity -= cantidad;
+      registrarMovimiento(codigo, 'salida', cantidad, 'Salida rápida desde inventario');
+      guardarDatos();
+      renderInventario();
+      renderDashboard();
+      mostrarMensaje('mensaje-inventario', `Se descontaron ${cantidad} unidades de "${p.name}"`, 'exito');
+    }
+
+    function eliminarProductoRapido(codigo) {
+      const p = productos[codigo];
+      if (!p) return;
+      if (!confirm(`¿Estás segura de eliminar "${p.name}"? Se perderá todo su historial.`)) return;
+
+      delete productos[codigo];
+      guardarDatos();
+      renderInventario();
+      renderDashboard();
+      mostrarMensaje('mensaje-inventario', `"${p.name}" eliminado correctamente`, 'exito');
+    }
+
+    function ajustarStock() {
+      if (!productoActual || !productos[productoActual]) return;
+      const p = productos[productoActual];
+      const valor = prompt(`Ajuste de stock para "${p.name}".\nStock actual: ${p.quantity}\n\nIngresa el stock real:`, String(p.quantity));
+      if (valor === null) return;
+      const nuevoStock = parseInt(valor, 10);
+      if (isNaN(nuevoStock) || nuevoStock < 0) {
+        mostrarMensaje('mensaje-detalle', 'Ingresa un número válido mayor o igual a 0.', 'error');
+        return;
+      }
+
+      const diferencia = nuevoStock - p.quantity;
+      p.quantity = nuevoStock;
+      const nota = diferencia === 0
+        ? 'Ajuste de stock sin cambio'
+        : `Ajuste de stock: ${diferencia > 0 ? '+' : ''}${diferencia}`;
+      registrarMovimiento(productoActual, 'edicion', Math.abs(diferencia), nota);
+      guardarDatos();
+      abrirDetalle(productoActual);
+      renderDashboard();
+      mostrarMensaje('mensaje-detalle', `Stock ajustado a ${nuevoStock} unidades.`, 'exito');
+    }
+
     // ========================
     // MOVIMIENTOS
     // ========================
@@ -1401,11 +1471,14 @@
         contenedorAlertas.innerHTML = '<p class="vacio">No hay productos con stock bajo.</p>';
       } else {
         contenedorAlertas.innerHTML = stockBajo.slice(0, 5).map(p => `
-          <div class="historial-item ${p.quantity === 0 ? 'salida' : 'edicion'}" style="cursor: pointer;" onclick="abrirDetalle('${p.code}')">
-            <div style="font-weight: 500;">${escaparHtml(p.name)}</div>
-            <div style="font-size: 0.85rem; color: var(--color-texto-secundario);">
-              Stock: <strong>${p.quantity || 0}</strong> / Mínimo: ${p.minStock || 0}
+          <div class="historial-item ${p.quantity === 0 ? 'salida' : 'edicion'}" style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+            <div style="cursor: pointer; flex: 1;" onclick="abrirDetalle('${p.code}')">
+              <div style="font-weight: 500;">${escaparHtml(p.name)}</div>
+              <div style="font-size: 0.85rem; color: var(--color-texto-secundario);">
+                Stock: <strong>${p.quantity || 0}</strong> / Mínimo: ${p.minStock || 0}
+              </div>
             </div>
+            <button class="btn btn-peligro btn-pequeno" style="width: auto; padding: 6px 10px;" onclick="event.stopPropagation(); salidaRapida('${p.code}')" title="Descontar">➖</button>
           </div>
         `).join('');
       }
@@ -1463,17 +1536,22 @@
         return;
       }
 
-      let html = '<table><thead><tr><th>Producto</th><th>Stock</th><th>Ubicación</th></tr></thead><tbody>';
+      let html = '<table><thead><tr><th>Producto</th><th>Stock</th><th>Ubicación</th><th style="text-align:center;">Acciones</th></tr></thead><tbody>';
       lista.forEach(p => {
         const nivel = nivelStockBajo(p);
-        html += `<tr onclick="abrirDetalle('${p.code}')" style="cursor: pointer;" class="${nivel ? 'fila-stock-bajo' : ''}">
-          <td>
+        html += `<tr class="${nivel ? 'fila-stock-bajo' : ''}">
+          <td onclick="abrirDetalle('${p.code}')" style="cursor: pointer;">
             <div style="font-weight: 500;">${escaparHtml(p.name)}</div>
             <div class="codigo-celda">${escaparHtml(p.code)}</div>
             ${renderAlertaStock(p)}
           </td>
-          <td style="font-weight: bold;">${p.quantity || 0}</td>
-          <td>${escaparHtml(p.location || '-')}</td>
+          <td onclick="abrirDetalle('${p.code}')" style="cursor: pointer; font-weight: bold;">${p.quantity || 0}</td>
+          <td onclick="abrirDetalle('${p.code}')" style="cursor: pointer;">${escaparHtml(p.location || '-')}</td>
+          <td style="white-space: nowrap; text-align: center;">
+            <button class="btn btn-exito btn-pequeno" style="width: auto; padding: 6px 10px;" onclick="event.stopPropagation(); entradaRapida('${p.code}')" title="Entrada">➕</button>
+            <button class="btn btn-peligro btn-pequeno" style="width: auto; padding: 6px 10px;" onclick="event.stopPropagation(); salidaRapida('${p.code}')" title="Salida / Descontar">➖</button>
+            <button class="btn btn-peligro btn-pequeno" style="width: auto; padding: 6px 10px; background: #7f1d1d;" onclick="event.stopPropagation(); eliminarProductoRapido('${p.code}')" title="Eliminar">🗑️</button>
+          </td>
         </tr>`;
       });
       html += '</tbody></table>';
