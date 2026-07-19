@@ -1000,6 +1000,16 @@
             <textarea id="detalle-descripcion" rows="2"></textarea>
           </div>
 
+          <div class="campo-completo">
+            <label>Foto del producto</label>
+            <div id="detalle-foto-preview" style="display:none; margin-bottom:10px;">
+              <img id="detalle-foto-img" src="" alt="Foto" style="max-width:200px; max-height:200px; border-radius:12px; object-fit:cover;">
+              <button class="btn btn-peligro btn-pequeno" onclick="eliminarFotoProducto()" style="margin-top:8px;">🗑️ Quitar foto</button>
+            </div>
+            <input type="file" id="detalle-foto" accept="image/*" onchange="procesarFotoProducto(this)">
+            <p style="font-size:0.8rem; color:var(--color-texto-secundario); margin:4px 0 0;">Imagen pequeña recomendada (max 1 MB)</p>
+          </div>
+
           <div>
             <label for="detalle-categoria">Categoría</label>
             <input type="text" id="detalle-categoria" list="lista-categorias" placeholder="Ej: Alimentos, Limpieza, Electrónica">
@@ -1007,8 +1017,23 @@
           </div>
 
           <div>
-            <label for="detalle-ubicacion">Ubicación</label>
-            <input type="text" id="detalle-ubicacion">
+            <label for="detalle-ubicacion-area">Área / Zona</label>
+            <input type="text" id="detalle-ubicacion-area" placeholder="Ej: Bodega, Tienda">
+          </div>
+
+          <div>
+            <label for="detalle-ubicacion-estante">Estante / Pasillo</label>
+            <input type="text" id="detalle-ubicacion-estante" placeholder="Ej: A12">
+          </div>
+
+          <div>
+            <label for="detalle-ubicacion-nivel">Nivel / Fila</label>
+            <input type="text" id="detalle-ubicacion-nivel" placeholder="Ej: 3">
+          </div>
+
+          <div>
+            <label for="detalle-ubicacion-posicion">Posición</label>
+            <input type="text" id="detalle-ubicacion-posicion" placeholder="Ej: 15">
           </div>
 
           <div>
@@ -1286,6 +1311,7 @@
     let productoActual = null;
     let tipoMovimientoPendiente = null;
     let seccionAnterior = 'dashboard';
+    let fotoProductoTemp = ''; // base64 de foto nueva, vacio si no se cambia
 
     // Estado para pistola escáner (teclado HID)
     let escanerPistolaActivo = false;
@@ -1424,6 +1450,11 @@
         if (typeof p.salePrice !== 'number') p.salePrice = parseFloat(p.salePrice) || 0;
         if (!p.lot) p.lot = '';
         if (!p.expiryDate) p.expiryDate = '';
+        if (!p.image) p.image = '';
+        if (!p.locationArea) p.locationArea = '';
+        if (!p.locationShelf) p.locationShelf = '';
+        if (!p.locationLevel) p.locationLevel = '';
+        if (!p.locationPosition) p.locationPosition = '';
       });
     }
 
@@ -1921,12 +1952,17 @@
       document.getElementById('detalle-nombre').value = '';
       document.getElementById('detalle-descripcion').value = '';
       document.getElementById('detalle-categoria').value = '';
-      document.getElementById('detalle-ubicacion').value = '';
+      document.getElementById('detalle-ubicacion-area').value = '';
+      document.getElementById('detalle-ubicacion-estante').value = '';
+      document.getElementById('detalle-ubicacion-nivel').value = '';
+      document.getElementById('detalle-ubicacion-posicion').value = '';
       document.getElementById('detalle-stock-minimo').value = '0';
       document.getElementById('detalle-lote').value = '';
       document.getElementById('detalle-fecha-vencimiento').value = '';
       document.getElementById('detalle-precio-costo').value = '';
       document.getElementById('detalle-precio-venta').value = '';
+      document.getElementById('detalle-foto').value = '';
+      mostrarPreviewFoto('');
       document.getElementById('detalle-historial').innerHTML = '<p class="vacio">Aún no hay historial.</p>';
       document.getElementById('detalle-titulo').textContent = 'Nuevo producto';
       renderCategoriasDatalist();
@@ -1956,12 +1992,17 @@
       document.getElementById('detalle-nombre').value = p.name || '';
       document.getElementById('detalle-descripcion').value = p.description || '';
       document.getElementById('detalle-categoria').value = p.category || '';
-      document.getElementById('detalle-ubicacion').value = p.location || '';
+      document.getElementById('detalle-ubicacion-area').value = p.locationArea || '';
+      document.getElementById('detalle-ubicacion-estante').value = p.locationShelf || '';
+      document.getElementById('detalle-ubicacion-nivel').value = p.locationLevel || '';
+      document.getElementById('detalle-ubicacion-posicion').value = p.locationPosition || '';
       document.getElementById('detalle-stock-minimo').value = (typeof p.minStock === 'number' ? p.minStock : 0);
       document.getElementById('detalle-lote').value = p.lot || '';
       document.getElementById('detalle-fecha-vencimiento').value = p.expiryDate || '';
       document.getElementById('detalle-precio-costo').value = p.costPrice > 0 ? p.costPrice.toFixed(2) : '';
       document.getElementById('detalle-precio-venta').value = p.salePrice > 0 ? p.salePrice.toFixed(2) : '';
+      document.getElementById('detalle-foto').value = '';
+      mostrarPreviewFoto(p.image || '');
 
       renderCategoriasDatalist();
       renderHistorialProducto(codigo);
@@ -1974,7 +2015,10 @@
       const nombre = document.getElementById('detalle-nombre').value.trim();
       const descripcion = document.getElementById('detalle-descripcion').value.trim();
       const categoria = document.getElementById('detalle-categoria').value.trim();
-      const ubicacion = document.getElementById('detalle-ubicacion').value.trim();
+      const ubicacionArea = document.getElementById('detalle-ubicacion-area').value.trim();
+      const ubicacionEstante = document.getElementById('detalle-ubicacion-estante').value.trim();
+      const ubicacionNivel = document.getElementById('detalle-ubicacion-nivel').value.trim();
+      const ubicacionPosicion = document.getElementById('detalle-ubicacion-posicion').value.trim();
       const stockMinimo = parseInt(document.getElementById('detalle-stock-minimo').value, 10) || 0;
       const lote = document.getElementById('detalle-lote').value.trim();
       const fechaVencimiento = document.getElementById('detalle-fecha-vencimiento').value;
@@ -1994,13 +2038,17 @@
           name: nombre,
           description: descripcion,
           category: categoria,
-          location: ubicacion,
+          locationArea: ubicacionArea,
+          locationShelf: ubicacionEstante,
+          locationLevel: ubicacionNivel,
+          locationPosition: ubicacionPosicion,
           quantity: 0,
           minStock: stockMinimo,
           lot: lote,
           expiryDate: fechaVencimiento,
           costPrice: precioCosto,
           salePrice: precioVenta,
+          image: fotoProductoTemp || '',
           createdAt: new Date().toISOString(),
           history: []
         };
@@ -2010,14 +2058,22 @@
         p.name = nombre;
         p.description = descripcion;
         p.category = categoria;
-        p.location = ubicacion;
+        p.locationArea = ubicacionArea;
+        p.locationShelf = ubicacionEstante;
+        p.locationLevel = ubicacionNivel;
+        p.locationPosition = ubicacionPosicion;
         p.minStock = stockMinimo;
         p.lot = lote;
         p.expiryDate = fechaVencimiento;
         p.costPrice = precioCosto;
         p.salePrice = precioVenta;
+        if (fotoProductoTemp || fotoProductoTemp === '') {
+          p.image = fotoProductoTemp;
+        }
         registrarMovimiento(productoActual, 'edicion', 0, 'Edición de datos');
       }
+
+      fotoProductoTemp = ''; // resetear temporal
 
       guardarDatos();
       mostrarToast(esNuevo ? 'Producto creado correctamente' : 'Producto actualizado correctamente', 'exito');
@@ -2050,6 +2106,49 @@
       guardarDatos();
       mostrarToast('Producto duplicado correctamente', 'exito');
       abrirDetalle(codigoLimpio);
+    }
+
+    function mostrarPreviewFoto(base64) {
+      const preview = document.getElementById('detalle-foto-preview');
+      const img = document.getElementById('detalle-foto-img');
+      if (base64) {
+        img.src = base64;
+        preview.style.display = 'block';
+      } else {
+        img.src = '';
+        preview.style.display = 'none';
+      }
+    }
+
+    function procesarFotoProducto(input) {
+      const archivo = input.files[0];
+      if (!archivo) return;
+      if (archivo.size > 1 * 1024 * 1024) {
+        mostrarToast('La imagen es muy grande. Maximo 1 MB.', 'error');
+        input.value = '';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        fotoProductoTemp = e.target.result;
+        mostrarPreviewFoto(fotoProductoTemp);
+      };
+      reader.readAsDataURL(archivo);
+    }
+
+    function eliminarFotoProducto() {
+      fotoProductoTemp = '';
+      document.getElementById('detalle-foto').value = '';
+      mostrarPreviewFoto('');
+    }
+
+    function formatearUbicacion(p) {
+      const partes = [];
+      if (p.locationArea) partes.push(p.locationArea);
+      if (p.locationShelf) partes.push('Estante ' + p.locationShelf);
+      if (p.locationLevel) partes.push('Nivel ' + p.locationLevel);
+      if (p.locationPosition) partes.push('Pos ' + p.locationPosition);
+      return partes.length ? partes.join(' · ') : (p.location || '-');
     }
 
     function eliminarProducto() {
@@ -2391,7 +2490,8 @@
       const estadoFiltro = document.getElementById('filtro-estado').value;
 
       const lista = Object.values(productos).filter(p => {
-        const texto = (p.name + ' ' + p.code + ' ' + p.location + ' ' + p.description + ' ' + p.lot + ' ' + p.category).toLowerCase();
+        const ubicacionTexto = (p.locationArea + ' ' + p.locationShelf + ' ' + p.locationLevel + ' ' + p.locationPosition + ' ' + (p.location || '')).toLowerCase();
+        const texto = (p.name + ' ' + p.code + ' ' + p.description + ' ' + p.lot + ' ' + p.category + ' ' + ubicacionTexto).toLowerCase();
         if (busqueda && !texto.includes(busqueda)) return false;
         if (categoriaFiltro && p.category !== categoriaFiltro) return false;
         if (estadoFiltro === 'stock-bajo' && !esStockBajo(p)) return false;
@@ -2413,16 +2513,22 @@
         const nivel = nivelStockBajo(p);
         const porVencer = estaPorVencer(p);
         const filaClase = nivel === 'critico' ? 'fila-sin-stock' : nivel ? 'fila-stock-bajo' : porVencer ? 'fila-vencimiento' : '';
+        const fotoMini = p.image ? `<img src="${p.image}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;margin-right:10px;flex-shrink:0;">` : `<div style="width:48px;height:48px;background:#e5e7eb;border-radius:8px;margin-right:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:1.2rem;">📦</div>`;
         html += `<tr class="${filaClase}">
           <td onclick="abrirDetalle('${p.code}')" style="cursor: pointer;">
-            <div style="font-weight: 600;">${escaparHtml(p.name)}</div>
-            <div class="codigo-celda">${escaparHtml(p.code)}</div>
-            ${p.category ? `<div class="badge">${escaparHtml(p.category)}</div>` : ''}
-            ${renderAlertaStock(p)}
-            ${renderAlertaVencimiento(p)}
+            <div style="display:flex;align-items:center;">
+              ${fotoMini}
+              <div>
+                <div style="font-weight: 600;">${escaparHtml(p.name)}</div>
+                <div class="codigo-celda">${escaparHtml(p.code)}</div>
+                ${p.category ? `<div class="badge">${escaparHtml(p.category)}</div>` : ''}
+                ${renderAlertaStock(p)}
+                ${renderAlertaVencimiento(p)}
+              </div>
+            </div>
           </td>
           <td onclick="abrirDetalle('${p.code}')" style="cursor: pointer; font-weight: 800;">${p.quantity || 0}</td>
-          <td onclick="abrirDetalle('${p.code}')" style="cursor: pointer;">${escaparHtml(p.location || '-')}</td>
+          <td onclick="abrirDetalle('${p.code}')" style="cursor: pointer; font-size:0.9rem;">${escaparHtml(formatearUbicacion(p))}</td>
           <td style="white-space: nowrap; text-align: center;">
             <button class="btn btn-exito btn-pequeno" style="width: auto; padding: 6px 10px;" onclick="event.stopPropagation(); entradaRapida('${p.code}')" title="Entrada">➕</button>
             <button class="btn btn-peligro btn-pequeno" style="width: auto; padding: 6px 10px;" onclick="event.stopPropagation(); salidaRapida('${p.code}')" title="Salida / Descontar">➖</button>
@@ -2629,7 +2735,7 @@
           escaparCsv(p.name),
           escaparCsv(p.description),
           escaparCsv(p.category),
-          escaparCsv(p.location),
+          escaparCsv(formatearUbicacion(p)),
           p.quantity || 0,
           p.minStock || 0,
           escaparCsv(p.lot),
