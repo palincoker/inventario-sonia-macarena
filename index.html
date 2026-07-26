@@ -1583,6 +1583,95 @@
     const THEME_KEY = 'inventario_sonia_macarena_tema';
     const PIN_KEY = 'inventario_sonia_macarena_pin';
 
+    // === CATEGORIZACIÓN AUTOMÁTICA ===
+    const MAPEO_CATEGORIAS_OFT = {
+      'sweet-biscuit': 'Galletas',
+      'biscuit': 'Galletas',
+      'cookie': 'Galletas',
+      'cracker': 'Galletas',
+      'chocolate': 'Chocolates',
+      'candy': 'Confites',
+      'confectionery': 'Confites',
+      'snack': 'Snacks',
+      'chip': 'Snacks',
+      'dairy': 'Lácteos',
+      'milk': 'Leche',
+      'cheese': 'Quesos',
+      'yogurt': 'Yogures',
+      'yoghurt': 'Yogures',
+      'beverage': 'Bebidas',
+      'soft-drink': 'Bebidas',
+      'juice': 'Jugos',
+      'water': 'Aguas',
+      'coffee': 'Café',
+      'tea': 'Té',
+      'alcoholic': 'Bebidas alcohólicas',
+      'bread': 'Panadería',
+      'cereal': 'Cereales',
+      'pasta': 'Pastas',
+      'noodle': 'Pastas',
+      'rice': 'Arroz',
+      'condiment': 'Salsas y condimentos',
+      'sauce': 'Salsas',
+      'canned': 'Enlatados',
+      'frozen': 'Congelados',
+      'fruit': 'Frutas',
+      'vegetable': 'Verduras',
+      'meat': 'Carnes',
+      'fish': 'Pescados',
+      'seafood': 'Mariscos',
+      'breakfast': 'Desayuno',
+      'dessert': 'Postres',
+      'baby-food': 'Alimentos infantiles',
+      'pet-food': 'Mascotas',
+      'cleaning': 'Limpieza',
+      'detergent': 'Limpieza',
+      'soap': 'Jabón',
+      'personal-care': 'Higiene personal',
+      'shampoo': 'Higiene personal',
+      'toothpaste': 'Higiene personal',
+      'deodorant': 'Higiene personal',
+      'paper': 'Papel',
+      'office': 'Oficina',
+      'electronic': 'Electrónica'
+    };
+
+    const REGLAS_CATEGORIAS = [
+      // Higiene personal (frases específicas primero)
+      { terminos: ['pasta de dientes', 'pasta dental', 'crema dental', 'cepillo dental', 'enjuague bucal', 'gel de ducha'], categoria: 'Higiene personal' },
+      { terminos: ['toalla higienica', 'toalla higiénica', 'papel higienico', 'papel higiénico'], categoria: 'Higiene personal' },
+      { terminos: ['shampoo', 'acondicionador', 'desodorante', 'talco', 'prestobarba', 'afeitadora', 'jabon', 'jabón'], categoria: 'Higiene personal' },
+      // Limpieza
+      { terminos: ['lavavajillas', 'desinfectante', 'suavizante', 'aromatizante', 'limpiavidrios'], categoria: 'Limpieza' },
+      { terminos: ['detergente', 'limpiador', 'cloro', 'cif', 'limpia'], categoria: 'Limpieza' },
+      // Papel
+      { terminos: ['toalla de papel', 'papel higienico', 'papel higiénico', 'servilleta', 'panuelo', 'pañuelo'], categoria: 'Papel' },
+      // Lácteos
+      { terminos: ['yogur', 'yoghurt', 'mantequilla'], categoria: 'Lácteos' },
+      { terminos: ['leche', 'queso', 'crema'], categoria: 'Lácteos' },
+      // Confites
+      { terminos: ['galletita', 'galleta', 'chocolate', 'dulce', 'confite', 'caramelo', 'chicle', 'helado', 'postre', 'oreo', 'ritz'], categoria: 'Confites' },
+      // Bebidas
+      { terminos: ['refresco', 'cerveza', 'vino', 'bebida'], categoria: 'Bebidas' },
+      { terminos: ['jugo', 'juego', 'agua', 'soda', 'te', 'té', 'cafe', 'café'], categoria: 'Bebidas' },
+      // Pastas
+      { terminos: ['fideo', 'tallarin', 'tallarín', 'espagueti', 'fettuccine', 'macarron', 'macarrón'], categoria: 'Pastas' },
+      { terminos: ['pasta'], categoria: 'Pastas' },
+      // Panadería
+      { terminos: ['pan de molde', 'hallulla', 'marraqueta', 'ciabatta', 'baguette'], categoria: 'Panadería' },
+      { terminos: ['pan'], categoria: 'Panadería' },
+      // Pescados
+      { terminos: ['atun', 'atún', 'jurel', 'sardina', 'caballa', 'salmón', 'salmon', 'choritos', 'mejillon', 'mejillón'], categoria: 'Pescados' },
+      // Frutas y verduras
+      { terminos: ['manzana', 'pera', 'platano', 'plátano', 'tomate', 'lechuga', 'naranja'], categoria: 'Frutas y verduras' },
+      { terminos: ['fruta', 'verdura'], categoria: 'Frutas y verduras' },
+      // Carnes
+      { terminos: ['pollo', 'pavo', 'cerdo', 'vacio', 'lomo', 'filete'], categoria: 'Carnes' },
+      { terminos: ['carne'], categoria: 'Carnes' },
+      // Alimentos generales
+      { terminos: ['aceite', 'azucar', 'azúcar', 'sal', 'harina', 'sopa', 'cereal', 'mayonesa', 'ketchup', 'mostaza'], categoria: 'Alimentos' }
+    ];
+
     // === CONFIGURACIÓN FIREBASE ===
     const firebaseConfig = {
       apiKey: 'AIzaSyDr-tQibiQrenB2RS9zW37iqbtLpMiMkZU',
@@ -2138,7 +2227,7 @@
         return {
           name: p.product_name || '',
           description: [p.brands, p.quantity].filter(Boolean).join(' - '),
-          category: extraerCategoriaOpenFoodFacts(p.categories),
+          category: clasificarCategoria(p.product_name, p.categories),
           image: p.image_url || ''
         };
       } catch (e) {
@@ -2147,10 +2236,58 @@
       }
     }
 
-    function extraerCategoriaOpenFoodFacts(categories) {
-      if (!categories) return 'Alimentos';
-      const partes = categories.split(',').map(s => s.trim());
-      return partes[0] || 'Alimentos';
+    function normalizarTexto(texto) {
+      if (!texto) return '';
+      return String(texto).toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9\s]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function contieneSecuencia(palabras, secuencia) {
+      if (!secuencia.length || !palabras.length) return false;
+      for (let i = 0; i <= palabras.length - secuencia.length; i++) {
+        let coincide = true;
+        for (let j = 0; j < secuencia.length; j++) {
+          if (palabras[i + j] !== secuencia[j]) {
+            coincide = false;
+            break;
+          }
+        }
+        if (coincide) return true;
+      }
+      return false;
+    }
+
+    function clasificarCategoria(nombre, categoriaOft) {
+      const nombreNorm = normalizarTexto(nombre);
+      const catNorm = normalizarTexto(categoriaOft);
+      const palabrasNombre = nombreNorm.split(' ').filter(Boolean);
+
+      // 1. Intentar mapear la categoria de Open Food Facts
+      if (catNorm) {
+        for (const [clave, valor] of Object.entries(MAPEO_CATEGORIAS_OFT)) {
+          if (catNorm.includes(clave)) {
+            return valor;
+          }
+        }
+      }
+
+      // 2. Si no hay mapeo, usar palabras clave del nombre (coincidencia de palabras/frases completas)
+      if (palabrasNombre.length) {
+        for (const regla of REGLAS_CATEGORIAS) {
+          for (const termino of regla.terminos) {
+            const palabrasTermino = normalizarTexto(termino).split(' ').filter(Boolean);
+            if (contieneSecuencia(palabrasNombre, palabrasTermino)) {
+              return regla.categoria;
+            }
+          }
+        }
+      }
+
+      // 3. Por defecto
+      return 'Sin categoría';
     }
 
     function generarCodigoUnico() {
@@ -2363,7 +2500,8 @@
       document.getElementById('detalle-stock').textContent = 'Nuevo producto';
       document.getElementById('detalle-nombre').value = d.name || '';
       document.getElementById('detalle-descripcion').value = d.description || '';
-      document.getElementById('detalle-categoria').value = d.category || '';
+      const categoriaAsignada = d.category || (d.name ? clasificarCategoria(d.name, '') : '');
+      document.getElementById('detalle-categoria').value = categoriaAsignada;
       document.getElementById('detalle-ubicacion-area').value = d.locationArea || '';
       document.getElementById('detalle-ubicacion-estante').value = d.locationShelf || '';
       document.getElementById('detalle-ubicacion-nivel').value = d.locationLevel || '';
