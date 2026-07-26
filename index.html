@@ -1310,6 +1310,11 @@
           </div>
 
           <div>
+            <label for="detalle-stock-actual">Stock actual</label>
+            <input type="number" id="detalle-stock-actual" min="0" value="0">
+          </div>
+
+          <div>
             <label for="detalle-lote">Lote (opcional)</label>
             <input type="text" id="detalle-lote">
           </div>
@@ -2363,6 +2368,7 @@
       document.getElementById('detalle-ubicacion-nivel').value = d.locationLevel || '';
       document.getElementById('detalle-ubicacion-posicion').value = d.locationPosition || '';
       document.getElementById('detalle-stock-minimo').value = '0';
+      document.getElementById('detalle-stock-actual').value = '0';
       document.getElementById('detalle-lote').value = d.lot || '';
       document.getElementById('detalle-fecha-vencimiento').value = d.expiryDate || '';
       document.getElementById('detalle-precio-costo').value = d.costPrice > 0 ? d.costPrice.toFixed(2) : '';
@@ -2408,6 +2414,7 @@
       document.getElementById('detalle-ubicacion-nivel').value = p.locationLevel || '';
       document.getElementById('detalle-ubicacion-posicion').value = p.locationPosition || '';
       document.getElementById('detalle-stock-minimo').value = (typeof p.minStock === 'number' ? p.minStock : 0);
+      document.getElementById('detalle-stock-actual').value = (typeof p.quantity === 'number' ? p.quantity : 0);
       document.getElementById('detalle-lote').value = p.lot || '';
       document.getElementById('detalle-fecha-vencimiento').value = p.expiryDate || '';
       document.getElementById('detalle-precio-costo').value = p.costPrice > 0 ? p.costPrice.toFixed(2) : '';
@@ -2431,6 +2438,7 @@
       const ubicacionNivel = document.getElementById('detalle-ubicacion-nivel').value.trim();
       const ubicacionPosicion = document.getElementById('detalle-ubicacion-posicion').value.trim();
       const stockMinimo = parseInt(document.getElementById('detalle-stock-minimo').value, 10) || 0;
+      const stockActual = parseInt(document.getElementById('detalle-stock-actual').value, 10) || 0;
       const lote = document.getElementById('detalle-lote').value.trim();
       const fechaVencimiento = document.getElementById('detalle-fecha-vencimiento').value;
       const precioCosto = parseFloat(document.getElementById('detalle-precio-costo').value) || 0;
@@ -2438,6 +2446,11 @@
 
       if (!nombre) {
         mostrarMensaje('mensaje-detalle', 'El nombre del producto es obligatorio.', 'error');
+        return;
+      }
+
+      if (stockActual < 0) {
+        mostrarMensaje('mensaje-detalle', 'El stock actual no puede ser negativo.', 'error');
         return;
       }
 
@@ -2453,7 +2466,7 @@
           locationShelf: ubicacionEstante,
           locationLevel: ubicacionNivel,
           locationPosition: ubicacionPosicion,
-          quantity: 0,
+          quantity: stockActual,
           minStock: stockMinimo,
           lot: lote,
           expiryDate: fechaVencimiento,
@@ -2463,9 +2476,15 @@
           createdAt: new Date().toISOString(),
           history: []
         };
-        registrarMovimiento(productoActual, 'alta', 0, 'Alta del producto');
+        if (stockActual > 0) {
+          registrarMovimiento(productoActual, 'entrada', stockActual, 'Stock inicial al crear el producto');
+        } else {
+          registrarMovimiento(productoActual, 'alta', 0, 'Alta del producto');
+        }
       } else {
         const p = productos[productoActual];
+        const stockAnterior = p.quantity || 0;
+        const diferencia = stockActual - stockAnterior;
         p.name = nombre;
         p.description = descripcion;
         p.category = categoria;
@@ -2473,6 +2492,7 @@
         p.locationShelf = ubicacionEstante;
         p.locationLevel = ubicacionNivel;
         p.locationPosition = ubicacionPosicion;
+        p.quantity = stockActual;
         p.minStock = stockMinimo;
         p.lot = lote;
         p.expiryDate = fechaVencimiento;
@@ -2481,7 +2501,12 @@
         if (fotoProductoTemp || fotoProductoTemp === '') {
           p.image = fotoProductoTemp;
         }
-        registrarMovimiento(productoActual, 'edicion', 0, 'Edición de datos');
+        if (diferencia !== 0) {
+          const nota = `Ajuste de stock en edición: ${diferencia > 0 ? '+' : ''}${diferencia}`;
+          registrarMovimiento(productoActual, 'edicion', Math.abs(diferencia), nota);
+        } else {
+          registrarMovimiento(productoActual, 'edicion', 0, 'Edición de datos');
+        }
       }
 
       fotoProductoTemp = ''; // resetear temporal
