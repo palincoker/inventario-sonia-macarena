@@ -172,6 +172,46 @@
       transform: translateY(-50%);
       display: flex;
       gap: 8px;
+      align-items: center;
+    }
+
+    .estado-sync {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--color-texto-secundario);
+      background: var(--color-superficie-secundaria);
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--color-borde);
+      white-space: nowrap;
+    }
+
+    .estado-sync.visible { display: inline-flex; }
+
+    .estado-sync .punto {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-advertencia);
+      animation: pulsarSync 1.4s infinite;
+    }
+
+    .estado-sync.sync-ok .punto {
+      background: var(--color-exito);
+      animation: none;
+    }
+
+    @keyframes pulsarSync {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+      70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+    }
+
+    @media (max-width: 480px) {
+      .estado-sync { display: none !important; }
     }
 
     .header-actions button {
@@ -987,6 +1027,10 @@
 
   <header>
     <div class="header-actions">
+      <span id="estado-sync" class="estado-sync visible" title="Estado de sincronización">
+        <span class="punto"></span>
+        <span id="estado-sync-texto">Sincronizando...</span>
+      </span>
       <button onclick="toggleTema()" id="btn-toggle-tema" title="Cambiar tema">
         <svg id="icono-tema" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
       </button>
@@ -1286,6 +1330,9 @@
             <label for="detalle-categoria">Categoría</label>
             <input type="text" id="detalle-categoria" list="lista-categorias" placeholder="Ej: Alimentos, Limpieza, Electrónica" oninput="mostrarPreviewFoto(fotoProductoTemp || '')">
             <datalist id="lista-categorias"></datalist>
+            <button type="button" class="btn btn-secundario btn-pequeno" onclick="sugerirCategoriaDesdeNombre()" style="margin-top: -8px; margin-bottom: 12px;">
+              💡 Sugerir categoría
+            </button>
           </div>
 
           <div>
@@ -1693,39 +1740,49 @@
     };
 
     const REGLAS_CATEGORIAS = [
-      // Higiene personal (frases específicas primero)
-      { terminos: ['pasta de dientes', 'pasta dental', 'crema dental', 'cepillo dental', 'enjuague bucal', 'gel de ducha'], categoria: 'Higiene personal' },
-      { terminos: ['toalla higienica', 'toalla higiénica', 'papel higienico', 'papel higiénico'], categoria: 'Higiene personal' },
-      { terminos: ['shampoo', 'acondicionador', 'desodorante', 'talco', 'prestobarba', 'afeitadora', 'jabon', 'jabón'], categoria: 'Higiene personal' },
-      // Limpieza
-      { terminos: ['lavavajillas', 'desinfectante', 'suavizante', 'aromatizante', 'limpiavidrios'], categoria: 'Limpieza' },
-      { terminos: ['detergente', 'limpiador', 'cloro', 'cif', 'limpia'], categoria: 'Limpieza' },
-      // Papel
-      { terminos: ['toalla de papel', 'papel higienico', 'papel higiénico', 'servilleta', 'panuelo', 'pañuelo'], categoria: 'Papel' },
-      // Lácteos
-      { terminos: ['yogur', 'yoghurt', 'mantequilla'], categoria: 'Lácteos' },
-      { terminos: ['leche', 'queso', 'crema'], categoria: 'Lácteos' },
-      // Confites
-      { terminos: ['galletita', 'galleta', 'chocolate', 'dulce', 'confite', 'caramelo', 'chicle', 'helado', 'postre', 'oreo', 'ritz'], categoria: 'Confites' },
-      // Bebidas
-      { terminos: ['refresco', 'cerveza', 'vino', 'bebida'], categoria: 'Bebidas' },
-      { terminos: ['jugo', 'juego', 'agua', 'soda', 'te', 'té', 'cafe', 'café'], categoria: 'Bebidas' },
-      // Pastas
-      { terminos: ['fideo', 'tallarin', 'tallarín', 'espagueti', 'fettuccine', 'macarron', 'macarrón'], categoria: 'Pastas' },
-      { terminos: ['pasta'], categoria: 'Pastas' },
-      // Panadería
-      { terminos: ['pan de molde', 'hallulla', 'marraqueta', 'ciabatta', 'baguette'], categoria: 'Panadería' },
+      // Aseo personal (frases específicas primero)
+      { terminos: ['pasta de dientes', 'pasta dental', 'crema dental', 'cepillo dental', 'cepillo de dientes', 'hilo dental', 'enjuague bucal'], categoria: 'Aseo personal' },
+      { terminos: ['pepsodent', 'colgate', 'oral b', 'oral-b'], categoria: 'Aseo personal' },
+      { terminos: ['pantene', 'head & shoulders', 'head and shoulders', 'dove', 'rexona', 'axe', 'nivea', 'elvive', 'schauma', 'sedal'], categoria: 'Aseo personal' },
+      { terminos: ['toalla higienica', 'toalla higiénica', 'protector diario', 'tampon', 'tampón'], categoria: 'Aseo personal' },
+      { terminos: ['jabon de tocador', 'jabón de tocador', 'gel de ducha', 'jabon liquido', 'jabón líquido', 'barra de jabon', 'barra de jabón'], categoria: 'Aseo personal' },
+      { terminos: ['shampoo', 'acondicionador', 'desodorante', 'talco', 'prestobarba', 'afeitadora', 'maquina de afeitar', 'máquina de afeitar', 'crema de afeitar', 'perfume', 'colonia', 'maquillaje'], categoria: 'Aseo personal' },
+      { terminos: ['jabon', 'jabón'], categoria: 'Aseo personal' },
+      // Limpieza (frases específicas primero)
+      { terminos: ['lavaloza', 'lavavajillas', 'detergente', 'cloro', 'desinfectante', 'suavizante', 'limpiavidrios', 'limpiaparabrisas'], categoria: 'Limpieza' },
+      { terminos: ['bolsa de basura', 'bolsas de basura', 'esponja', 'estropajo', 'trapero', 'escoba', 'trapeador', 'aromatizante', 'ambientador'], categoria: 'Limpieza' },
+      { terminos: ['limpiador', 'cif', 'limpia', 'poett', 'sapolio'], categoria: 'Limpieza' },
+      // Papel (frases específicas primero)
+      { terminos: ['papel higienico', 'papel higiénico', 'toalla de papel', 'toallas de papel', 'papel toalla', 'servilleta', 'panuelo', 'pañuelo', 'pañuelo desechable'], categoria: 'Papel' },
+      { terminos: ['papel'], categoria: 'Papel' },
+      // Despensa (frases específicas primero)
+      { terminos: ['leche condensada', 'leche evaporada', 'atun enlatado', 'atún enlatado', 'sopa instantanea', 'sopa instantánea', 'consome', 'consomé'], categoria: 'Despensa' },
+      { terminos: ['arroz', 'fideos', 'fideo', 'aceite', 'azucar', 'azúcar', 'sal', 'harina', 'sopa', 'consome', 'consomé', 'atun', 'atún'], categoria: 'Despensa' },
+      // Bebidas (frases específicas primero)
+      { terminos: ['coca cola', 'coca-cola', 'cocacola', 'fanta', 'sprite', 'pepsi', 'seven up', '7up'], categoria: 'Bebidas' },
+      { terminos: ['agua mineral', 'agua sin gas', 'agua con gas', 'jugo natural', 'nectar', 'néctar', 'bebida energetica', 'bebida energética', 'isotonica', 'isotónica'], categoria: 'Bebidas' },
+      { terminos: ['agua', 'jugo', 'juego', 'gaseosa', 'refresco', 'soda', 'te', 'té', 'cafe', 'café', 'mate', 'cerveza', 'vino'], categoria: 'Bebidas' },
+      // Confites (frases específicas primero)
+      { terminos: ['galletas', 'galleta', 'chocolate', 'chocolates', 'dulce', 'dulces', 'caramelo', 'caramelos', 'helado', 'helados', 'confite', 'chicle', 'gomita', 'oreo', 'ritz'], categoria: 'Confites' },
+      // Lácteos (frases específicas primero)
+      { terminos: ['leche entera', 'leche descremada', 'leche semidescremada', 'leche sin lactosa', 'leche en polvo', 'leche chocolatada'], categoria: 'Lácteos' },
+      { terminos: ['yogur', 'yoghurt', 'yogurt'], categoria: 'Lácteos' },
+      { terminos: ['leche', 'queso', 'mantequilla', 'margarina', 'crema', 'huevo', 'huevos'], categoria: 'Lácteos' },
+      // Panadería (frases específicas primero)
+      { terminos: ['pan de molde', 'pan integral', 'pan amasado', 'hallulla', 'marraqueta', 'ciabatta', 'baguette', 'tostadas'], categoria: 'Panadería' },
       { terminos: ['pan'], categoria: 'Panadería' },
-      // Pescados
-      { terminos: ['atun', 'atún', 'jurel', 'sardina', 'caballa', 'salmón', 'salmon', 'choritos', 'mejillon', 'mejillón'], categoria: 'Pescados' },
       // Frutas y verduras
-      { terminos: ['manzana', 'pera', 'platano', 'plátano', 'tomate', 'lechuga', 'naranja'], categoria: 'Frutas y verduras' },
+      { terminos: ['manzana', 'platano', 'plátano', 'tomate', 'lechuga', 'naranja', 'papa', 'patata', 'cebolla', 'zanahoria', 'ajo'], categoria: 'Frutas y verduras' },
       { terminos: ['fruta', 'verdura'], categoria: 'Frutas y verduras' },
       // Carnes
-      { terminos: ['pollo', 'pavo', 'cerdo', 'vacio', 'lomo', 'filete'], categoria: 'Carnes' },
-      { terminos: ['carne'], categoria: 'Carnes' },
+      { terminos: ['pollo', 'pavo', 'cerdo', 'carne', 'vacuno', 'res', 'salchicha', 'hamburguesa', 'jamon', 'jamón'], categoria: 'Carnes' },
+      // Pescados
+      { terminos: ['atun', 'atún', 'jurel', 'sardina', 'salmón', 'salmon', 'caballa', 'choritos', 'mejillon', 'mejillón', 'langostino', 'camaron', 'camarón'], categoria: 'Pescados' },
+      // Pastas
+      { terminos: ['fideo', 'tallarin', 'tallarín', 'espagueti', 'fettuccine', 'macarron', 'macarrón', 'lasana', 'lasaña', 'ravioles', 'ravioli'], categoria: 'Pastas' },
+      { terminos: ['pasta'], categoria: 'Pastas' },
       // Alimentos generales
-      { terminos: ['aceite', 'azucar', 'azúcar', 'sal', 'harina', 'sopa', 'cereal', 'mayonesa', 'ketchup', 'mostaza'], categoria: 'Alimentos' }
+      { terminos: ['aceite', 'sal', 'harina', 'cereal', 'mayonesa', 'ketchup', 'mostaza', 'miel', 'mermelada', 'manjar', 'dulce de leche'], categoria: 'Alimentos' }
     ];
 
     // === CONFIGURACIÓN FIREBASE ===
@@ -1795,6 +1852,18 @@
 
     function configurarEventosGlobales() {
       document.addEventListener('keydown', onKeydownPistola);
+
+      // Sugerir categoría automáticamente mientras se escribe el nombre
+      const inputNombre = document.getElementById('detalle-nombre');
+      const inputCategoria = document.getElementById('detalle-categoria');
+      if (inputNombre && inputCategoria) {
+        inputNombre.addEventListener('input', () => {
+          const catActual = inputCategoria.value.trim();
+          if (catActual === '' || catActual.toLowerCase() === 'sin categoria' || catActual.toLowerCase() === 'sin categoría') {
+            sugerirCategoriaDesdeNombre();
+          }
+        });
+      }
 
       const inputPistola = document.getElementById('input-pistola');
       if (inputPistola) {
@@ -1913,14 +1982,33 @@
       }
     }
 
+    function actualizarEstadoSync(estado, texto) {
+      const indicador = document.getElementById('estado-sync');
+      const textoEl = document.getElementById('estado-sync-texto');
+      if (!indicador || !textoEl) return;
+      if (!estado) {
+        indicador.classList.remove('visible', 'sync-ok');
+        return;
+      }
+      textoEl.textContent = texto || '';
+      indicador.classList.add('visible');
+      if (estado === 'ok') {
+        indicador.classList.add('sync-ok');
+      } else {
+        indicador.classList.remove('sync-ok');
+      }
+    }
+
     function inicializarFirebase() {
       if (!firebaseConfig.apiKey || firebaseConfig.apiKey === 'TU_API_KEY') {
         console.log('Firebase no configurado. Usando solo localStorage.');
+        actualizarEstadoSync(null);
         return;
       }
 
       if (window.location.protocol === 'file:') {
         console.warn('Abre esta página desde http://localhost para usar la sincronización con Firebase.');
+        actualizarEstadoSync(null);
         return;
       }
 
@@ -1928,6 +2016,9 @@
         firebaseApp = firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig);
         dbRef = firebase.database().ref('inventario');
         firebaseActivado = true;
+
+        // Indicar que estamos esperando la primera carga
+        actualizarEstadoSync('pending', 'Sincronizando...');
 
         dbRef.on('value', (snapshot) => {
           const datos = snapshot.val();
@@ -1944,9 +2035,14 @@
             if (document.getElementById('seccion-inventario').classList.contains('activa')) renderInventario();
             if (document.getElementById('seccion-historico').classList.contains('activa')) renderHistorico();
           }
+          actualizarEstadoSync('ok', 'Sincronizado');
+        }, (err) => {
+          console.error('Error leyendo Firebase:', err);
+          actualizarEstadoSync('pending', 'Error de sincronización');
         });
       } catch (e) {
         console.error('Error inicializando Firebase:', e);
+        actualizarEstadoSync(null);
       }
     }
 
@@ -2349,6 +2445,16 @@
       return 'Sin categoría';
     }
 
+    function sugerirCategoriaDesdeNombre() {
+      const nombre = document.getElementById('detalle-nombre').value || '';
+      if (!nombre.trim()) return;
+      const sugerencia = clasificarCategoria(nombre, '');
+      if (sugerencia && sugerencia !== 'Sin categoría') {
+        document.getElementById('detalle-categoria').value = sugerencia;
+        mostrarPreviewFoto(fotoProductoTemp || '');
+      }
+    }
+
     function reclasificarProductosPorNombre() {
       const total = Object.keys(productos).length;
       if (total === 0) {
@@ -2678,6 +2784,14 @@
 
       const esNuevo = !productos[productoActual];
 
+      function resolverImagen(p, fotoTemp) {
+        if (fotoTemp && !esImagenReferencial(fotoTemp)) return fotoTemp;
+        if (fotoTemp === '') return generarImagenReferencial(categoria, nombre);
+        // fotoTemp es undefined: no se tocó la foto
+        if (p && p.image && !esImagenReferencial(p.image)) return p.image;
+        return generarImagenReferencial(categoria, nombre);
+      }
+
       if (!productos[productoActual]) {
         productos[productoActual] = {
           code: productoActual,
@@ -2694,7 +2808,7 @@
           expiryDate: fechaVencimiento,
           costPrice: precioCosto,
           salePrice: precioVenta,
-          image: fotoProductoTemp || '',
+          image: resolverImagen(null, fotoProductoTemp),
           createdAt: new Date().toISOString(),
           history: []
         };
@@ -2720,9 +2834,7 @@
         p.expiryDate = fechaVencimiento;
         p.costPrice = precioCosto;
         p.salePrice = precioVenta;
-        if (fotoProductoTemp || fotoProductoTemp === '') {
-          p.image = fotoProductoTemp;
-        }
+        p.image = resolverImagen(p, fotoProductoTemp);
         if (diferencia !== 0) {
           const nota = `Ajuste de stock en edición: ${diferencia > 0 ? '+' : ''}${diferencia}`;
           registrarMovimiento(productoActual, 'edicion', Math.abs(diferencia), nota);
@@ -2828,270 +2940,255 @@
       const catNorm = normalizarTexto(categoria || '');
       const nombreNorm = normalizarTexto(nombreProducto || '');
       const palabrasCat = catNorm.split(' ').filter(Boolean);
+      const palabrasNombre = nombreNorm.split(' ').filter(Boolean);
 
-      const categoriasGenericas = new Set(['', 'sin categoria', 'otra', 'otros', 'general', 'varios', 'miscelaneos', 'categoria']);
+      const categoriasGenericas = new Set(['', 'sin categoria', 'sin categoría', 'otra', 'otros', 'general', 'varios', 'miscelaneos', 'categoria']);
       const categoriaEsUtil = catNorm && !palabrasCat.some(p => categoriasGenericas.has(p));
 
-      const mapa = {
+      // Mapa de emojis por palabra/frase (más específicos primero)
+      const mapaEmoji = {
+        // Marcas chilenas comunes (Aseo personal)
+        'pepsodent': '🦷', 'colgate': '🦷', 'oral b': '🦷', 'oral-b': '🦷',
+        'pantene': '🧴', 'head & shoulders': '🧴', 'head and shoulders': '🧴',
+        'dove': '🧴', 'rexona': '🧴', 'axe': '🧴', 'nivea': '🧴', 'elvive': '🧴',
+        'schauma': '🧴', 'sedal': '🧴', 'dental': '🦷', 'gillette': '🪒',
+        'elite': '🧻', 'confort': '🧻', 'nova': '🧻', 'familia': '🧻',
+        // Marcas chilenas comunes (Alimentos / Bebidas / Lácteos)
+        'costa': '🍪', 'colun': '🥛', 'nestle': '🍫', 'nestlé': '🍫',
+        'unimarc': '🛒', 'soprole': '🥛', 'loncoleche': '🥛', 'coca cola': '🥤',
+        'coca-cola': '🥤', 'fanta': '🥤', 'sprite': '🥤', 'pepsi': '🥤',
+        // Aseo personal
+        'aseo personal': '🧴', 'higiene personal': '🧴', 'shampoo': '🧴',
+        'acondicionador': '🧴', 'desodorante': '🧴', 'talco': '🧴', 'perfume': '🧴',
+        'colonia': '🧴', 'maquillaje': '💄', 'crema': '🧴', 'protector solar': '🧴',
+        'repelente': '🦟', 'pasta de dientes': '🦷', 'pasta dental': '🦷',
+        'crema dental': '🦷', 'cepillo dental': '🪥', 'cepillo de dientes': '🪥',
+        'hilo dental': '🦷', 'enjuague bucal': '😷', 'jabon de tocador': '🧼',
+        'jabón de tocador': '🧼', 'gel de ducha': '🧼', 'jabon liquido': '🧼',
+        'jabón líquido': '🧼', 'barra de jabon': '🧼', 'barra de jabón': '🧼',
+        'jabon': '🧼', 'jabón': '🧼', 'toalla higienica': '🩸', 'toalla higiénica': '🩸',
+        'protector diario': '🩸', 'tampon': '🩸', 'tampón': '🩸', 'afeitadora': '🪒',
+        'prestobarba': '🪒', 'cuchilla': '🪒', 'maquina de afeitar': '🪒',
+        'máquina de afeitar': '🪒', 'crema de afeitar': '🪒',
+        // Bebés
+        'pañales': '👶', 'pañal': '👶', 'toallitas humedas': '👶', 'toallitas húmedas': '👶',
+        'alimentos infantiles': '🍼', 'formula': '🍼', 'fórmula': '🍼',
+        // Limpieza
+        'limpieza': '🧽', 'detergente': '🧴', 'cloro': '🧴', 'limpiador': '🧽',
+        'lavaloza': '🧼', 'lavavajillas': '🧼', 'desinfectante': '🧽', 'suavizante': '🧺',
+        'limpiavidrios': '🧽', 'limpiaparabrisas': '🧽', 'aromatizante': '🌸',
+        'ambientador': '🌸', 'cif': '🧽', 'poett': '🌸', 'sapolio': '🧽',
+        'escoba': '🧹', 'trapeador': '🧹', 'trapero': '🧹', 'bolsa de basura': '🗑️',
+        'bolsas de basura': '🗑️', 'esponja': '🧽', 'estropajo': '🧽',
+        // Papel
+        'papel': '🧻', 'papel higienico': '🧻', 'papel higiénico': '🧻',
+        'toalla de papel': '🧻', 'toallas de papel': '🧻', 'papel toalla': '🧻',
+        'servilleta': '🧻', 'panuelo': '🧻', 'pañuelo': '🧻',
+        // Despensa
+        'despensa': '🥫', 'arroz': '🍚', 'fideos': '🍜', 'fideo': '🍜', 'aceite': '🫒',
+        'azucar': '🍬', 'azúcar': '🍬', 'sal': '🧂', 'harina': '🌾', 'sopa': '🍜',
+        'consome': '🍜', 'consomé': '🍜', 'atun': '🐟', 'atún': '🐟',
+        'leche condensada': '🥛', 'leche evaporada': '🥛',
         // Alimentos generales
         'alimento': '🥫', 'alimentos': '🥫', 'enlatados': '🥫', 'conservas': '🥫',
-        'sopas': '🍜', 'sopa': '🍜', 'caldos': '🍜', 'caldo': '🍜',
-        'salsas y condimentos': '🍶', 'salsas': '🥣', 'condimentos': '🧂',
-        'especias': '🌶️', 'sal': '🧂', 'pimienta': '🧂', 'aceite': '🫒',
+        'sopas': '🍜', 'caldos': '🍜', 'caldo': '🍜', 'salsas y condimentos': '🍶',
+        'salsas': '🥣', 'condimentos': '🧂', 'especias': '🌶️', 'pimienta': '🧂',
         'vinagre': '🍾', 'mayonesa': '🥚', 'mostaza': '🌭', 'ketchup': '🍅',
         'miel': '🍯', 'mermelada': '🍯', 'manjar': '🍯', 'dulce de leche': '🍯',
-        'harina': '🌾', 'azucar': '🍬', 'azúcar': '🍬', 'sal': '🧂',
+        'cereal': '🥣', 'cereales': '🥣', 'avena': '🥣', 'granola': '🥣', 'muesli': '🥣',
         // Lácteos y huevos
         'lacteos': '🧀', 'lacteo': '🧀', 'leche': '🥛', 'yogur': '🍦', 'yoghurt': '🍦',
-        'queso': '🧀', 'mantequilla': '🧈', 'margarina': '🧈', 'crema': '🥛',
-        'huevos': '🥚', 'huevo': '🥚',
-        // Panadería y cereales
+        'yogurt': '🍦', 'queso': '🧀', 'mantequilla': '🧈', 'margarina': '🧈',
+        'crema': '🥛', 'huevos': '🥚', 'huevo': '🥚',
+        // Panadería
         'panaderia': '🥖', 'pan': '🥖', 'hallulla': '🥖', 'marraqueta': '🥖',
-        'cereales': '🥣', 'avena': '🥣', 'granola': '🥣', 'muesli': '🥣',
-        'tortillas': '🌮', 'taco': '🌮', 'arepa': '🌽',
+        'pan de molde': '🍞', 'tostadas': '🍞', 'tortillas': '🌮', 'taco': '🌮',
+        'arepa': '🌽', 'ciabatta': '🥖', 'baguette': '🥖',
         // Pastas y arroz
-        'pastas': '🍝', 'pasta': '🍝', 'fideos': '🍜', 'fideo': '🍜', 'tallarines': '🍝',
-        'tallarin': '🍝', 'espagueti': '🍝', 'macarrones': '🍝', 'lasana': '🍝',
-        'arroz': '🍚', 'quinua': '🍚',
-        // Dulces y snacks
+        'pastas': '🍝', 'pasta': '🍝', 'tallarines': '🍝', 'tallarin': '🍝',
+        'tallarín': '🍝', 'espagueti': '🍝', 'espaguetis': '🍝', 'macarrones': '🍝',
+        'macarron': '🍝', 'macarrón': '🍝', 'lasana': '🍝', 'lasaña': '🍝',
+        'ravioles': '🍝', 'ravioli': '🍝', 'quinua': '🍚',
+        // Confites y dulces
         'galletas': '🍪', 'galleta': '🍪', 'chocolates': '🍫', 'chocolate': '🍫',
         'confites': '🍬', 'caramelos': '🍬', 'chicles': '🍬', 'dulces': '🍬',
+        'caramelo': '🍬', 'chicle': '🍬', 'gomita': '🍬', 'marshmallow': '🍬',
         'snacks': '🍿', 'papas fritas': '🍟', 'nachos': '🌮', 'palomitas': '🍿',
         'helados': '🍦', 'helado': '🍦', 'postres': '🍰', 'pastel': '🎂', 'torta': '🎂',
-        'flan': '🍮', 'gelatina': '🍮',
+        'flan': '🍮', 'gelatina': '🍮', 'oreo': '🍪', 'ritz': '🍪', 'chips': '🍿',
         // Bebidas
-        'bebidas': '🥤', 'refrescos': '🥤', 'gaseosas': '🥤', 'jugos': '🧃',
-        'jugo': '🧃', 'nectar': '🧃', 'aguas': '💧', 'agua': '💧',
-        'cafe': '☕', 'te': '🍵', 'té': '🍵', 'mate': '🧉',
+        'bebidas': '🥤', 'refrescos': '🥤', 'gaseosas': '🥤', 'gaseosa': '🥤',
+        'refresco': '🥤', 'soda': '🥤', 'cola': '🥤', 'jugos': '🧃', 'jugo': '🧃',
+        'nectar': '🧃', 'néctar': '🧃', 'aguas': '💧', 'agua': '💧', 'cafe': '☕',
+        'café': '☕', 'capuchino': '☕', 'expresso': '☕', 'espresso': '☕',
+        'te': '🍵', 'té': '🍵', 'mate': '🧉',
         'bebidas alcoholicas': '🍷', 'cervezas': '🍺', 'cerveza': '🍺',
         'vinos': '🍷', 'vino': '🍷', 'whisky': '🥃', 'ron': '🥃', 'pisco': '🥃',
-        'vodka': '🥃', 'coctel': '🍸', 'tragos': '🍸',
-        'bebidas energeticas': '⚡', 'energetica': '⚡', 'isotonica': '⚡',
+        'vodka': '🥃', 'coctel': '🍸', 'tragos': '🍸', 'bebidas energeticas': '⚡',
+        'energetica': '⚡', 'energética': '⚡', 'isotonica': '⚡', 'isotónica': '⚡',
         // Frutas
-        'frutas': '🍎', 'fruta': '🍎', 'manzana': '🍎', 'platano': '🍌', 'banana': '🍌',
-        'naranja': '🍊', 'mandarina': '🍊', 'limon': '🍋', 'pomelo': '🍊',
-        'uva': '🍇', 'uvas': '🍇', 'fresa': '🍓', 'frutilla': '🍓', 'arandano': '🫐',
-        'sandia': '🍉', 'melon': '🍈', 'piña': '🍍', 'mango': '🥭', 'durazno': '🍑',
-        'cereza': '🍒', 'pera': '🍐', 'kiwi': '🥝', 'aguacate': '🥑', 'palta': '🥑',
+        'frutas': '🍎', 'fruta': '🍎', 'manzana': '🍎', 'platano': '🍌', 'plátano': '🍌',
+        'banana': '🍌', 'naranja': '🍊', 'mandarina': '🍊', 'pomelo': '🍊',
+        'limon': '🍋', 'lima': '🍋', 'uva': '🍇', 'uvas': '🍇', 'fresa': '🍓',
+        'frutilla': '🍓', 'arandano': '🫐', 'sandia': '🍉', 'melon': '🍈',
+        'piña': '🍍', 'mango': '🥭', 'durazno': '🍑', 'cereza': '🍒', 'pera': '🍐',
+        'kiwi': '🥝', 'aguacate': '🥑', 'palta': '🥑',
         // Verduras
         'verduras': '🥬', 'verdura': '🥬', 'lechuga': '🥬', 'espinaca': '🥬',
         'tomate': '🍅', 'cebolla': '🧅', 'ajo': '🧄', 'zanahoria': '🥕',
         'papa': '🥔', 'patata': '🥔', 'camote': '🍠', 'zapallo': '🎃', 'calabaza': '🎃',
         'maiz': '🌽', 'choclo': '🌽', 'pepino': '🥒', 'pimiento': '🫑', 'aji': '🌶️',
-        'brocoli': '🥦', 'coliflor': '🥦', 'apio': '🥬', 'rabano': '🥬',
-        // Carnes y pescados
+        'ají': '🌶️', 'brocoli': '🥦', 'coliflor': '🥦', 'apio': '🥬', 'rabano': '🥬',
+        // Carnes
         'carnes': '🥩', 'carne': '🥩', 'res': '🥩', 'vacuno': '🥩', 'cerdo': '🥓',
-        'pollo': '🍗', 'pavo': '🍗', 'pescados': '🐟', 'pescado': '🐟',
-        'mariscos': '🦐', 'camaron': '🦐', 'langostino': '🦐', 'jaiba': '🦀',
-        'salmon': '🐟', 'atun': '🐟', 'jurel': '🐟', 'sardina': '🐟', 'caballa': '🐟',
-        'jamon': '🥓', 'salchicha': '🌭', 'hamburguesa': '🍔', 'hot dog': '🌭',
+        'pollo': '🍗', 'pavo': '🍗', 'jamon': '🥓', 'jamón': '🥓', 'salchicha': '🌭',
+        'hamburguesa': '🍔', 'hot dog': '🌭',
+        // Pescados
+        'pescados': '🐟', 'pescado': '🐟', 'salmon': '🐟', 'salmón': '🐟',
+        'jurel': '🐟', 'sardina': '🐟', 'caballa': '🐟', 'choritos': '🦐',
+        'mejillon': '🦐', 'mejillón': '🦐',
+        // Mariscos
+        'mariscos': '🦐', 'camaron': '🦐', 'camarón': '🦐', 'langostino': '🦐',
+        'jaiba': '🦀',
         // Desayuno
-        'desayuno': '🍳', 'huevos': '🥚', 'mermelada': '🍯', 'cereal': '🥣',
-        'pan de molde': '🍞', 'tostadas': '🍞', 'mantequilla': '🧈',
-        // Alimentos infantiles
-        'alimentos infantiles': '🍼', 'pañales': '👶', 'pañal': '👶', 'toallitas': '👶',
+        'desayuno': '🍳',
         // Mascotas
         'mascotas': '🐾', 'comida de perro': '🐕', 'comida de gato': '🐈',
         'arena de gato': '🐈', 'croquetas': '🐕',
-        // Higiene personal
-        'higiene personal': '🧴', 'shampoo': '🧴', 'acondicionador': '🧴',
-        'pasta de dientes': '🦷', 'pasta dental': '🦷', 'crema dental': '🦷',
-        'cepillo dental': '🪥', 'hilo dental': '🦷', 'enjuague bucal': '😷',
-        'desodorante': '🧴', 'talco': '🧴', 'perfume': '🧴', 'colonia': '🧴',
-        'maquillaje': '💄', 'crema': '🧴', 'protector solar': '🧴', 'repelente': '🦟',
-        'jabon': '🧼', 'jabon de tocador': '🧼', 'gel de ducha': '🧼',
-        'toalla higienica': '🩸', 'papel higienico': '🧻', 'pañuelo desechable': '🧻',
-        'afeitadora': '🪒', 'prestobarba': '🪒', 'cuchilla': '🪒',
-        // Limpieza
-        'limpieza': '🧽', 'detergente': '🧴', 'cloro': '🧴', 'limpiador': '🧽',
-        'lavavajillas': '🧼', 'desinfectante': '🧽', 'suavizante': '🧺',
-        'aromatizante': '🌸', 'cif': '🧽', 'escoba': '🧹', 'trapeador': '🧹',
-        'bolsas de basura': '🗑️', 'esponja': '🧽', 'ambientador': '🌸',
-        // Papel y despensa
-        'papel': '🧻', 'servilleta': '🧻', 'panuelo': '🧻', 'toalla de papel': '🧻',
-        'toallas de papel': '🧻', 'papel toalla': '🧻',
-        // Oficina y útiles
+        // Bebés
+        'bebes': '👶', 'bebés': '👶',
+        // Hogar
+        'hogar': '🏠', 'cocina': '🍳', 'olla': '🍲', 'sarten': '🍳', 'sartén': '🍳',
+        'cubiertos': '🍴', 'platos': '🍽️', 'vasos': '🥛', 'tazas': '☕',
+        'botellas': '🍾', 'frascos': '🫙', 'velas': '🕯️', 'focos': '💡',
+        'bombillas': '💡', 'encendedor': '🔥', 'cerillos': '🔥', 'colchas': '🛏️',
+        'sabanas': '🛏️', 'almohadas': '🛏️', 'toallas': '🛁', 'ropa': '👕',
+        'zapatos': '👟', 'calcetines': '🧦',
+        // Jardín
+        'jardin': '🌱', 'jardín': '🌱', 'plantas': '🌿', 'flores': '🌸',
+        'semillas': '🌱', 'tierra de hojas': '🌱', 'fertilizante': '🌱',
+        'insecticida': '🐛',
+        // Congelados
+        'congelados': '🧊',
+        // Oficina
         'oficina': '📎', 'utiles escolares': '✏️', 'cuaderno': '📓', 'libreta': '📓',
-        'lapiz': '✏️', 'lapices': '✏️', 'boligrafo': '🖊️', 'pluma': '🖊️',
-        'pegamento': '🧴', 'tijeras': '✂️', 'cinta adhesiva': '🧵',
+        'lapiz': '✏️', 'lápiz': '✏️', 'lapices': '✏️', 'boligrafo': '🖊️',
+        'pluma': '🖊️', 'pegamento': '🧴', 'tijeras': '✂️', 'cinta adhesiva': '🧵',
         'resma': '📄', 'papel bond': '📄', 'corrector': '🖊️',
         // Electrónica
-        'electronica': '🔌', 'cargador': '🔌', 'cable': '🔌', 'audifonos': '🎧',
-        'auriculares': '🎧', 'parlante': '🔊', 'bateria': '🔋', 'pila': '🔋',
-        'computadora': '💻', 'notebook': '💻', 'celular': '📱', 'tablet': '📱',
-        'televisor': '📺', 'control remoto': '📱',
-        // Hogar
-        'hogar': '🏠', 'cocina': '🍳', 'olla': '🍲', 'sarten': '🍳', 'cubiertos': '🍴',
-        'platos': '🍽️', 'vasos': '🥛', 'tazas': '☕', 'botellas': '🍾', 'frascos': '🫙',
-        'velas': '🕯️', 'focos': '💡', 'bombillas': '💡', 'encendedor': '🔥',
-        'cerillos': '🔥', 'colchas': '🛏️', 'sabanas': '🛏️', 'almohadas': '🛏️',
-        'toallas': '🛁', 'ropa': '👕', 'zapatos': '👟', 'calcetines': '🧦',
-        // Jardín
-        'jardin': '🌱', 'plantas': '🌿', 'flores': '🌸', 'semillas': '🌱',
-        'tierra de hojas': '🌱', 'fertilizante': '🌱', 'insecticida': '🐛',
+        'electronica': '🔌', 'electrónica': '🔌', 'cargador': '🔌', 'cable': '🔌',
+        'audifonos': '🎧', 'auriculares': '🎧', 'parlante': '🔊', 'bateria': '🔋',
+        'batería': '🔋', 'pila': '🔋', 'computadora': '💻', 'notebook': '💻',
+        'celular': '📱', 'tablet': '📱', 'televisor': '📺', 'control remoto': '📱',
         // Herramientas
         'herramientas': '🛠️', 'tornillos': '🔩', 'clavos': '🔩', 'cinta': '🧵',
-        'pintura': '🎨', 'barniz': '🎨', 'pegamento': '🧴'
+        'pintura': '🎨', 'barniz': '🎨'
       };
 
-      // Si la categoria es util, intentar mapearla
-      if (categoriaEsUtil) {
-        // 1. Coincidencia exacta normalizada
-        if (mapa[catNorm]) return mapa[catNorm];
+      // 1. Buscar primero en el nombre del producto (más específico)
+      if (palabrasNombre.length) {
+        // 1a. Coincidencia exacta normalizada del nombre completo
+        if (mapaEmoji[nombreNorm]) return mapaEmoji[nombreNorm];
 
-        // 2. Buscar claves del mapa como secuencia completa dentro de la categoria
-        for (const [clave, emoji] of Object.entries(mapa)) {
+        // 1b. Buscar claves del mapa como secuencia completa dentro del nombre
+        for (const [clave, emoji] of Object.entries(mapaEmoji)) {
           const palabrasClave = clave.split(' ').filter(Boolean);
-          if (contieneSecuencia(palabrasCat, palabrasClave)) return emoji;
+          if (contieneSecuencia(palabrasNombre, palabrasClave)) return emoji;
         }
 
-        // 3. Buscar cada palabra de la categoria dentro de las claves del mapa
-        for (const palabra of palabrasCat) {
-          for (const [clave, emoji] of Object.entries(mapa)) {
+        // 1c. Buscar cada palabra del nombre dentro de las claves del mapa
+        for (const palabra of palabrasNombre) {
+          for (const [clave, emoji] of Object.entries(mapaEmoji)) {
             const palabrasClave = clave.split(' ').filter(Boolean);
             if (palabrasClave.includes(palabra)) return emoji;
           }
         }
       }
 
-      // 4. Si no hay categoria util o no se pudo mapear, analizar el nombre del producto
-      if (nombreNorm) {
-        const palabrasNombre = nombreNorm.split(' ').filter(Boolean);
-        const reglasNombre = [
-          // Higiene personal (especificos primero)
-          { terminos: ['pasta de dientes', 'pasta dental', 'crema dental', 'cepillo dental', 'hilo dental', 'enjuague bucal'], emoji: '🦷' },
-          { terminos: ['toalla higienica', 'toalla higiénica', 'protector diario', 'tampon'], emoji: '🩸' },
-          { terminos: ['papel higienico', 'papel higiénico', 'pañuelo desechable'], emoji: '🧻' },
-          { terminos: ['shampoo', 'acondicionador', 'desodorante', 'talco', 'perfume', 'colonia', 'crema', 'protector solar', 'repelente', 'maquillaje'], emoji: '🧴' },
-          { terminos: ['jabon de tocador', 'gel de ducha', 'jabon liquido', 'jabón líquido'], emoji: '🧼' },
-          { terminos: ['afeitadora', 'prestobarba', 'cuchilla', 'maquina de afeitar'], emoji: '🪒' },
-          { terminos: ['cepillo de dientes', 'cepillo dental'], emoji: '🪥' },
-          { terminos: ['pañal', 'pañales', 'toallitas humedas', 'toallitas húmedas'], emoji: '👶' },
-          // Limpieza
-          { terminos: ['detergente', 'cloro', 'limpiador', 'lavavajillas', 'desinfectante', 'suavizante', 'cif', 'limpia', 'esponja'], emoji: '🧽' },
-          { terminos: ['aromatizante', 'ambientador'], emoji: '🌸' },
-          { terminos: ['escoba', 'trapeador', 'trapero'], emoji: '🧹' },
-          { terminos: ['bolsa de basura', 'bolsas de basura'], emoji: '🗑️' },
-          // Papel
-          { terminos: ['servilleta', 'toalla de papel', 'papel toalla', 'panuelo'], emoji: '🧻' },
-          // Lacteos
-          { terminos: ['leche condensada', 'leche evaporada', 'leche en polvo', 'leche sin lactosa', 'leche'], emoji: '🥛' },
-          { terminos: ['yogur', 'yoghurt'], emoji: '🍦' },
-          { terminos: ['queso'], emoji: '🧀' },
-          { terminos: ['mantequilla', 'margarina', 'crema'], emoji: '🧈' },
-          { terminos: ['huevo', 'huevos'], emoji: '🥚' },
-          // Dulces y snacks
-          { terminos: ['helado', 'postre', 'flan', 'gelatina', 'torta', 'pastel'], emoji: '🍦' },
-          { terminos: ['chocolate', 'chocolates'], emoji: '🍫' },
-          { terminos: ['galleta', 'galletas', 'oreo', 'ritz', 'chips'], emoji: '🍪' },
-          { terminos: ['caramelo', 'dulce', 'confite', 'chicle', 'gomita', 'marshmallow'], emoji: '🍬' },
-          { terminos: ['papas fritas', 'papas', 'nachos', 'palomitas'], emoji: '🍿' },
-          // Bebidas
-          { terminos: ['cerveza'], emoji: '🍺' },
-          { terminos: ['vino'], emoji: '🍷' },
-          { terminos: ['whisky', 'ron', 'pisco', 'vodka', 'tequila'], emoji: '🥃' },
-          { terminos: ['coctel', 'trago'], emoji: '🍸' },
-          { terminos: ['energetica', 'bebida energetica', 'isotonica'], emoji: '⚡' },
-          { terminos: ['cafe', 'café', 'capuchino', 'expresso', 'espresso'], emoji: '☕' },
-          { terminos: ['te', 'té', 'mate'], emoji: '🍵' },
-          { terminos: ['jugo', 'nectar', 'néctar'], emoji: '🧃' },
-          { terminos: ['agua mineral', 'agua'], emoji: '💧' },
-          { terminos: ['coca', 'coca cola', 'gaseosa', 'gaseosas', 'refresco', 'refrescos', 'soda', 'cola'], emoji: '🥤' },
-          // Panaderia
-          { terminos: ['pan', 'hallulla', 'marraqueta', 'ciabatta', 'baguette', 'pan de molde', 'tostadas'], emoji: '🥖' },
-          { terminos: ['tortilla', 'arepa'], emoji: '🌮' },
-          // Pastas y arroz
-          { terminos: ['arroz'], emoji: '🍚' },
-          { terminos: ['fideos', 'fideo', 'pastas', 'pasta', 'tallarines', 'tallarin', 'tallarín', 'espaguetis', 'espagueti', 'macarrones', 'macarron', 'lasaña', 'lasana', 'ravioles', 'ravioli'], emoji: '🍝' },
-          { terminos: ['sopa', 'sopas', 'caldo', 'caldos', 'consome'], emoji: '🍜' },
-          { terminos: ['cereal', 'avena', 'granola', 'muesli'], emoji: '🥣' },
-          // Frutas
-          { terminos: ['manzana'], emoji: '🍎' },
-          { terminos: ['platano', 'banana'], emoji: '🍌' },
-          { terminos: ['naranja', 'mandarina', 'pomelo'], emoji: '🍊' },
-          { terminos: ['limon', 'lima'], emoji: '🍋' },
-          { terminos: ['uva'], emoji: '🍇' },
-          { terminos: ['fresa', 'frutilla', 'arandano'], emoji: '🍓' },
-          { terminos: ['sandia'], emoji: '🍉' },
-          { terminos: ['melon'], emoji: '🍈' },
-          { terminos: ['piña'], emoji: '🍍' },
-          { terminos: ['mango'], emoji: '🥭' },
-          { terminos: ['durazno'], emoji: '🍑' },
-          { terminos: ['cereza'], emoji: '🍒' },
-          { terminos: ['pera'], emoji: '🍐' },
-          { terminos: ['kiwi'], emoji: '🥝' },
-          { terminos: ['aguacate', 'palta'], emoji: '🥑' },
-          { terminos: ['fruta'], emoji: '🍎' },
-          // Verduras
-          { terminos: ['tomate'], emoji: '🍅' },
-          { terminos: ['cebolla'], emoji: '🧅' },
-          { terminos: ['ajo'], emoji: '🧄' },
-          { terminos: ['zanahoria'], emoji: '🥕' },
-          { terminos: ['papa', 'patata'], emoji: '🥔' },
-          { terminos: ['camote'], emoji: '🍠' },
-          { terminos: ['zapallo', 'calabaza'], emoji: '🎃' },
-          { terminos: ['maiz', 'choclo'], emoji: '🌽' },
-          { terminos: ['pepino'], emoji: '🥒' },
-          { terminos: ['pimiento', 'aji', 'ají'], emoji: '🫑' },
-          { terminos: ['brocoli', 'coliflor', 'repollo'], emoji: '🥦' },
-          { terminos: ['lechuga', 'espinaca', 'apio', 'verdura'], emoji: '🥬' },
-          // Carnes y pescados
-          { terminos: ['hamburguesa', 'hamburguesas'], emoji: '🍔' },
-          { terminos: ['hot dog', 'hot dogs', 'completo', 'completos'], emoji: '🌭' },
-          { terminos: ['pollo', 'pollos', 'pavo', 'pavos'], emoji: '🍗' },
-          { terminos: ['carne', 'carnes', 'res', 'vacuno', 'lomo', 'lomos', 'filete', 'filetes'], emoji: '🥩' },
-          { terminos: ['cerdo', 'jamon', 'jamón', 'salchicha', 'salchichas', 'longaniza', 'longanizas', 'chorizo', 'chorizos'], emoji: '🥓' },
-          { terminos: ['salmón', 'salmon', 'atun', 'atún', 'jurel', 'jureles', 'sardina', 'sardinas', 'caballa', 'caballas', 'pescado', 'pescados'], emoji: '🐟' },
-          { terminos: ['camaron', 'camarón', 'camarones', 'langostino', 'langostinos', 'jaiba', 'jaibas', 'marisco', 'mariscos'], emoji: '🦐' },
-          // Condimentos y despensa
-          { terminos: ['aceite'], emoji: '🫒' },
-          { terminos: ['azucar', 'azúcar', 'sal', 'pimienta', 'oregano', 'comino'], emoji: '🧂' },
-          { terminos: ['salsa de tomate', 'ketchup'], emoji: '🍅' },
-          { terminos: ['mayonesa'], emoji: '🥚' },
-          { terminos: ['mostaza'], emoji: '🌭' },
-          { terminos: ['miel', 'mermelada', 'manjar'], emoji: '🍯' },
-          { terminos: ['harina'], emoji: '🌾' },
-          // Mascotas
-          { terminos: ['comida de perro', 'comida de gato', 'arena de gato', 'croquetas', 'alimento para mascota'], emoji: '🐾' },
-          // Hogar
-          { terminos: ['olla', 'sarten', 'sartén', 'cacerola'], emoji: '🍲' },
-          { terminos: ['plato', 'platos', 'vaso', 'vasos', 'taza', 'tazas', 'copa', 'copas'], emoji: '🍽️' },
-          { terminos: ['vela', 'velas'], emoji: '🕯️' },
-          { terminos: ['foco', 'focos', 'bombilla', 'bombillas'], emoji: '💡' },
-          { terminos: ['sabana', 'colcha', 'almohada', 'cobija'], emoji: '🛏️' },
-          { terminos: ['toalla de bano', 'toalla de baño'], emoji: '🛁' },
-          // Oficina
-          { terminos: ['cuaderno', 'libreta'], emoji: '📓' },
-          { terminos: ['lapiz', 'lápiz'], emoji: '✏️' },
-          { terminos: ['boligrafo', 'pluma', 'marcador'], emoji: '🖊️' },
-          { terminos: ['tijeras'], emoji: '✂️' },
-          { terminos: ['pegamento', 'corrector'], emoji: '🧴' },
-          // Electronica
-          { terminos: ['cargador', 'cable', 'audifono', 'auricular', 'parlante'], emoji: '🔌' },
-          { terminos: ['pila', 'bateria'], emoji: '🔋' },
-          { terminos: ['celular', 'telefono', 'tablet'], emoji: '📱' },
-          { terminos: ['computadora', 'notebook', 'laptop'], emoji: '💻' },
-          { terminos: ['televisor', 'control remoto'], emoji: '📺' },
-          // Jardin
-          { terminos: ['semilla', 'fertilizante', 'tierra de hojas', 'insecticida'], emoji: '🌱' },
-          { terminos: ['planta', 'flor'], emoji: '🌿' },
-          // Generales alimentos
-          { terminos: ['alimento', 'comida', 'producto'], emoji: '🥫' }
-        ];
-        for (const regla of reglasNombre) {
-          for (const termino of regla.terminos) {
-            const palabrasTermino = normalizarTexto(termino).split(' ').filter(Boolean);
-            if (contieneSecuencia(palabrasNombre, palabrasTermino)) return regla.emoji;
+      // 2. Si no hay match en el nombre, buscar en la categoría
+      if (categoriaEsUtil) {
+        if (mapaEmoji[catNorm]) return mapaEmoji[catNorm];
+
+        for (const [clave, emoji] of Object.entries(mapaEmoji)) {
+          const palabrasClave = clave.split(' ').filter(Boolean);
+          if (contieneSecuencia(palabrasCat, palabrasClave)) return emoji;
+        }
+
+        for (const palabra of palabrasCat) {
+          for (const [clave, emoji] of Object.entries(mapaEmoji)) {
+            const palabrasClave = clave.split(' ').filter(Boolean);
+            if (palabrasClave.includes(palabra)) return emoji;
           }
         }
       }
 
-      // 5. Si la categoria era generica, intentar mapearla ahora (sin categoria -> 📦)
-      if (!categoriaEsUtil && catNorm) {
-        if (catNorm.includes('categoria')) return '📦';
-      }
+      // 3. Emoji por categoría si no se encontró match específico
+      const emojiPorCategoria = {
+        'aseo personal': '🧴', 'higiene personal': '🧴', 'limpieza': '🧽',
+        'papel': '🧻', 'despensa': '🥫', 'alimentos': '🥫', 'bebidas': '🥤',
+        'confites': '🍬', 'lacteos': '🧀', 'panaderia': '🥖', 'frutas y verduras': '🍎',
+        'carnes': '🥩', 'pescados': '🐟', 'mariscos': '🦐', 'congelados': '🧊',
+        'mascotas': '🐾', 'bebes': '👶', 'bebés': '👶', 'hogar': '🏠', 'jardin': '🌱',
+        'jardín': '🌱', 'oficina': '📎', 'electronica': '🔌', 'electrónica': '🔌',
+        'herramientas': '🛠️'
+      };
+      if (emojiPorCategoria[catNorm]) return emojiPorCategoria[catNorm];
 
       return '📦';
+    }
+
+    function colorFondoCategoria(categoria) {
+      const catNorm = normalizarTexto(categoria || '');
+      const mapaColores = {
+        'aseo personal': ['#ffd1dc', '#ffe6eb'],
+        'higiene personal': ['#ffd1dc', '#ffe6eb'],
+        'limpieza': ['#d1f0ff', '#e6f7ff'],
+        'papel': ['#fff4d1', '#fff9e6'],
+        'despensa': ['#ffe4c4', '#fff0db'],
+        'alimentos': ['#ffe4c4', '#fff0db'],
+        'bebidas': ['#c8e6ff', '#e6f3ff'],
+        'confites': ['#ffd1e8', '#ffe6f3'],
+        'lacteos': ['#fffdd0', '#fffee6'],
+        'panaderia': ['#f5deb3', '#faebd7'],
+        'frutas y verduras': ['#d4edda', '#e6f5ea'],
+        'carnes': ['#f8d7da', '#fbe6e8'],
+        'pescados': ['#d1ecf1', '#e6f7fa'],
+        'mariscos': ['#d1ecf1', '#e6f7fa'],
+        'congelados': ['#d6eaf8', '#eaf2fb'],
+        'mascotas': ['#e2d4f0', '#f0e9f8'],
+        'bebes': ['#fce4ec', '#fdeef4'],
+        'bebés': ['#fce4ec', '#fdeef4'],
+        'hogar': ['#fdebd0', '#fef5e7'],
+        'jardin': ['#d5f5e3', '#eafaf1'],
+        'jardín': ['#d5f5e3', '#eafaf1'],
+        'oficina': ['#e5e8e8', '#f2f3f4'],
+        'electronica': ['#d6eaf8', '#eaf2fb'],
+        'electrónica': ['#d6eaf8', '#eaf2fb'],
+        'herramientas': ['#fadbd8', '#fdecea']
+      };
+      return mapaColores[catNorm] || ['#f3e8ff', '#fce7f3'];
+    }
+
+    function generarImagenReferencial(categoria, nombre) {
+      const emoji = obtenerEmojiCategoria(categoria, nombre) || '📦';
+      const colores = colorFondoCategoria(categoria);
+      const color1 = colores[0];
+      const color2 = colores[1];
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+        <defs>
+          <radialGradient id="g" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+            <stop offset="0%" stop-color="${color2}"/>
+            <stop offset="100%" stop-color="${color1}"/>
+          </radialGradient>
+        </defs>
+        <circle cx="60" cy="60" r="58" fill="url(#g)" stroke="rgba(0,0,0,0.06)" stroke-width="1"/>
+        <text x="60" y="68" font-size="52" text-anchor="middle" dominant-baseline="middle">${emoji}</text>
+      </svg>`;
+      return 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
+    }
+
+    function esImagenReferencial(src) {
+      return src && typeof src === 'string' && src.startsWith('data:image/svg+xml');
     }
 
     function mostrarPreviewFoto(base64) {
@@ -3101,7 +3198,7 @@
       const btnQuitar = document.getElementById('detalle-btn-quitar-foto');
       const categoria = document.getElementById('detalle-categoria').value || 'Sin categoría';
       const nombre = document.getElementById('detalle-nombre').value || '';
-      if (base64) {
+      if (base64 && !esImagenReferencial(base64)) {
         img.src = base64;
         img.style.display = 'block';
         emojiDiv.style.display = 'none';
@@ -3110,7 +3207,8 @@
       } else {
         img.src = '';
         img.style.display = 'none';
-        emojiDiv.textContent = obtenerEmojiCategoria(categoria, nombre);
+        const srcRef = generarImagenReferencial(categoria, nombre);
+        emojiDiv.innerHTML = `<img src="${srcRef}" alt="" style="width:120px;height:120px;border-radius:12px;object-fit:cover;">`;
         emojiDiv.style.display = 'flex';
         preview.style.display = 'block';
         if (btnQuitar) btnQuitar.style.display = 'none';
@@ -3500,7 +3598,9 @@
         contenedorAlertas.innerHTML = stockBajo.slice(0, 5).map(p => `
           <div class="historial-item ${p.quantity === 0 ? 'salida' : 'edicion'}" style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
             <div style="cursor: pointer; flex: 1; display: flex; align-items: center; gap: 10px;" onclick="abrirDetalle('${p.code}')">
-              <div style="font-size: 1.6rem; flex-shrink: 0;">${obtenerEmojiCategoria(p.category, p.name)}</div>
+              ${p.image
+                ? `<img src="${p.image}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;flex-shrink:0;background:var(--color-primario-claro);" alt="">`
+                : `<div style="width:40px;height:40px;background:var(--color-primario-claro);border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--color-primario-oscuro);font-size:1.6rem;" title="${escaparHtml(p.category || 'Sin categoría')}">${obtenerEmojiCategoria(p.category, p.name)}</div>`}
               <div>
                 <div style="font-weight: 600;">${escaparHtml(p.name)}</div>
                 <div style="font-size: 0.85rem; color: var(--color-texto-secundario);">
@@ -3524,7 +3624,9 @@
           return `
           <div class="historial-item ${dias <= 7 ? 'salida' : 'edicion'}" style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
             <div style="cursor: pointer; flex: 1; display: flex; align-items: center; gap: 10px;" onclick="abrirDetalle('${p.code}')">
-              <div style="font-size: 1.6rem; flex-shrink: 0;">${obtenerEmojiCategoria(p.category, p.name)}</div>
+              ${p.image
+                ? `<img src="${p.image}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;flex-shrink:0;background:var(--color-primario-claro);" alt="">`
+                : `<div style="width:40px;height:40px;background:var(--color-primario-claro);border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--color-primario-oscuro);font-size:1.6rem;" title="${escaparHtml(p.category || 'Sin categoría')}">${obtenerEmojiCategoria(p.category, p.name)}</div>`}
               <div>
                 <div style="font-weight: 600;">${escaparHtml(p.name)}</div>
                 <div style="font-size: 0.85rem; color: var(--color-texto-secundario);">
@@ -3654,7 +3756,10 @@
         const nivel = nivelStockBajo(p);
         const porVencer = estaPorVencer(p);
         const filaClase = (nivel === 'critico' ? 'fila-sin-stock' : nivel ? 'fila-stock-bajo' : porVencer ? 'fila-vencimiento' : '') + (productosSeleccionados.has(p.code) ? ' fila-seleccionada' : '');
-        const fotoMini = p.image ? `<img src="${p.image}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;margin-right:10px;flex-shrink:0;">` : `<div style="width:48px;height:48px;background:#fce7f3;border-radius:8px;margin-right:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#db2777;font-size:1.6rem;" title="${escaparHtml(p.category || 'Sin categoría')}">${obtenerEmojiCategoria(p.category, p.name)}</div>`;
+        const coloresRef = colorFondoCategoria(p.category);
+        const fotoMini = p.image
+          ? `<img src="${p.image}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;margin-right:10px;flex-shrink:0;">`
+          : `<div style="width:48px;height:48px;border-radius:8px;margin-right:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.6rem;background:radial-gradient(circle, ${coloresRef[1]} 0%, ${coloresRef[0]} 100%);" title="${escaparHtml(p.category || 'Sin categoría')}">${obtenerEmojiCategoria(p.category, p.name)}</div>`;
         const checked = productosSeleccionados.has(p.code) ? 'checked' : '';
         html += `<tr class="${filaClase}">
           <td style="text-align:center;" onclick="event.stopPropagation();">
@@ -3672,7 +3777,10 @@
               </div>
             </div>
           </td>
-          <td ondblclick="event.stopPropagation(); editarStockRapido('${p.code}')" title="Doble clic para editar stock" style="cursor: pointer; font-weight: 800; text-align:center;" onclick="abrirDetalle('${p.code}')">${p.quantity || 0}</td>
+          <td style="text-align:center;">
+            <span onclick="abrirDetalle('${p.code}')" style="cursor:pointer; font-weight:800; display:inline-block; min-width:24px;" title="Abrir detalle">${p.quantity || 0}</span>
+            <button class="btn btn-secundario btn-pequeno" style="width:auto; padding:4px 8px; margin-left:4px;" onclick="event.stopPropagation(); editarStockRapido('${p.code}')" title="Editar stock">✏️</button>
+          </td>
           <td onclick="abrirDetalle('${p.code}')" style="cursor: pointer; font-size:0.9rem;">${escaparHtml(formatearUbicacion(p))}</td>
           <td style="white-space: nowrap; text-align: center;">
             <button class="btn btn-exito btn-pequeno" style="width: auto; padding: 6px 10px;" onclick="event.stopPropagation(); entradaRapida('${p.code}')" title="Entrada">➕</button>
@@ -3834,11 +3942,13 @@
 
       sugerencias.forEach((p, idx) => {
         const cantidad = calcularCantidadSugerida(p);
-        const emoji = obtenerEmojiCategoria(p.category, p.name);
+        const iconoProducto = p.image
+          ? `<img src="${p.image}" style="width:48px;height:48px;object-fit:cover;border-radius:10px;flex-shrink:0;background:var(--color-primario-claro);" alt="">`
+          : `<div style="width:48px;height:48px;border-radius:10px;background:var(--color-primario-claro);display:flex;align-items:center;justify-content:center;font-size:1.8rem;flex-shrink:0;">${obtenerEmojiCategoria(p.category, p.name)}</div>`;
         html += `
           <label class="supermercado-item" style="display:flex; align-items:center; gap:12px; padding:12px; background:var(--color-superficie-secundaria); border-radius:12px; cursor:pointer; border:1px solid var(--color-borde);">
             <input type="checkbox" class="checkbox-supermercado" data-codigo="${p.code}" checked style="width:20px; height:20px; flex-shrink:0;">
-            <div style="font-size:1.6rem; flex-shrink:0;">${emoji}</div>
+            ${iconoProducto}
             <div style="flex:1; min-width:0;">
               <div style="font-weight:600;">${escaparHtml(p.name)}</div>
               <div style="font-size:0.8rem; color:var(--color-texto-secundario);">${escaparHtml(p.category || 'Sin categoría')} · Stock: ${p.quantity || 0}</div>
@@ -4095,22 +4205,52 @@
       lector.onload = (e) => {
         try {
           const datos = JSON.parse(e.target.result);
-          if (typeof datos !== 'object' || datos === null || Array.isArray(datos)) {
-            throw new Error('El archivo no tiene el formato esperado.');
+          let datosProductos = null;
+
+          if (Array.isArray(datos)) {
+            // Formato array de productos: convertir a objeto usando code
+            datosProductos = {};
+            datos.forEach((p, idx) => {
+              const codigo = p && (p.code || p.codigo || ('importado-' + idx));
+              datosProductos[codigo] = p;
+            });
+          } else if (datos && typeof datos === 'object') {
+            // Formato objeto {codigo: producto} o envuelto en inventario/productos
+            if (datos.inventario && typeof datos.inventario === 'object' && !Array.isArray(datos.inventario)) {
+              datosProductos = datos.inventario;
+            } else if (datos.productos && typeof datos.productos === 'object' && !Array.isArray(datos.productos)) {
+              datosProductos = datos.productos;
+            } else {
+              // Asumir que el objeto raíz es {codigo: producto}
+              datosProductos = datos;
+            }
           }
-          productos = datos;
+
+          if (!datosProductos || typeof datosProductos !== 'object' || Array.isArray(datosProductos) || Object.keys(datosProductos).length === 0) {
+            throw new Error('El archivo no es un backup válido. Debe ser un JSON con los productos.');
+          }
+
+          productos = datosProductos;
           migrarDatos();
           guardarDatos();
           renderInventario();
           renderDashboard();
           renderCategoriasFiltro();
-          mostrarMensaje('mensaje-inventario', 'Backup importado correctamente.', 'exito');
-          mostrarToast('Backup importado correctamente', 'exito');
+          const total = Object.keys(productos).length;
+          mostrarMensaje('mensaje-inventario', `${total} productos importados correctamente.`, 'exito');
+          mostrarToast(`${total} productos importados correctamente`, 'exito');
         } catch (err) {
           console.error(err);
-          mostrarMensaje('mensaje-inventario', 'No se pudo importar el archivo. Verifica que sea un backup válido.', 'error');
+          const mensaje = err && err.message && err.message.includes('backup')
+            ? err.message
+            : 'El archivo no es un backup válido. Debe ser un JSON con los productos.';
+          mostrarMensaje('mensaje-inventario', mensaje, 'error');
           mostrarToast('Error al importar backup', 'error');
         }
+      };
+      lector.onerror = () => {
+        mostrarMensaje('mensaje-inventario', 'No se pudo leer el archivo.', 'error');
+        mostrarToast('Error al importar backup', 'error');
       };
       lector.readAsText(archivo);
     }
