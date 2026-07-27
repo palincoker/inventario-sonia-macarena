@@ -1443,6 +1443,16 @@
 
         <div class="config-opcion">
           <div class="config-opcion-info">
+            <h4>🏷️ Reclasificar productos</h4>
+            <p>Asigna automáticamente la categoría a todos los productos según su nombre.</p>
+          </div>
+          <button class="btn btn-pequeno" onclick="reclasificarProductosPorNombre()">
+            Reclasificar
+          </button>
+        </div>
+
+        <div class="config-opcion">
+          <div class="config-opcion-info">
             <h4>🗑️ Vaciar datos</h4>
             <p>Elimina todos los productos y movimientos del almacenamiento local.</p>
           </div>
@@ -2337,6 +2347,30 @@
 
       // 3. Por defecto
       return 'Sin categoría';
+    }
+
+    function reclasificarProductosPorNombre() {
+      const total = Object.keys(productos).length;
+      if (total === 0) {
+        mostrarToast('No hay productos para reclasificar', 'advertencia');
+        return;
+      }
+      if (!confirm(`¿Reclasificar automáticamente las categorías de ${total} productos según sus nombres?`)) return;
+
+      let cambiados = 0;
+      Object.values(productos).forEach(p => {
+        const nuevaCategoria = clasificarCategoria(p.name || '', '');
+        if (nuevaCategoria !== 'Sin categoría' && p.category !== nuevaCategoria) {
+          p.category = nuevaCategoria;
+          cambiados++;
+        }
+      });
+
+      guardarDatos();
+      renderDashboard();
+      renderCategoriasFiltro();
+      if (document.getElementById('seccion-inventario').classList.contains('activa')) renderInventario();
+      mostrarToast(`${cambiados} de ${total} productos reclasificados correctamente`, 'exito');
     }
 
     function generarCodigoUnico() {
