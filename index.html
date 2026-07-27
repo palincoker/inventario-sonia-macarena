@@ -1272,7 +1272,8 @@
             <label>Foto del producto</label>
             <div id="detalle-foto-preview" style="display:none; margin-bottom:10px;">
               <img id="detalle-foto-img" src="" alt="Foto" style="max-width:200px; max-height:200px; border-radius:12px; object-fit:cover;">
-              <button class="btn btn-peligro btn-pequeno" onclick="eliminarFotoProducto()" style="margin-top:8px;">🗑️ Quitar foto</button>
+              <div id="detalle-foto-emoji" style="display:none; width:120px; height:120px; border-radius:12px; background:var(--color-primario-claro); align-items:center; justify-content:center; font-size:3.5rem; margin-bottom:8px;"></div>
+              <button id="detalle-btn-quitar-foto" class="btn btn-peligro btn-pequeno" onclick="eliminarFotoProducto()" style="margin-top:8px;">🗑️ Quitar foto</button>
             </div>
             <input type="file" id="detalle-foto" accept="image/*" onchange="procesarFotoProducto(this)">
             <p style="font-size:0.8rem; color:var(--color-texto-secundario); margin:4px 0 0;">Imagen pequeña recomendada (max 1 MB)</p>
@@ -1280,7 +1281,7 @@
 
           <div>
             <label for="detalle-categoria">Categoría</label>
-            <input type="text" id="detalle-categoria" list="lista-categorias" placeholder="Ej: Alimentos, Limpieza, Electrónica">
+            <input type="text" id="detalle-categoria" list="lista-categorias" placeholder="Ej: Alimentos, Limpieza, Electrónica" oninput="mostrarPreviewFoto(fotoProductoTemp || '')">
             <datalist id="lista-categorias"></datalist>
           </div>
 
@@ -2741,15 +2742,69 @@
       setTimeout(() => ventana.print(), 300);
     }
 
+    function obtenerEmojiCategoria(categoria) {
+      const mapa = {
+        'Alimentos': '🥫',
+        'Galletas': '🍪',
+        'Chocolates': '🍫',
+        'Confites': '🍬',
+        'Snacks': '🍿',
+        'Bebidas': '🥤',
+        'Leche': '🥛',
+        'Lácteos': '🧀',
+        'Jugos': '🧃',
+        'Aguas': '💧',
+        'Café': '☕',
+        'Té': '🍵',
+        'Bebidas alcohólicas': '🍷',
+        'Panadería': '🥖',
+        'Cereales': '🥣',
+        'Pastas': '🍝',
+        'Arroz': '🍚',
+        'Salsas y condimentos': '🍶',
+        'Salsas': '🥣',
+        'Enlatados': '🥫',
+        'Congelados': '🧊',
+        'Frutas': '🍎',
+        'Verduras': '🥬',
+        'Frutas y verduras': '🍏',
+        'Carnes': '🥩',
+        'Pescados': '🐟',
+        'Mariscos': '🦐',
+        'Desayuno': '🍳',
+        'Postres': '🍰',
+        'Alimentos infantiles': '🍼',
+        'Mascotas': '🐶',
+        'Limpieza': '🧽',
+        'Jabón': '🧼',
+        'Higiene personal': '🧴',
+        'Papel': '🧻',
+        'Oficina': '📎',
+        'Electrónica': '🔌',
+        'Sin categoría': '📦'
+      };
+      return mapa[categoria] || mapa['Sin categoría'];
+    }
+
     function mostrarPreviewFoto(base64) {
       const preview = document.getElementById('detalle-foto-preview');
       const img = document.getElementById('detalle-foto-img');
+      const emojiDiv = document.getElementById('detalle-foto-emoji');
+      const btnQuitar = document.getElementById('detalle-btn-quitar-foto');
+      const categoria = document.getElementById('detalle-categoria').value || 'Sin categoría';
       if (base64) {
         img.src = base64;
+        img.style.display = 'block';
+        emojiDiv.style.display = 'none';
         preview.style.display = 'block';
+        if (btnQuitar) btnQuitar.style.display = 'inline-block';
       } else {
         img.src = '';
-        preview.style.display = 'none';
+        img.style.display = 'none';
+        emojiDiv.textContent = obtenerEmojiCategoria(categoria);
+        emojiDiv.style.display = 'flex';
+        preview.style.display = 'block';
+        if (btnQuitar) btnQuitar.style.display = 'none';
       }
     }
 
@@ -3284,7 +3339,7 @@
         const nivel = nivelStockBajo(p);
         const porVencer = estaPorVencer(p);
         const filaClase = (nivel === 'critico' ? 'fila-sin-stock' : nivel ? 'fila-stock-bajo' : porVencer ? 'fila-vencimiento' : '') + (productosSeleccionados.has(p.code) ? ' fila-seleccionada' : '');
-        const fotoMini = p.image ? `<img src="${p.image}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;margin-right:10px;flex-shrink:0;">` : `<div style="width:48px;height:48px;background:#fce7f3;border-radius:8px;margin-right:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#db2777;font-size:1.2rem;">📦</div>`;
+        const fotoMini = p.image ? `<img src="${p.image}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;margin-right:10px;flex-shrink:0;">` : `<div style="width:48px;height:48px;background:#fce7f3;border-radius:8px;margin-right:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#db2777;font-size:1.6rem;" title="${escaparHtml(p.category || 'Sin categoría')}">${obtenerEmojiCategoria(p.category)}</div>`;
         const checked = productosSeleccionados.has(p.code) ? 'checked' : '';
         html += `<tr class="${filaClase}">
           <td style="text-align:center;" onclick="event.stopPropagation();">
