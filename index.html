@@ -2790,48 +2790,106 @@
       setTimeout(() => ventana.print(), 300);
     }
 
-    function obtenerEmojiCategoria(categoria) {
+    function obtenerEmojiCategoria(categoria, nombreProducto) {
+      const catNorm = normalizarTexto(categoria || '');
+      const nombreNorm = normalizarTexto(nombreProducto || '');
+      const palabrasCat = catNorm.split(' ').filter(Boolean);
+
+      const categoriasGenericas = new Set(['', 'sin categoria', 'otra', 'otros', 'general', 'varios', 'miscelaneos', 'categoria']);
+      const categoriaEsUtil = catNorm && !palabrasCat.some(p => categoriasGenericas.has(p));
+
       const mapa = {
-        'Alimentos': '🥫',
-        'Galletas': '🍪',
-        'Chocolates': '🍫',
-        'Confites': '🍬',
-        'Snacks': '🍿',
-        'Bebidas': '🥤',
-        'Leche': '🥛',
-        'Lácteos': '🧀',
-        'Jugos': '🧃',
-        'Aguas': '💧',
-        'Café': '☕',
-        'Té': '🍵',
-        'Bebidas alcohólicas': '🍷',
-        'Panadería': '🥖',
-        'Cereales': '🥣',
-        'Pastas': '🍝',
-        'Arroz': '🍚',
-        'Salsas y condimentos': '🍶',
-        'Salsas': '🥣',
-        'Enlatados': '🥫',
-        'Congelados': '🧊',
-        'Frutas': '🍎',
-        'Verduras': '🥬',
-        'Frutas y verduras': '🍏',
-        'Carnes': '🥩',
-        'Pescados': '🐟',
-        'Mariscos': '🦐',
-        'Desayuno': '🍳',
-        'Postres': '🍰',
-        'Alimentos infantiles': '🍼',
-        'Mascotas': '🐶',
-        'Limpieza': '🧽',
-        'Jabón': '🧼',
-        'Higiene personal': '🧴',
-        'Papel': '🧻',
-        'Oficina': '📎',
-        'Electrónica': '🔌',
-        'Sin categoría': '📦'
+        'alimento': '🥫',
+        'alimentos': '🥫',
+        'galletas': '🍪',
+        'chocolates': '🍫',
+        'confites': '🍬',
+        'snacks': '🍿',
+        'bebidas': '🥤',
+        'leche': '🥛',
+        'lacteos': '🧀',
+        'jugos': '🧃',
+        'aguas': '💧',
+        'cafe': '☕',
+        'te': '🍵',
+        'bebidas alcoholicas': '🍷',
+        'panaderia': '🥖',
+        'cereales': '🥣',
+        'pastas': '🍝',
+        'arroz': '🍚',
+        'salsas y condimentos': '🍶',
+        'salsas': '🥣',
+        'enlatados': '🥫',
+        'congelados': '🧊',
+        'frutas': '🍎',
+        'verduras': '🥬',
+        'frutas y verduras': '🍏',
+        'carnes': '🥩',
+        'pescados': '🐟',
+        'mariscos': '🦐',
+        'desayuno': '🍳',
+        'postres': '🍰',
+        'alimentos infantiles': '🍼',
+        'mascotas': '🐶',
+        'limpieza': '🧽',
+        'jabon': '🧼',
+        'higiene personal': '🧴',
+        'papel': '🧻',
+        'oficina': '📎',
+        'electronica': '🔌'
       };
-      return mapa[categoria] || mapa['Sin categoría'];
+
+      // Si la categoria es util, intentar mapearla
+      if (categoriaEsUtil) {
+        // 1. Coincidencia exacta normalizada
+        if (mapa[catNorm]) return mapa[catNorm];
+
+        // 2. Buscar claves del mapa como secuencia completa dentro de la categoria
+        for (const [clave, emoji] of Object.entries(mapa)) {
+          const palabrasClave = clave.split(' ').filter(Boolean);
+          if (contieneSecuencia(palabrasCat, palabrasClave)) return emoji;
+        }
+
+        // 3. Buscar cada palabra de la categoria dentro de las claves del mapa
+        for (const palabra of palabrasCat) {
+          for (const [clave, emoji] of Object.entries(mapa)) {
+            const palabrasClave = clave.split(' ').filter(Boolean);
+            if (palabrasClave.includes(palabra)) return emoji;
+          }
+        }
+      }
+
+      // 4. Si no hay categoria util o no se pudo mapear, analizar el nombre del producto
+      if (nombreNorm) {
+        const palabrasNombre = nombreNorm.split(' ').filter(Boolean);
+        const reglasNombre = [
+          { terminos: ['pasta de dientes', 'pasta dental', 'crema dental', 'cepillo dental', 'enjuague bucal', 'shampoo', 'acondicionador', 'desodorante', 'talco', 'prestobarba', 'jabon', 'toalla higienica', 'papel higienico'], emoji: '🧴' },
+          { terminos: ['detergente', 'limpiador', 'cloro', 'lavavajillas', 'desinfectante', 'suavizante', 'cif', 'aromatizante', 'limpia'], emoji: '🧽' },
+          { terminos: ['servilleta', 'panuelo', 'toalla de papel'], emoji: '🧻' },
+          { terminos: ['leche', 'yogur', 'yoghurt', 'queso', 'mantequilla'], emoji: '🧀' },
+          { terminos: ['galleta', 'chocolate', 'dulce', 'confite', 'caramelo', 'chicle', 'helado', 'postre', 'oreo', 'ritz'], emoji: '🍬' },
+          { terminos: ['jugo', 'agua', 'refresco', 'soda', 'te', 'té', 'cafe', 'cerveza', 'vino'], emoji: '🥤' },
+          { terminos: ['arroz', 'fideo', 'pasta', 'tallarin', 'tallarin', 'espagueti'], emoji: '🍝' },
+          { terminos: ['pan', 'hallulla', 'marraqueta'], emoji: '🥖' },
+          { terminos: ['atun', 'jurel', 'sardina', 'salmon', 'choritos'], emoji: '🐟' },
+          { terminos: ['manzana', 'platano', 'tomate', 'lechuga', 'fruta', 'verdura'], emoji: '🍎' },
+          { terminos: ['carne', 'pollo', 'pavo', 'cerdo', 'lomo'], emoji: '🥩' },
+          { terminos: ['aceite', 'azucar', 'sal', 'harina', 'sopa', 'cereal'], emoji: '🥫' }
+        ];
+        for (const regla of reglasNombre) {
+          for (const termino of regla.terminos) {
+            const palabrasTermino = normalizarTexto(termino).split(' ').filter(Boolean);
+            if (contieneSecuencia(palabrasNombre, palabrasTermino)) return regla.emoji;
+          }
+        }
+      }
+
+      // 5. Si la categoria era generica, intentar mapearla ahora (sin categoria -> 📦)
+      if (!categoriaEsUtil && catNorm) {
+        if (catNorm.includes('categoria')) return '📦';
+      }
+
+      return '📦';
     }
 
     function mostrarPreviewFoto(base64) {
@@ -2840,6 +2898,7 @@
       const emojiDiv = document.getElementById('detalle-foto-emoji');
       const btnQuitar = document.getElementById('detalle-btn-quitar-foto');
       const categoria = document.getElementById('detalle-categoria').value || 'Sin categoría';
+      const nombre = document.getElementById('detalle-nombre').value || '';
       if (base64) {
         img.src = base64;
         img.style.display = 'block';
@@ -2849,7 +2908,7 @@
       } else {
         img.src = '';
         img.style.display = 'none';
-        emojiDiv.textContent = obtenerEmojiCategoria(categoria);
+        emojiDiv.textContent = obtenerEmojiCategoria(categoria, nombre);
         emojiDiv.style.display = 'flex';
         preview.style.display = 'block';
         if (btnQuitar) btnQuitar.style.display = 'none';
@@ -3387,7 +3446,7 @@
         const nivel = nivelStockBajo(p);
         const porVencer = estaPorVencer(p);
         const filaClase = (nivel === 'critico' ? 'fila-sin-stock' : nivel ? 'fila-stock-bajo' : porVencer ? 'fila-vencimiento' : '') + (productosSeleccionados.has(p.code) ? ' fila-seleccionada' : '');
-        const fotoMini = p.image ? `<img src="${p.image}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;margin-right:10px;flex-shrink:0;">` : `<div style="width:48px;height:48px;background:#fce7f3;border-radius:8px;margin-right:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#db2777;font-size:1.6rem;" title="${escaparHtml(p.category || 'Sin categoría')}">${obtenerEmojiCategoria(p.category)}</div>`;
+        const fotoMini = p.image ? `<img src="${p.image}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;margin-right:10px;flex-shrink:0;">` : `<div style="width:48px;height:48px;background:#fce7f3;border-radius:8px;margin-right:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#db2777;font-size:1.6rem;" title="${escaparHtml(p.category || 'Sin categoría')}">${obtenerEmojiCategoria(p.category, p.name)}</div>`;
         const checked = productosSeleccionados.has(p.code) ? 'checked' : '';
         html += `<tr class="${filaClase}">
           <td style="text-align:center;" onclick="event.stopPropagation();">
@@ -3567,7 +3626,7 @@
 
       sugerencias.forEach((p, idx) => {
         const cantidad = calcularCantidadSugerida(p);
-        const emoji = obtenerEmojiCategoria(p.category);
+        const emoji = obtenerEmojiCategoria(p.category, p.name);
         html += `
           <label class="supermercado-item" style="display:flex; align-items:center; gap:12px; padding:12px; background:var(--color-superficie-secundaria); border-radius:12px; cursor:pointer; border:1px solid var(--color-borde);">
             <input type="checkbox" class="checkbox-supermercado" data-codigo="${p.code}" checked style="width:20px; height:20px; flex-shrink:0;">
