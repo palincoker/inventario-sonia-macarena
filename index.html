@@ -3465,10 +3465,13 @@
       } else {
         contenedorAlertas.innerHTML = stockBajo.slice(0, 5).map(p => `
           <div class="historial-item ${p.quantity === 0 ? 'salida' : 'edicion'}" style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
-            <div style="cursor: pointer; flex: 1;" onclick="abrirDetalle('${p.code}')">
-              <div style="font-weight: 600;">${escaparHtml(p.name)}</div>
-              <div style="font-size: 0.85rem; color: var(--color-texto-secundario);">
-                Stock: <strong>${p.quantity || 0}</strong> / Mínimo: ${p.minStock || 0}
+            <div style="cursor: pointer; flex: 1; display: flex; align-items: center; gap: 10px;" onclick="abrirDetalle('${p.code}')">
+              <div style="font-size: 1.6rem; flex-shrink: 0;">${obtenerEmojiCategoria(p.category, p.name)}</div>
+              <div>
+                <div style="font-weight: 600;">${escaparHtml(p.name)}</div>
+                <div style="font-size: 0.85rem; color: var(--color-texto-secundario);">
+                  Stock: <strong>${p.quantity || 0}</strong> / Mínimo: ${p.minStock || 0}
+                </div>
               </div>
             </div>
             <button class="btn btn-peligro btn-pequeno" style="width: auto; padding: 6px 10px;" onclick="event.stopPropagation(); salidaRapida('${p.code}')" title="Descontar">➖</button>
@@ -3486,12 +3489,15 @@
           const texto = dias < 0 ? `Vencido hace ${Math.abs(dias)} días` : dias === 0 ? 'Vence hoy' : `Vence en ${dias} días`;
           return `
           <div class="historial-item ${dias <= 7 ? 'salida' : 'edicion'}" style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
-            <div style="cursor: pointer; flex: 1;" onclick="abrirDetalle('${p.code}')">
-              <div style="font-weight: 600;">${escaparHtml(p.name)}</div>
-              <div style="font-size: 0.85rem; color: var(--color-texto-secundario);">
-                Lote: ${escaparHtml(p.lot || '-')} · Vence: ${formatearFecha(p.expiryDate)}
+            <div style="cursor: pointer; flex: 1; display: flex; align-items: center; gap: 10px;" onclick="abrirDetalle('${p.code}')">
+              <div style="font-size: 1.6rem; flex-shrink: 0;">${obtenerEmojiCategoria(p.category, p.name)}</div>
+              <div>
+                <div style="font-weight: 600;">${escaparHtml(p.name)}</div>
+                <div style="font-size: 0.85rem; color: var(--color-texto-secundario);">
+                  Lote: ${escaparHtml(p.lot || '-')} · Vence: ${formatearFecha(p.expiryDate)}
+                </div>
+                <div class="alerta-stock ${clase}">${texto}</div>
               </div>
-              <div class="alerta-stock ${clase}">${texto}</div>
             </div>
           </div>
         `}).join('');
@@ -4239,9 +4245,10 @@
         if (esSinStock(p)) estado = 'Sin stock';
         else if (esStockBajo(p)) estado = 'Stock bajo';
         if (dias !== null && dias <= 30) estado += dias < 0 ? ' · Vencido' : dias === 0 ? ' · Vence hoy' : ` · Vence en ${dias}d`;
+        const emoji = obtenerEmojiCategoria(p.category, p.name);
         return `<tr class="${i % 2 === 0 ? '' : 'alt'}">
           <td>${escaparHtml(p.code)}</td>
-          <td><strong>${escaparHtml(p.name)}</strong></td>
+          <td><span style="font-size:1.2rem; margin-right:6px;">${emoji}</span><strong>${escaparHtml(p.name)}</strong></td>
           <td>${escaparHtml(p.category || '-')}</td>
           <td style="text-align:center">${p.quantity || 0}</td>
           <td style="text-align:center">${p.minStock || 0}</td>
@@ -4258,7 +4265,8 @@
         return `<ul>${items.map(p => {
           const dias = diasParaVencer(p);
           const extra = dias !== null ? (dias < 0 ? ` · Vencido hace ${Math.abs(dias)} días` : dias === 0 ? ' · Vence hoy' : ` · Vence en ${dias} días`) : '';
-          return `<li><strong>${escaparHtml(p.name)}</strong> (código ${escaparHtml(p.code)}) — Stock: ${p.quantity || 0}${extra}</li>`;
+          const emoji = obtenerEmojiCategoria(p.category, p.name);
+          return `<li><span style="font-size:1.2rem; margin-right:6px;">${emoji}</span><strong>${escaparHtml(p.name)}</strong> (código ${escaparHtml(p.code)}) — Stock: ${p.quantity || 0}${extra}</li>`;
         }).join('')}</ul>`;
       };
 
