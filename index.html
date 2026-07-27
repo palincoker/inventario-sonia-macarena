@@ -2799,44 +2799,105 @@
       const categoriaEsUtil = catNorm && !palabrasCat.some(p => categoriasGenericas.has(p));
 
       const mapa = {
-        'alimento': '🥫',
-        'alimentos': '🥫',
-        'galletas': '🍪',
-        'chocolates': '🍫',
-        'confites': '🍬',
-        'snacks': '🍿',
-        'bebidas': '🥤',
-        'leche': '🥛',
-        'lacteos': '🧀',
-        'jugos': '🧃',
-        'aguas': '💧',
-        'cafe': '☕',
-        'te': '🍵',
-        'bebidas alcoholicas': '🍷',
-        'panaderia': '🥖',
-        'cereales': '🥣',
-        'pastas': '🍝',
-        'arroz': '🍚',
-        'salsas y condimentos': '🍶',
-        'salsas': '🥣',
-        'enlatados': '🥫',
-        'congelados': '🧊',
-        'frutas': '🍎',
-        'verduras': '🥬',
-        'frutas y verduras': '🍏',
-        'carnes': '🥩',
-        'pescados': '🐟',
-        'mariscos': '🦐',
-        'desayuno': '🍳',
-        'postres': '🍰',
-        'alimentos infantiles': '🍼',
-        'mascotas': '🐶',
-        'limpieza': '🧽',
-        'jabon': '🧼',
-        'higiene personal': '🧴',
-        'papel': '🧻',
-        'oficina': '📎',
-        'electronica': '🔌'
+        // Alimentos generales
+        'alimento': '🥫', 'alimentos': '🥫', 'enlatados': '🥫', 'conservas': '🥫',
+        'sopas': '🍜', 'sopa': '🍜', 'caldos': '🍜', 'caldo': '🍜',
+        'salsas y condimentos': '🍶', 'salsas': '🥣', 'condimentos': '🧂',
+        'especias': '🌶️', 'sal': '🧂', 'pimienta': '🧂', 'aceite': '🫒',
+        'vinagre': '🍾', 'mayonesa': '🥚', 'mostaza': '🌭', 'ketchup': '🍅',
+        'miel': '🍯', 'mermelada': '🍯', 'manjar': '🍯', 'dulce de leche': '🍯',
+        'harina': '🌾', 'azucar': '🍬', 'azúcar': '🍬', 'sal': '🧂',
+        // Lácteos y huevos
+        'lacteos': '🧀', 'lacteo': '🧀', 'leche': '🥛', 'yogur': '🍦', 'yoghurt': '🍦',
+        'queso': '🧀', 'mantequilla': '🧈', 'margarina': '🧈', 'crema': '🥛',
+        'huevos': '🥚', 'huevo': '🥚',
+        // Panadería y cereales
+        'panaderia': '🥖', 'pan': '🥖', 'hallulla': '🥖', 'marraqueta': '🥖',
+        'cereales': '🥣', 'avena': '🥣', 'granola': '🥣', 'muesli': '🥣',
+        'tortillas': '🌮', 'taco': '🌮', 'arepa': '🌽',
+        // Pastas y arroz
+        'pastas': '🍝', 'pasta': '🍝', 'fideos': '🍜', 'fideo': '🍜', 'tallarines': '🍝',
+        'tallarin': '🍝', 'espagueti': '🍝', 'macarrones': '🍝', 'lasana': '🍝',
+        'arroz': '🍚', 'quinua': '🍚',
+        // Dulces y snacks
+        'galletas': '🍪', 'galleta': '🍪', 'chocolates': '🍫', 'chocolate': '🍫',
+        'confites': '🍬', 'caramelos': '🍬', 'chicles': '🍬', 'dulces': '🍬',
+        'snacks': '🍿', 'papas fritas': '🍟', 'nachos': '🌮', 'palomitas': '🍿',
+        'helados': '🍦', 'helado': '🍦', 'postres': '🍰', 'pastel': '🎂', 'torta': '🎂',
+        'flan': '🍮', 'gelatina': '🍮',
+        // Bebidas
+        'bebidas': '🥤', 'refrescos': '🥤', 'gaseosas': '🥤', 'jugos': '🧃',
+        'jugo': '🧃', 'nectar': '🧃', 'aguas': '💧', 'agua': '💧',
+        'cafe': '☕', 'te': '🍵', 'té': '🍵', 'mate': '🧉',
+        'bebidas alcoholicas': '🍷', 'cervezas': '🍺', 'cerveza': '🍺',
+        'vinos': '🍷', 'vino': '🍷', 'whisky': '🥃', 'ron': '🥃', 'pisco': '🥃',
+        'vodka': '🥃', 'coctel': '🍸', 'tragos': '🍸',
+        'bebidas energeticas': '⚡', 'energetica': '⚡', 'isotonica': '⚡',
+        // Frutas
+        'frutas': '🍎', 'fruta': '🍎', 'manzana': '🍎', 'platano': '🍌', 'banana': '🍌',
+        'naranja': '🍊', 'mandarina': '🍊', 'limon': '🍋', 'pomelo': '🍊',
+        'uva': '🍇', 'uvas': '🍇', 'fresa': '🍓', 'frutilla': '🍓', 'arandano': '🫐',
+        'sandia': '🍉', 'melon': '🍈', 'piña': '🍍', 'mango': '🥭', 'durazno': '🍑',
+        'cereza': '🍒', 'pera': '🍐', 'kiwi': '🥝', 'aguacate': '🥑', 'palta': '🥑',
+        // Verduras
+        'verduras': '🥬', 'verdura': '🥬', 'lechuga': '🥬', 'espinaca': '🥬',
+        'tomate': '🍅', 'cebolla': '🧅', 'ajo': '🧄', 'zanahoria': '🥕',
+        'papa': '🥔', 'patata': '🥔', 'camote': '🍠', 'zapallo': '🎃', 'calabaza': '🎃',
+        'maiz': '🌽', 'choclo': '🌽', 'pepino': '🥒', 'pimiento': '🫑', 'aji': '🌶️',
+        'brocoli': '🥦', 'coliflor': '🥦', 'apio': '🥬', 'rabano': '🥬',
+        // Carnes y pescados
+        'carnes': '🥩', 'carne': '🥩', 'res': '🥩', 'vacuno': '🥩', 'cerdo': '🥓',
+        'pollo': '🍗', 'pavo': '🍗', 'pescados': '🐟', 'pescado': '🐟',
+        'mariscos': '🦐', 'camaron': '🦐', 'langostino': '🦐', 'jaiba': '🦀',
+        'salmon': '🐟', 'atun': '🐟', 'jurel': '🐟', 'sardina': '🐟', 'caballa': '🐟',
+        'jamon': '🥓', 'salchicha': '🌭', 'hamburguesa': '🍔', 'hot dog': '🌭',
+        // Desayuno
+        'desayuno': '🍳', 'huevos': '🥚', 'mermelada': '🍯', 'cereal': '🥣',
+        'pan de molde': '🍞', 'tostadas': '🍞', 'mantequilla': '🧈',
+        // Alimentos infantiles
+        'alimentos infantiles': '🍼', 'pañales': '👶', 'pañal': '👶', 'toallitas': '👶',
+        // Mascotas
+        'mascotas': '🐾', 'comida de perro': '🐕', 'comida de gato': '🐈',
+        'arena de gato': '🐈', 'croquetas': '🐕',
+        // Higiene personal
+        'higiene personal': '🧴', 'shampoo': '🧴', 'acondicionador': '🧴',
+        'pasta de dientes': '🦷', 'pasta dental': '🦷', 'crema dental': '🦷',
+        'cepillo dental': '🪥', 'hilo dental': '🦷', 'enjuague bucal': '😷',
+        'desodorante': '🧴', 'talco': '🧴', 'perfume': '🧴', 'colonia': '🧴',
+        'maquillaje': '💄', 'crema': '🧴', 'protector solar': '🧴', 'repelente': '🦟',
+        'jabon': '🧼', 'jabon de tocador': '🧼', 'gel de ducha': '🧼',
+        'toalla higienica': '🩸', 'papel higienico': '🧻', 'pañuelo desechable': '🧻',
+        'afeitadora': '🪒', 'prestobarba': '🪒', 'cuchilla': '🪒',
+        // Limpieza
+        'limpieza': '🧽', 'detergente': '🧴', 'cloro': '🧴', 'limpiador': '🧽',
+        'lavavajillas': '🧼', 'desinfectante': '🧽', 'suavizante': '🧺',
+        'aromatizante': '🌸', 'cif': '🧽', 'escoba': '🧹', 'trapeador': '🧹',
+        'bolsas de basura': '🗑️', 'esponja': '🧽', 'ambientador': '🌸',
+        // Papel y despensa
+        'papel': '🧻', 'servilleta': '🧻', 'panuelo': '🧻', 'toalla de papel': '🧻',
+        'toallas de papel': '🧻', 'papel toalla': '🧻',
+        // Oficina y útiles
+        'oficina': '📎', 'utiles escolares': '✏️', 'cuaderno': '📓', 'libreta': '📓',
+        'lapiz': '✏️', 'lapices': '✏️', 'boligrafo': '🖊️', 'pluma': '🖊️',
+        'pegamento': '🧴', 'tijeras': '✂️', 'cinta adhesiva': '🧵',
+        'resma': '📄', 'papel bond': '📄', 'corrector': '🖊️',
+        // Electrónica
+        'electronica': '🔌', 'cargador': '🔌', 'cable': '🔌', 'audifonos': '🎧',
+        'auriculares': '🎧', 'parlante': '🔊', 'bateria': '🔋', 'pila': '🔋',
+        'computadora': '💻', 'notebook': '💻', 'celular': '📱', 'tablet': '📱',
+        'televisor': '📺', 'control remoto': '📱',
+        // Hogar
+        'hogar': '🏠', 'cocina': '🍳', 'olla': '🍲', 'sarten': '🍳', 'cubiertos': '🍴',
+        'platos': '🍽️', 'vasos': '🥛', 'tazas': '☕', 'botellas': '🍾', 'frascos': '🫙',
+        'velas': '🕯️', 'focos': '💡', 'bombillas': '💡', 'encendedor': '🔥',
+        'cerillos': '🔥', 'colchas': '🛏️', 'sabanas': '🛏️', 'almohadas': '🛏️',
+        'toallas': '🛁', 'ropa': '👕', 'zapatos': '👟', 'calcetines': '🧦',
+        // Jardín
+        'jardin': '🌱', 'plantas': '🌿', 'flores': '🌸', 'semillas': '🌱',
+        'tierra de hojas': '🌱', 'fertilizante': '🌱', 'insecticida': '🐛',
+        // Herramientas
+        'herramientas': '🛠️', 'tornillos': '🔩', 'clavos': '🔩', 'cinta': '🧵',
+        'pintura': '🎨', 'barniz': '🎨', 'pegamento': '🧴'
       };
 
       // Si la categoria es util, intentar mapearla
@@ -2863,18 +2924,125 @@
       if (nombreNorm) {
         const palabrasNombre = nombreNorm.split(' ').filter(Boolean);
         const reglasNombre = [
-          { terminos: ['pasta de dientes', 'pasta dental', 'crema dental', 'cepillo dental', 'enjuague bucal', 'shampoo', 'acondicionador', 'desodorante', 'talco', 'prestobarba', 'jabon', 'toalla higienica', 'papel higienico'], emoji: '🧴' },
-          { terminos: ['detergente', 'limpiador', 'cloro', 'lavavajillas', 'desinfectante', 'suavizante', 'cif', 'aromatizante', 'limpia'], emoji: '🧽' },
-          { terminos: ['servilleta', 'panuelo', 'toalla de papel'], emoji: '🧻' },
-          { terminos: ['leche', 'yogur', 'yoghurt', 'queso', 'mantequilla'], emoji: '🧀' },
-          { terminos: ['galleta', 'chocolate', 'dulce', 'confite', 'caramelo', 'chicle', 'helado', 'postre', 'oreo', 'ritz'], emoji: '🍬' },
-          { terminos: ['jugo', 'agua', 'refresco', 'soda', 'te', 'té', 'cafe', 'cerveza', 'vino'], emoji: '🥤' },
-          { terminos: ['arroz', 'fideo', 'pasta', 'tallarin', 'tallarin', 'espagueti'], emoji: '🍝' },
-          { terminos: ['pan', 'hallulla', 'marraqueta'], emoji: '🥖' },
-          { terminos: ['atun', 'jurel', 'sardina', 'salmon', 'choritos'], emoji: '🐟' },
-          { terminos: ['manzana', 'platano', 'tomate', 'lechuga', 'fruta', 'verdura'], emoji: '🍎' },
-          { terminos: ['carne', 'pollo', 'pavo', 'cerdo', 'lomo'], emoji: '🥩' },
-          { terminos: ['aceite', 'azucar', 'sal', 'harina', 'sopa', 'cereal'], emoji: '🥫' }
+          // Higiene personal (especificos primero)
+          { terminos: ['pasta de dientes', 'pasta dental', 'crema dental', 'cepillo dental', 'hilo dental', 'enjuague bucal'], emoji: '🦷' },
+          { terminos: ['toalla higienica', 'toalla higiénica', 'protector diario', 'tampon'], emoji: '🩸' },
+          { terminos: ['papel higienico', 'papel higiénico', 'pañuelo desechable'], emoji: '🧻' },
+          { terminos: ['shampoo', 'acondicionador', 'desodorante', 'talco', 'perfume', 'colonia', 'crema', 'protector solar', 'repelente', 'maquillaje'], emoji: '🧴' },
+          { terminos: ['jabon de tocador', 'gel de ducha', 'jabon liquido', 'jabón líquido'], emoji: '🧼' },
+          { terminos: ['afeitadora', 'prestobarba', 'cuchilla', 'maquina de afeitar'], emoji: '🪒' },
+          { terminos: ['cepillo de dientes', 'cepillo dental'], emoji: '🪥' },
+          { terminos: ['pañal', 'pañales', 'toallitas humedas', 'toallitas húmedas'], emoji: '👶' },
+          // Limpieza
+          { terminos: ['detergente', 'cloro', 'limpiador', 'lavavajillas', 'desinfectante', 'suavizante', 'cif', 'limpia', 'esponja'], emoji: '🧽' },
+          { terminos: ['aromatizante', 'ambientador'], emoji: '🌸' },
+          { terminos: ['escoba', 'trapeador', 'trapero'], emoji: '🧹' },
+          { terminos: ['bolsa de basura', 'bolsas de basura'], emoji: '🗑️' },
+          // Papel
+          { terminos: ['servilleta', 'toalla de papel', 'papel toalla', 'panuelo'], emoji: '🧻' },
+          // Lacteos
+          { terminos: ['leche condensada', 'leche evaporada', 'leche en polvo', 'leche sin lactosa', 'leche'], emoji: '🥛' },
+          { terminos: ['yogur', 'yoghurt'], emoji: '🍦' },
+          { terminos: ['queso'], emoji: '🧀' },
+          { terminos: ['mantequilla', 'margarina', 'crema'], emoji: '🧈' },
+          { terminos: ['huevo', 'huevos'], emoji: '🥚' },
+          // Dulces y snacks
+          { terminos: ['helado', 'postre', 'flan', 'gelatina', 'torta', 'pastel'], emoji: '🍦' },
+          { terminos: ['chocolate', 'chocolates'], emoji: '🍫' },
+          { terminos: ['galleta', 'galletas', 'oreo', 'ritz', 'chips'], emoji: '🍪' },
+          { terminos: ['caramelo', 'dulce', 'confite', 'chicle', 'gomita', 'marshmallow'], emoji: '🍬' },
+          { terminos: ['papas fritas', 'papas', 'nachos', 'palomitas'], emoji: '🍿' },
+          // Bebidas
+          { terminos: ['cerveza'], emoji: '🍺' },
+          { terminos: ['vino'], emoji: '🍷' },
+          { terminos: ['whisky', 'ron', 'pisco', 'vodka', 'tequila'], emoji: '🥃' },
+          { terminos: ['coctel', 'trago'], emoji: '🍸' },
+          { terminos: ['energetica', 'bebida energetica', 'isotonica'], emoji: '⚡' },
+          { terminos: ['cafe', 'café', 'capuchino', 'expresso', 'espresso'], emoji: '☕' },
+          { terminos: ['te', 'té', 'mate'], emoji: '🍵' },
+          { terminos: ['jugo', 'nectar', 'néctar'], emoji: '🧃' },
+          { terminos: ['agua mineral', 'agua'], emoji: '💧' },
+          { terminos: ['coca', 'coca cola', 'gaseosa', 'gaseosas', 'refresco', 'refrescos', 'soda', 'cola'], emoji: '🥤' },
+          // Panaderia
+          { terminos: ['pan', 'hallulla', 'marraqueta', 'ciabatta', 'baguette', 'pan de molde', 'tostadas'], emoji: '🥖' },
+          { terminos: ['tortilla', 'arepa'], emoji: '🌮' },
+          // Pastas y arroz
+          { terminos: ['arroz'], emoji: '🍚' },
+          { terminos: ['fideos', 'fideo', 'pastas', 'pasta', 'tallarines', 'tallarin', 'tallarín', 'espaguetis', 'espagueti', 'macarrones', 'macarron', 'lasaña', 'lasana', 'ravioles', 'ravioli'], emoji: '🍝' },
+          { terminos: ['sopa', 'sopas', 'caldo', 'caldos', 'consome'], emoji: '🍜' },
+          { terminos: ['cereal', 'avena', 'granola', 'muesli'], emoji: '🥣' },
+          // Frutas
+          { terminos: ['manzana'], emoji: '🍎' },
+          { terminos: ['platano', 'banana'], emoji: '🍌' },
+          { terminos: ['naranja', 'mandarina', 'pomelo'], emoji: '🍊' },
+          { terminos: ['limon', 'lima'], emoji: '🍋' },
+          { terminos: ['uva'], emoji: '🍇' },
+          { terminos: ['fresa', 'frutilla', 'arandano'], emoji: '🍓' },
+          { terminos: ['sandia'], emoji: '🍉' },
+          { terminos: ['melon'], emoji: '🍈' },
+          { terminos: ['piña'], emoji: '🍍' },
+          { terminos: ['mango'], emoji: '🥭' },
+          { terminos: ['durazno'], emoji: '🍑' },
+          { terminos: ['cereza'], emoji: '🍒' },
+          { terminos: ['pera'], emoji: '🍐' },
+          { terminos: ['kiwi'], emoji: '🥝' },
+          { terminos: ['aguacate', 'palta'], emoji: '🥑' },
+          { terminos: ['fruta'], emoji: '🍎' },
+          // Verduras
+          { terminos: ['tomate'], emoji: '🍅' },
+          { terminos: ['cebolla'], emoji: '🧅' },
+          { terminos: ['ajo'], emoji: '🧄' },
+          { terminos: ['zanahoria'], emoji: '🥕' },
+          { terminos: ['papa', 'patata'], emoji: '🥔' },
+          { terminos: ['camote'], emoji: '🍠' },
+          { terminos: ['zapallo', 'calabaza'], emoji: '🎃' },
+          { terminos: ['maiz', 'choclo'], emoji: '🌽' },
+          { terminos: ['pepino'], emoji: '🥒' },
+          { terminos: ['pimiento', 'aji', 'ají'], emoji: '🫑' },
+          { terminos: ['brocoli', 'coliflor', 'repollo'], emoji: '🥦' },
+          { terminos: ['lechuga', 'espinaca', 'apio', 'verdura'], emoji: '🥬' },
+          // Carnes y pescados
+          { terminos: ['hamburguesa', 'hamburguesas'], emoji: '🍔' },
+          { terminos: ['hot dog', 'hot dogs', 'completo', 'completos'], emoji: '🌭' },
+          { terminos: ['pollo', 'pollos', 'pavo', 'pavos'], emoji: '🍗' },
+          { terminos: ['carne', 'carnes', 'res', 'vacuno', 'lomo', 'lomos', 'filete', 'filetes'], emoji: '🥩' },
+          { terminos: ['cerdo', 'jamon', 'jamón', 'salchicha', 'salchichas', 'longaniza', 'longanizas', 'chorizo', 'chorizos'], emoji: '🥓' },
+          { terminos: ['salmón', 'salmon', 'atun', 'atún', 'jurel', 'jureles', 'sardina', 'sardinas', 'caballa', 'caballas', 'pescado', 'pescados'], emoji: '🐟' },
+          { terminos: ['camaron', 'camarón', 'camarones', 'langostino', 'langostinos', 'jaiba', 'jaibas', 'marisco', 'mariscos'], emoji: '🦐' },
+          // Condimentos y despensa
+          { terminos: ['aceite'], emoji: '🫒' },
+          { terminos: ['azucar', 'azúcar', 'sal', 'pimienta', 'oregano', 'comino'], emoji: '🧂' },
+          { terminos: ['salsa de tomate', 'ketchup'], emoji: '🍅' },
+          { terminos: ['mayonesa'], emoji: '🥚' },
+          { terminos: ['mostaza'], emoji: '🌭' },
+          { terminos: ['miel', 'mermelada', 'manjar'], emoji: '🍯' },
+          { terminos: ['harina'], emoji: '🌾' },
+          // Mascotas
+          { terminos: ['comida de perro', 'comida de gato', 'arena de gato', 'croquetas', 'alimento para mascota'], emoji: '🐾' },
+          // Hogar
+          { terminos: ['olla', 'sarten', 'sartén', 'cacerola'], emoji: '🍲' },
+          { terminos: ['plato', 'platos', 'vaso', 'vasos', 'taza', 'tazas', 'copa', 'copas'], emoji: '🍽️' },
+          { terminos: ['vela', 'velas'], emoji: '🕯️' },
+          { terminos: ['foco', 'focos', 'bombilla', 'bombillas'], emoji: '💡' },
+          { terminos: ['sabana', 'colcha', 'almohada', 'cobija'], emoji: '🛏️' },
+          { terminos: ['toalla de bano', 'toalla de baño'], emoji: '🛁' },
+          // Oficina
+          { terminos: ['cuaderno', 'libreta'], emoji: '📓' },
+          { terminos: ['lapiz', 'lápiz'], emoji: '✏️' },
+          { terminos: ['boligrafo', 'pluma', 'marcador'], emoji: '🖊️' },
+          { terminos: ['tijeras'], emoji: '✂️' },
+          { terminos: ['pegamento', 'corrector'], emoji: '🧴' },
+          // Electronica
+          { terminos: ['cargador', 'cable', 'audifono', 'auricular', 'parlante'], emoji: '🔌' },
+          { terminos: ['pila', 'bateria'], emoji: '🔋' },
+          { terminos: ['celular', 'telefono', 'tablet'], emoji: '📱' },
+          { terminos: ['computadora', 'notebook', 'laptop'], emoji: '💻' },
+          { terminos: ['televisor', 'control remoto'], emoji: '📺' },
+          // Jardin
+          { terminos: ['semilla', 'fertilizante', 'tierra de hojas', 'insecticida'], emoji: '🌱' },
+          { terminos: ['planta', 'flor'], emoji: '🌿' },
+          // Generales alimentos
+          { terminos: ['alimento', 'comida', 'producto'], emoji: '🥫' }
         ];
         for (const regla of reglasNombre) {
           for (const termino of regla.terminos) {
