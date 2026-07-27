@@ -1057,6 +1057,9 @@
       <button class="btn" onclick="mostrarSeccion('inventario')">
         <span>📋</span> Ver inventario
       </button>
+      <button class="btn btn-secundario" onclick="mostrarSeccion('supermercado')">
+        <span>🛒</span> Lista de supermercado
+      </button>
       <button class="btn btn-secundario" onclick="mostrarSeccion('historico')">
         <span>📜</span> Ver histórico
       </button>
@@ -1456,6 +1459,48 @@
         </p>
       </div>
     </section>
+
+    <!-- LISTA DE SUPERMERCADO -->
+    <section id="seccion-supermercado" class="seccion">
+      <div class="tarjeta">
+        <button class="btn btn-secundario btn-pequeno" onclick="volverAtras()" style="margin-bottom: 12px;">
+          ← Volver
+        </button>
+        <h2>🛒 Lista de supermercado</h2>
+        <p style="font-size: 0.9rem; color: var(--color-texto-secundario); margin-top: -8px;">
+          Productos sin stock o con stock bajo. Selecciona los que necesitas comprar.
+        </p>
+
+        <div id="mensaje-supermercado" class="mensaje"></div>
+
+        <div class="botones-grupo">
+          <button class="btn btn-exito" onclick="seleccionarTodoSupermercado(true)">
+            ✅ Seleccionar todos
+          </button>
+          <button class="btn btn-secundario" onclick="seleccionarTodoSupermercado(false)">
+            ❌ Ninguno
+          </button>
+          <button class="btn" onclick="agregarItemSupermercadoManual()">
+            ➕ Agregar otro
+          </button>
+        </div>
+
+        <div id="lista-supermercado" style="margin-top: 16px;">
+          <p class="vacio">No hay productos que necesiten reposición.</p>
+        </div>
+
+        <hr style="border: none; border-top: 1px solid var(--color-borde); margin: 20px 0;">
+
+        <div class="botones-grupo">
+          <button class="btn btn-exito" onclick="imprimirListaSupermercado()">
+            🖨️ Imprimir
+          </button>
+          <button class="btn" onclick="copiarListaSupermercado()">
+            📋 Copiar
+          </button>
+        </div>
+      </div>
+    </section>
   </main>
 
   <!-- MODAL MOVIMIENTO -->
@@ -1689,6 +1734,8 @@
 
     let productos = {};
     let productosSeleccionados = new Set();
+    let itemsSupermercadoManual = [];
+    let cantidadesSupermercado = {};
     let escaner = null;
     let escaneoActivo = false;
     let productoActual = null;
@@ -2065,6 +2112,7 @@
       if (seccion === 'inventario') { renderCategoriasFiltro(); renderInventario(); }
       if (seccion === 'historico') renderHistorico();
       if (seccion === 'configuracion') renderConfiguracion();
+      if (seccion === 'supermercado') renderListaSupermercado();
     }
 
     function volverAtras() {
@@ -3483,6 +3531,183 @@
 
       const toggle = document.getElementById('toggle-tema-config');
       if (toggle) toggle.checked = (localStorage.getItem(THEME_KEY) || 'claro') === 'oscuro';
+    }
+
+    // ========================
+    // LISTA DE SUPERMERCADO
+    // ========================
+    function obtenerSugerenciasSupermercado() {
+      return Object.values(productos).filter(p => {
+        const qty = p.quantity || 0;
+        const min = typeof p.minStock === 'number' ? p.minStock : 0;
+        return qty === 0 || (min > 0 && qty < min);
+      }).sort((a, b) => (a.name || '').localeCompare(b.name || '', 'es', { sensitivity: 'base' }));
+    }
+
+    function calcularCantidadSugerida(p) {
+      if (cantidadesSupermercado[p.code] && cantidadesSupermercado[p.code] >= 1) {
+        return cantidadesSupermercado[p.code];
+      }
+      const qty = p.quantity || 0;
+      const min = typeof p.minStock === 'number' ? p.minStock : 0;
+      if (min > 0) return Math.max(min - qty, 1);
+      return qty === 0 ? 1 : 0;
+    }
+
+    function renderListaSupermercado() {
+      const sugerencias = obtenerSugerenciasSupermercado();
+      const contenedor = document.getElementById('lista-supermercado');
+
+      if (sugerencias.length === 0 && itemsSupermercadoManual.length === 0) {
+        contenedor.innerHTML = '<p class="vacio">No hay productos que necesiten reposición.</p>';
+        return;
+      }
+
+      let html = '<div style="display:flex; flex-direction:column; gap:10px;">';
+
+      sugerencias.forEach((p, idx) => {
+        const cantidad = calcularCantidadSugerida(p);
+        const emoji = obtenerEmojiCategoria(p.category);
+        html += `
+          <label class="supermercado-item" style="display:flex; align-items:center; gap:12px; padding:12px; background:var(--color-superficie-secundaria); border-radius:12px; cursor:pointer; border:1px solid var(--color-borde);">
+            <input type="checkbox" class="checkbox-supermercado" data-codigo="${p.code}" checked style="width:20px; height:20px; flex-shrink:0;">
+            <div style="font-size:1.6rem; flex-shrink:0;">${emoji}</div>
+            <div style="flex:1; min-width:0;">
+              <div style="font-weight:600;">${escaparHtml(p.name)}</div>
+              <div style="font-size:0.8rem; color:var(--color-texto-secundario);">${escaparHtml(p.category || 'Sin categoría')} · Stock: ${p.quantity || 0}</div>
+            </div>
+            <input type="number" class="cantidad-supermercado" data-codigo="${p.code}" min="1" value="${cantidad}" style="width:70px; padding:6px; border-radius:8px; border:1px solid var(--color-borde); text-align:center; flex-shrink:0;">
+          </label>`;
+      });
+
+      itemsSupermercadoManual.forEach((item, idx) => {
+        html += `
+          <div class="supermercado-item" style="display:flex; align-items:center; gap:12px; padding:12px; background:var(--color-superficie-secundaria); border-radius:12px; border:1px solid var(--color-borde);">
+            <input type="checkbox" class="checkbox-supermercado-manual" data-idx="${idx}" ${item.checked ? 'checked' : ''} style="width:20px; height:20px; flex-shrink:0;">
+            <div style="font-size:1.6rem; flex-shrink:0;">✏️</div>
+            <input type="text" class="nombre-supermercado-manual" data-idx="${idx}" value="${escaparHtml(item.nombre)}" placeholder="Producto" style="flex:1; min-width:0; padding:6px; border-radius:8px; border:1px solid var(--color-borde);">
+            <input type="number" class="cantidad-supermercado-manual" data-idx="${idx}" min="1" value="${item.cantidad}" style="width:70px; padding:6px; border-radius:8px; border:1px solid var(--color-borde); text-align:center; flex-shrink:0;">
+            <button class="btn btn-peligro btn-pequeno" onclick="eliminarItemSupermercadoManual(${idx})" style="flex-shrink:0; padding:6px 10px;">🗑️</button>
+          </div>`;
+      });
+
+      html += '</div>';
+      contenedor.innerHTML = html;
+
+      // Persistir cambios de checkboxes y cantidades mientras se editan
+      contenedor.querySelectorAll('.cantidad-supermercado').forEach(input => {
+        input.addEventListener('change', () => {
+          const codigo = input.dataset.codigo;
+          cantidadesSupermercado[codigo] = parseInt(input.value, 10) || 1;
+        });
+      });
+
+      contenedor.querySelectorAll('.cantidad-supermercado-manual, .nombre-supermercado-manual').forEach(input => {
+        input.addEventListener('change', () => {
+          const idx = parseInt(input.dataset.idx, 10);
+          const item = itemsSupermercadoManual[idx];
+          if (!item) return;
+          if (input.classList.contains('cantidad-supermercado-manual')) {
+            item.cantidad = parseInt(input.value, 10) || 1;
+          } else {
+            item.nombre = input.value.trim() || 'Producto';
+          }
+        });
+      });
+
+      contenedor.querySelectorAll('.checkbox-supermercado-manual').forEach(input => {
+        input.addEventListener('change', () => {
+          const idx = parseInt(input.dataset.idx, 10);
+          const item = itemsSupermercadoManual[idx];
+          if (item) item.checked = input.checked;
+        });
+      });
+    }
+
+    function seleccionarTodoSupermercado(seleccionar) {
+      const contenedor = document.getElementById('lista-supermercado');
+      contenedor.querySelectorAll('.checkbox-supermercado').forEach(cb => cb.checked = seleccionar);
+      itemsSupermercadoManual.forEach(item => item.checked = seleccionar);
+      renderListaSupermercado();
+    }
+
+    function agregarItemSupermercadoManual() {
+      itemsSupermercadoManual.push({ nombre: '', cantidad: 1, checked: true });
+      renderListaSupermercado();
+      const inputs = document.querySelectorAll('.nombre-supermercado-manual');
+      if (inputs.length) inputs[inputs.length - 1].focus();
+    }
+
+    function eliminarItemSupermercadoManual(idx) {
+      itemsSupermercadoManual.splice(idx, 1);
+      renderListaSupermercado();
+    }
+
+    function obtenerItemsSeleccionadosSupermercado() {
+      const seleccionados = [];
+      const contenedor = document.getElementById('lista-supermercado');
+
+      contenedor.querySelectorAll('.checkbox-supermercado:checked').forEach(cb => {
+        const codigo = cb.dataset.codigo;
+        const p = productos[codigo];
+        if (!p) return;
+        const cantidadInput = contenedor.querySelector(`.cantidad-supermercado[data-codigo="${codigo}"]`);
+        const cantidad = cantidadInput ? (parseInt(cantidadInput.value, 10) || 1) : calcularCantidadSugerida(p);
+        seleccionados.push({ nombre: p.name, categoria: p.category || 'Sin categoría', cantidad });
+      });
+
+      itemsSupermercadoManual.filter(item => item.checked && item.nombre.trim()).forEach(item => {
+        seleccionados.push({ nombre: item.nombre, categoria: 'Otro', cantidad: item.cantidad });
+      });
+
+      return seleccionados;
+    }
+
+    function imprimirListaSupermercado() {
+      const items = obtenerItemsSeleccionadosSupermercado();
+      if (items.length === 0) {
+        mostrarMensaje('mensaje-supermercado', 'Selecciona al menos un producto para imprimir.', 'error');
+        return;
+      }
+
+      const fecha = new Date().toLocaleDateString('es-ES');
+      const html = `
+        <html>
+          <head><title>Lista de supermercado</title></head>
+          <body style="font-family:sans-serif; padding:20px; max-width:600px; margin:0 auto;">
+            <h2>🛒 Lista de supermercado</h2>
+            <p style="color:#666;">Generada el ${fecha}</p>
+            <ul style="font-size:1.1rem; line-height:1.8;">
+              ${items.map(i => `<li>${i.cantidad}x ${escaparHtml(i.nombre)} <span style="color:#888; font-size:0.9rem;">(${escaparHtml(i.categoria)})</span></li>`).join('')}
+            </ul>
+          </body>
+        </html>
+      `;
+      const ventana = window.open('', '_blank');
+      ventana.document.write(html);
+      ventana.document.close();
+      ventana.focus();
+      setTimeout(() => ventana.print(), 300);
+    }
+
+    async function copiarListaSupermercado() {
+      const items = obtenerItemsSeleccionadosSupermercado();
+      if (items.length === 0) {
+        mostrarMensaje('mensaje-supermercado', 'Selecciona al menos un producto para copiar.', 'error');
+        return;
+      }
+
+      const fecha = new Date().toLocaleDateString('es-ES');
+      const texto = `🛒 Lista de supermercado (${fecha})\n\n` + items.map(i => `- ${i.cantidad}x ${i.nombre}`).join('\n');
+
+      try {
+        await navigator.clipboard.writeText(texto);
+        mostrarMensaje('mensaje-supermercado', 'Lista copiada al portapapeles.', 'exito');
+        mostrarToast('Lista copiada al portapapeles', 'exito');
+      } catch (e) {
+        console.error(e);
+        mostrarMensaje('mensaje-supermercado', 'No se pudo copiar automáticamente. Puedes imprimirla.', 'error');
+      }
     }
 
     function vaciarDatos() {
